@@ -7,27 +7,26 @@ public class Client {
     
     public static void main(String[] args) {
 
-        String pseudo = null;
-        String motDePasse = null;
+        String ip = args[0];
+        String pseudo = args[1];
 
+        while(ip == null){
+            System.out.print("Entrer votre ip : ");
+            pseudo = new Scanner(System.in).nextLine();
+        }
         while(pseudo == null){
             System.out.print("Entrer votre pseudo : ");
             pseudo = new Scanner(System.in).nextLine();
-        }
-        while(motDePasse == null){
-            System.out.print("Entrer votre mot de passe : ");
-            motDePasse = new Scanner(System.in).nextLine();
         }
 
         Socket socket = null;
         
         while(socket == null){
             try {
-                socket = new Socket("localhost", 3030);
+                socket = new Socket(ip, 3030);
                 Scanner scanner = new Scanner(System.in);
                 DataOutputStream dataOutput = new DataOutputStream(socket.getOutputStream());
                 dataOutput.writeUTF(pseudo);
-                dataOutput.writeUTF(motDePasse);
                 dataOutput.flush();
                 while(true){
                     String message = scanner.nextLine();
