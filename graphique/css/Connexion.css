@@ -1,0 +1,10 @@
+.textfield {
+    -fx-background-color: #ecf0f1;
+    -fx-text-fill: #333;
+    -fx-font-size: 14px;
+    -fx-pref-width: 200px;
+    -fx-pref-height: 30px;
+    -fx-border-radius: 5px;
+    -fx-border-color: #3498db;
+    -fx-padding: 5px;
+}
