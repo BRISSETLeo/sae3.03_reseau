@@ -1,0 +1,54 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Server",
+            "request": "launch",
+            "mainClass": "server.Server",
+            "projectName": "sae3.03_reseau_47e80892"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "vmArgs": "--module-path /usr/share/openjfx/lib --add-modules javafx.controls,javafx.graphics",
+            "mainClass": "graphique.Main",
+            "projectName": "sae3.03_reseau_47e80892"
+        },
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "vmArgs": "--module-path C:/Users/Utilisateur/OneDrive/Bureau/projet/SpaceInvaders/JavaFX/lib --add-modules javafx.controls",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Client",
+            "request": "launch",
+            "vmArgs": "--module-path C:/Users/Utilisateur/OneDrive/Bureau/projet/SpaceInvaders/JavaFX/lib --add-modules javafx.controls",
+            "mainClass": "Client",
+            "projectName": "sae3.03_reseau_4fa13ed8"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "vmArgs": "--module-path C:/Users/Utilisateur/OneDrive/Bureau/projet/SpaceInvaders/JavaFX/lib --add-modules javafx.controls",
+            "mainClass": "graphique.Main",
+            "projectName": "sae3.03_reseau_4fa13ed8"
+        },
+        {
+            "type": "java",
+            "name": "Server",
+            "request": "launch",
+            "vmArgs": "--module-path C:/Users/Utilisateur/OneDrive/Bureau/projet/SpaceInvaders/JavaFX/lib --add-modules javafx.controls",
+            "mainClass": "server.Server",
+            "projectName": "sae3.03_reseau_4fa13ed8"
+        }
+    ]
+}
