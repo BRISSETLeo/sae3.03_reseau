@@ -6,8 +6,24 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Server",
+            "request": "launch",
+            "mainClass": "server.Server",
+            "projectName": "sae3.03_reseau_47e80892"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "vmArgs": "--module-path /usr/share/openjfx/lib --add-modules javafx.controls,javafx.graphics",
+            "mainClass": "graphique.Main",
+            "projectName": "sae3.03_reseau_47e80892"
+        },
+        {
+            "type": "java",
             "name": "Current File",
             "request": "launch",
+            "vmArgs": "--module-path C:/Users/Utilisateur/OneDrive/Bureau/projet/SpaceInvaders/JavaFX/lib --add-modules javafx.controls",
             "mainClass": "${file}"
         },
         {
