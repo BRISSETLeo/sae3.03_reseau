@@ -1,4 +1,5 @@
-package graphique.BD;
+package sql;
+
 
 import java.sql.*;
 
