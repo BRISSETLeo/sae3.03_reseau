@@ -1,6 +1,8 @@
 import java.sql.*;
 import java.util.ArrayList;
 
+import graphique.BD.ConnexionMySQL;
+
 public class UtilisateurBD {
 	ConnexionMySQL laConnexion;
 	Statement st;

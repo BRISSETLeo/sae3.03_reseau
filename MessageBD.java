@@ -1,5 +1,7 @@
 import java.sql.*;
 
+import graphique.BD.ConnexionMySQL;
+
 public class MessageBD {
     ConnexionMySQL laConnexion;
     Statement st;

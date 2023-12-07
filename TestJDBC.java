@@ -1,5 +1,7 @@
 import java.sql.*;
 
+import graphique.BD.ConnexionMySQL;
+
 public class TestJDBC {
     static ConnexionMySQL connexion;
 
