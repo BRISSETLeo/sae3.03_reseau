@@ -9,6 +9,13 @@
             "name": "Server",
             "request": "launch",
             "mainClass": "server.Server",
+            "projectName": "sae3.03_reseau_36e92b4d"
+        },
+        {
+            "type": "java",
+            "name": "Server",
+            "request": "launch",
+            "mainClass": "server.Server",
             "projectName": "sae3.03_reseau_47e80892"
         },
         {

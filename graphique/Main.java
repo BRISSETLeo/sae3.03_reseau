@@ -30,7 +30,9 @@ public class Main extends Application {
         stage.setTitle("SysX");
         Scene scene = new Scene(borderPane, 400, 250);
         stage.setScene(scene);
-        scene.getStylesheets().addAll("graphique/css/Connexion.css");
+        String cssFile = getClass().getResource("/graphique/css/Connexion.css").toExternalForm();
+        System.out.println("Chemin du fichier CSS : " + cssFile);
+        scene.getStylesheets().add(cssFile);
         stage.setResizable(false);
         stage.show();
     }
