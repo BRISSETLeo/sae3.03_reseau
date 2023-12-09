@@ -13,11 +13,11 @@ public class Server {
     public static void main(String[] args) {
 
         connexion = new ConnexionMySQL();
-        
+
         try {
             try (ServerSocket serverSocket = new ServerSocket(3030)) {
                 System.out.println("Server Socket en attente...");
-                while(true){
+                while (true) {
                     Socket socket = serverSocket.accept();
                     new ServerThread(socket).start();
                 }
