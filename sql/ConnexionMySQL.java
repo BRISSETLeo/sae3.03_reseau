@@ -3,37 +3,35 @@ package sql;
 import java.sql.*;
 
 public class ConnexionMySQL {
-	Connection mysql=null;
-    boolean connecte=false;
-    
-	public ConnexionMySQL(String nomServeur, String nomBase, String nomLogin, String motDePasse) {
-		try {
-			//Class.forName("com.mysql.jdbc.Driver");
-			Class.forName("org.mariadb.jdbc.Driver");
-		} catch (ClassNotFoundException e) {
-			System.out.println("Driver MySQL non trouvé?");
-			mysql=null;
-			return;
-		}
-		try {
-			mysql = DriverManager.getConnection(
-					"jdbc:mysql://"+nomServeur+":3306/"+nomBase,nomLogin, motDePasse);
-			connecte=true;
-		} catch (SQLException e) {
-			System.out.println("Echec de connexion!"); 
-			System.out.println(e.getMessage());
-			mysql=null;
-			return;
-		}
-	}
-    public Connection getConnexion(){
+    Connection mysql = null;
+    boolean connecte = false;
+
+    private static final String nomBD = "localhost";
+    private static final String nomBase = "sysx";
+    private static final String user = "root";
+    private static final String password = "";
+
+    public ConnexionMySQL() {
+        String url = "jdbc:mysql://" + nomBD + ":3306/" + nomBase;
+
+        // Connexion à la base de données
+        try (Connection connexion = DriverManager.getConnection(url, user, password)) {
+            System.out.println("Connexion réussie.");
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la connexion à la base de données : " + e.getMessage());
+        }
+    }
+
+    public Connection getConnexion() {
         return this.mysql;
     }
-    public boolean getConnecte(){
+
+    public boolean getConnecte() {
         return this.connecte;
     }
+
     public Statement createStatement() {
         return null;
     }
-	
+
 }

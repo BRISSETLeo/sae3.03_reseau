@@ -30,7 +30,7 @@ public class Main extends Application {
         stage.setTitle("SysX");
         Scene scene = new Scene(borderPane, 400, 250);
         stage.setScene(scene);
-        scene.getStylesheets().addAll("graphique/css/Connexion.css");
+        scene.getStylesheets().add("graphique/css/Connexion.css");
         stage.setResizable(false);
         stage.show();
     }
