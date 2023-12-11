@@ -4,13 +4,11 @@ import client.Client;
 import graphique.page.Connexion;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 public class Main extends Application {
 
-    private Stage stage;
-    private static BorderPane borderPane;
+    private static Stage stage;
     private static Client client;
 
     public static void main(String[] args) {
@@ -19,16 +17,14 @@ public class Main extends Application {
 
     @Override
     public void init() throws Exception {
-        borderPane = new BorderPane();
-        borderPane.setCenter(new Connexion());
 
     }
 
     @Override
     public void start(Stage stage) throws Exception {
-        this.stage = stage;
+        Main.stage = stage;
         stage.setTitle("SysX");
-        Scene scene = new Scene(borderPane, 400, 250);
+        Scene scene = new Scene(new Connexion(), 400, 250);
         stage.setScene(scene);
         scene.getStylesheets().add("graphique/css/Connexion.css");
         stage.setResizable(false);
@@ -43,12 +39,8 @@ public class Main extends Application {
         client = newClient;
     }
 
-    public Stage getStage() {
-        return this.stage;
-    }
-
-    public static BorderPane getBorderPane() {
-        return borderPane;
+    public static Stage getStage() {
+        return stage;
     }
 
 }

@@ -15,8 +15,6 @@ public class EnvoyerMessage implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
 
-        Main.getClient().setMessage(this.cliquerConnexion.t);
-
     }
 
 }
