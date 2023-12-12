@@ -1,5 +1,7 @@
 package graphique;
 
+import java.util.List;
+
 import client.Client;
 import graphique.page.Accueil;
 import graphique.page.Connexion;
@@ -20,7 +22,8 @@ public class Main extends Application {
     private boolean windowIsClosed;
 
     private static Main INSTANCE;
-    public static Main getInstance(){
+
+    public static Main getInstance() {
         return INSTANCE;
     }
 
@@ -39,7 +42,7 @@ public class Main extends Application {
         this.stage = stage;
         stage.setTitle("SysX");
         Scene scene = new Scene(new Connexion(), 400, 250);
-        
+
         this.centrerWindow(stage, 400, 250);
 
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -54,12 +57,11 @@ public class Main extends Application {
         stage.show();
     }
 
-
-    public void centrerWindow(Stage stage, int width, int heigh){
+    public void centrerWindow(Stage stage, int width, int heigh) {
         Screen screen = Screen.getPrimary();
         Rectangle2D bounds = screen.getVisualBounds();
-        stage.setX((bounds.getWidth()/2) - (width/2));
-        stage.setY((bounds.getHeight()/2) - (heigh/2));
+        stage.setX((bounds.getWidth() / 2) - (width / 2));
+        stage.setY((bounds.getHeight() / 2) - (heigh / 2));
     }
 
     public Client getClient() {
@@ -78,9 +80,13 @@ public class Main extends Application {
         return this.windowIsClosed;
     }
 
-    public void changerWindow(Pane node, int width, int height){
+    public void changerWindow(Pane node, int width, int height) {
         this.stage.setScene(new Scene(new Accueil(), width, height));
-        Platform.runLater(() -> this.centrerWindow(this.stage, width, height) );
+        Platform.runLater(() -> this.centrerWindow(this.stage, width, height));
+    }
+
+    public void nouvellePublication(List<String> publication) {
+        Accueil.ajouterContenue(publication);
     }
 
 }

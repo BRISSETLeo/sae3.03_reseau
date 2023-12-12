@@ -9,4 +9,10 @@
     -fx-background-color: transparent;
     -fx-border-color: transparent;
     -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-underline: true;
+    -fx-underline-fill: black;
 }
