@@ -6,7 +6,6 @@ import graphique.page.Accueil;
 import graphique.page.Connexion;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.Scene;
 
 public class CliquerConnexion implements EventHandler<ActionEvent> {
 
@@ -19,10 +18,12 @@ public class CliquerConnexion implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
 
+        Main instance = Main.getInstance();
+
         Client client = new Client(this.connexion.getIp().getText(), this.connexion.getPseudo().getText());
-        Main.setClient(client);
+        instance.setClient(client);
         client.start();
-        Main.getStage().setScene(new Scene(new Accueil(), 1000, 700));
+        instance.changerWindow(new Accueil(), 1000, 700);
 
     }
 

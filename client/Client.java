@@ -38,7 +38,7 @@ public class Client extends Thread {
                 this.dataOutput = new DataOutputStream(this.socket.getOutputStream());
                 this.dataOutput.writeUTF(pseudo);
                 this.dataOutput.flush();
-                while (!Main.windowIsClosed()) {
+                while (!Main.getInstance().windowIsClosed()) {
                     if (this.message != null) {
                         System.out.println("Message envoyé : " + this.message);
                         this.dataOutput.writeUTF(this.message);
