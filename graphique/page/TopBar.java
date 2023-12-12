@@ -21,7 +21,7 @@ public class TopBar extends HBox {
         this.recherche = new TextField();
         this.recherche.setPromptText("Rechercher...");
 
-        HBox hBox = new HBox(50, sysX, this.recherche);
+        HBox hBox = new HBox(70, sysX, this.recherche);
 
         hBox.getStyleClass().add("containerRechercher");
         this.recherche.getStyleClass().add("recherche");

@@ -17,11 +17,21 @@ public class ServerThread extends Thread {
     @Override
     public void run() {
 
+        Socket misAJour = null;
+        Publications modif = null;
+
         while (true) {
             for (Entry<String, Socket> s : Server.getSockets().entrySet()) {
                 String pseudo = s.getKey();
                 Socket socket = s.getValue();
                 try {
+                    if (misAJour != null) {
+                        envoyerMisAJourLike(socket, modif);
+                        if (misAJour == socket) {
+                            misAJour = null;
+                            modif = null;
+                        }
+                    }
                     DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
                     if (dataInputStream.available() > 0) {
                         String message = dataInputStream.readUTF();
@@ -34,6 +44,10 @@ public class ServerThread extends Thread {
                                     .getFollowersPublications(Server.getConnexionMySQL(), pseudo)) {
                                 this.envoyerPublicationAuClient(socket, publications);
                             }
+                        } else if (message.equalsIgnoreCase("Ajout de like")) {
+                            misAJour = socket;
+                            String idPublication = dataInputStream.readUTF();
+                            modif = Requete.newLikes(Server.getConnexionMySQL(), idPublication);
                         }
                     }
                 } catch (IOException e) {
@@ -48,7 +62,6 @@ public class ServerThread extends Thread {
         try {
             DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
             dataOutputStream.writeUTF("Recherche des publications");
-            System.out.println(publication.getIdPublication());
             dataOutputStream.writeUTF(publication.getIdPublication());
             dataOutputStream.writeUTF(publication.getNomUser());
             dataOutputStream.writeUTF(publication.getContenue());
@@ -59,6 +72,18 @@ public class ServerThread extends Thread {
             e.printStackTrace();
         }
 
+    }
+
+    private void envoyerMisAJourLike(Socket socket, Publications publication) {
+        try {
+            DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+            dataOutputStream.writeUTF("Demande de mis à jour des likes");
+            dataOutputStream.writeUTF(publication.getIdPublication());
+            dataOutputStream.writeInt(publication.getLikes());
+            dataOutputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

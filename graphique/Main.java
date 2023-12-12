@@ -5,6 +5,8 @@ import java.util.List;
 import client.Client;
 import graphique.page.Accueil;
 import graphique.page.Connexion;
+import graphique.page.centerPage.Publication;
+import graphique.page.centerPage.Publications;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -18,6 +20,9 @@ import javafx.stage.WindowEvent;
 public class Main extends Application {
 
     private Stage stage;
+    private Accueil accueil;
+    private Publications publications;
+    private Publication publication;
     private Client client;
     private boolean windowIsClosed;
 
@@ -35,6 +40,9 @@ public class Main extends Application {
     public void init() throws Exception {
         INSTANCE = this;
         this.windowIsClosed = false;
+        this.publications = new Publications();
+        this.publication = new Publication();
+        this.accueil = new Accueil();
     }
 
     @Override
@@ -86,7 +94,23 @@ public class Main extends Application {
     }
 
     public void nouvellePublication(List<String> publication) {
-        Accueil.ajouterContenue(publication);
+        Publications.ajouterContenue(publication);
+    }
+
+    public Accueil getAccueil() {
+        return this.accueil;
+    }
+
+    public Publications getPublications() {
+        return this.publications;
+    }
+
+    public Publication getPublication() {
+        return publication;
+    }
+
+    public void updateLike(String idPublication, int nouveauLike) {
+        this.getPublications().updateLikes(idPublication, nouveauLike);
     }
 
 }

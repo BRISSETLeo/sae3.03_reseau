@@ -34,15 +34,21 @@ public class Client extends Thread {
                 dataOutputStream.flush();
                 while (!Main.getInstance().windowIsClosed()) {
                     DataInputStream dataInputStream = new DataInputStream(this.socket.getInputStream());
-                    String demande = dataInputStream.readUTF();
-                    if (demande.equalsIgnoreCase("Recherche des publications")) {
-                        String idPublication = dataInputStream.readUTF();
-                        String nomUser = dataInputStream.readUTF();
-                        String contenue = dataInputStream.readUTF();
-                        String date = dataInputStream.readUTF();
-                        int likes = dataInputStream.readInt();
-                        Platform.runLater(() -> Main.getInstance().nouvellePublication(
-                                Arrays.asList(idPublication, nomUser, contenue, date, likes + "")));
+                    if (dataInputStream.available() > 0) {
+                        String demande = dataInputStream.readUTF();
+                        if (demande.equalsIgnoreCase("Recherche des publications")) {
+                            String idPublication = dataInputStream.readUTF();
+                            String nomUser = dataInputStream.readUTF();
+                            String contenue = dataInputStream.readUTF();
+                            String date = dataInputStream.readUTF();
+                            int likes = dataInputStream.readInt();
+                            Platform.runLater(() -> Main.getInstance().nouvellePublication(
+                                    Arrays.asList(idPublication, nomUser, contenue, date, likes + "")));
+                        } else if (demande.equalsIgnoreCase("Demande de mis à jour des likes")) {
+                            String idPublication = dataInputStream.readUTF();
+                            int likes = dataInputStream.readInt();
+                            Platform.runLater(() -> Main.getInstance().updateLike(idPublication, likes));
+                        }
                     }
                 }
                 this.socket.close();
@@ -57,6 +63,17 @@ public class Client extends Thread {
         try {
             DataOutputStream dataOutputStream = new DataOutputStream(this.socket.getOutputStream());
             dataOutputStream.writeUTF("Recherche des publications");
+            dataOutputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void ajouterLike(String idPublication) {
+        try {
+            DataOutputStream dataOutputStream = new DataOutputStream(this.socket.getOutputStream());
+            dataOutputStream.writeUTF("Ajout de like");
+            dataOutputStream.writeUTF(idPublication);
             dataOutputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();

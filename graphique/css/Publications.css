@@ -6,12 +6,13 @@
 .conteneur {
     -fx-border-color: black;
     -fx-border-style: solid;
-    -fx-border-width: 0.2em;
+    -fx-border-width: 0.1em;
+    -fx-border-radius: 0.5em 0.5em 0 0.5em;
     -fx-font-size: 1.5em;
 }
 
 .nomUser {
-    -fx-padding: 1em;
+    -fx-margin: 1em;
     -fx-font-size: 1em;
 }
 
@@ -25,5 +26,8 @@
 
 .likesBox {
     -fx-padding: 1em;
-    -fx-pref-width: 71em;
+}
+
+.buttonLike {
+    -fx-padding: 0.2em;
 }

@@ -1,5 +1,7 @@
 package graphique.page;
 
+import graphique.controller.PageAccueil;
+import graphique.controller.PagePublication;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -12,9 +14,11 @@ public class Navbar extends VBox {
         super.getStyleClass().add("navBar");
 
         Button accueil = new Button("Accueil");
+        accueil.setOnAction(new PageAccueil());
         Button notif = new Button("Notifications");
         Button msg = new Button("Messages");
         Button publi = new Button("Publication");
+        publi.setOnAction(new PagePublication());
 
         ImageView accueilImg = new ImageView(new Image("graphique/images/accueil.png"));
         ImageView notifImg = new ImageView(new Image("graphique/images/notification.png"));
