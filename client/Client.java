@@ -4,6 +4,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+import graphique.Main;
 import javafx.scene.control.TextField;
 
 public class Client extends Thread {
@@ -37,7 +38,7 @@ public class Client extends Thread {
                 this.dataOutput = new DataOutputStream(this.socket.getOutputStream());
                 this.dataOutput.writeUTF(pseudo);
                 this.dataOutput.flush();
-                while (true) {
+                while (!Main.windowIsClosed()) {
                     if (this.message != null) {
                         System.out.println("Message envoyé : " + this.message);
                         this.dataOutput.writeUTF(this.message);

@@ -1,6 +1,5 @@
 package graphique.controller;
 
-import graphique.Main;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 

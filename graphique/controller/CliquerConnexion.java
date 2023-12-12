@@ -22,7 +22,7 @@ public class CliquerConnexion implements EventHandler<ActionEvent> {
         Client client = new Client(this.connexion.getIp().getText(), this.connexion.getPseudo().getText());
         Main.setClient(client);
         client.start();
-        Main.getStage().setScene(new Scene(new Accueil(), 1000, 800));
+        Main.getStage().setScene(new Scene(new Accueil(), 1000, 700));
 
     }
 
