@@ -22,8 +22,7 @@ public class Accueil extends BorderPane {
         Accueil.scrollPane = new ScrollPane(contenant);
 
         this.splitPane = new SplitPane();
-        this.splitPane.getItems().addAll(Accueil.scrollPane, Main.getInstance().getPublication());
-        this.splitPane.getItems().get(1).setVisible(false);
+        this.splitPane.getItems().add(Accueil.scrollPane);
         this.splitPane.setDividerPositions(1);
 
         Accueil.scrollPane.setFitToWidth(true);
@@ -44,13 +43,14 @@ public class Accueil extends BorderPane {
     }
 
     public void setPageCenter(VBox vBox) {
-        this.splitPane.setDividerPositions(1);
-        this.splitPane.getItems().get(1).setVisible(false);
+        if (this.splitPane.getItems().size() == 2) {
+            this.splitPane.getItems().remove(1);
+        }
         scrollPane.setContent(vBox);
     }
 
     public void setPageRight(VBox vBox) {
-        this.splitPane.getItems().get(1).setVisible(true);
+        this.splitPane.getItems().add(vBox);
         this.splitPane.setDividerPositions(0.7);
     }
 
