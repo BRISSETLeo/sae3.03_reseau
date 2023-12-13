@@ -20,6 +20,7 @@ import javafx.stage.WindowEvent;
 public class Main extends Application {
 
     private Stage stage;
+    private Connexion connexion;
     private Accueil accueil;
     private Publications publications;
     private Publication publication;
@@ -43,13 +44,14 @@ public class Main extends Application {
         this.publications = new Publications();
         this.publication = new Publication();
         this.accueil = new Accueil();
+        this.connexion = new Connexion();
     }
 
     @Override
     public void start(Stage stage) throws Exception {
         this.stage = stage;
         stage.setTitle("SysX");
-        Scene scene = new Scene(new Connexion(), 400, 250);
+        Scene scene = new Scene(this.connexion, 400, 250);
 
         this.centrerWindow(stage, 400, 250);
 
@@ -111,6 +113,10 @@ public class Main extends Application {
 
     public void updateLike(String idPublication, int nouveauLike) {
         this.getPublications().updateLikes(idPublication, nouveauLike);
+    }
+
+    public Connexion getConnexion() {
+        return this.connexion;
     }
 
 }

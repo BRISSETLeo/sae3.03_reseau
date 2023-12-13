@@ -17,17 +17,22 @@ public class CliquerConnexion implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
 
+        Main instance = Main.getInstance();
+
         if (this.connexion.getPseudo().getText().equals("")) {
+            instance.getConnexion().erreurPseudo();
             return;
         }
-
-        Main instance = Main.getInstance();
 
         Client client = new Client(this.connexion.getIp().getText(), this.connexion.getPseudo().getText());
         instance.setClient(client);
         client.start();
-        instance.changerWindow(instance.getAccueil(), 1000, 700);
-        client.demanderPublication();
+        if(client.isConntected()){
+            instance.changerWindow(instance.getAccueil(), 1000, 700);
+            client.demanderPublication();
+        }else{
+            instance.getConnexion().erreurIp();
+        }
 
     }
 

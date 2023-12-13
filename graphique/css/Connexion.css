@@ -26,3 +26,7 @@
 .button:hover {
     -fx-background-color: #45a049;
 }
+
+.erreur{
+    -fx-border-color: red;
+}
