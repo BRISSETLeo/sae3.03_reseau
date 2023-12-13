@@ -23,7 +23,6 @@ public class Server {
         try {
             try (ServerSocket serverSocket = new ServerSocket(3030)) {
                 System.out.println("Server Socket en attente...");
-                new ServerThread().start();
                 while (true) {
                     Socket socket = serverSocket.accept();
                     DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
@@ -32,6 +31,7 @@ public class Server {
                     Requete.addUser(connexionMySQL, pseudo);
                     System.out.println(
                             "\u001B[32m" + pseudo + "\u001B[33m s'est connecté au serveur\u001B[31m.\u001B[37m");
+                    new ServerThread(pseudo, socket).start();
                 }
             }
         } catch (IOException e) {
