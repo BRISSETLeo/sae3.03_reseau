@@ -43,6 +43,11 @@ public class ServerThread extends Thread {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                try {
+                    this.socket.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
             }
         }
     }

@@ -10,7 +10,7 @@ public class PagePublication implements EventHandler<ActionEvent> {
     public void handle(ActionEvent event) {
 
         Main instance = Main.getInstance();
-        instance.getAccueil().setPageCenter(instance.getPublication());
+        instance.getAccueil().setPageRight(instance.getPublication());
 
     }
 

@@ -63,7 +63,7 @@ public class Main extends Application {
         });
         stage.setScene(scene);
         scene.getStylesheets().addAll("graphique/css/Connexion.css");
-        stage.setResizable(false);
+        stage.setResizable(true);
         stage.show();
     }
 
@@ -91,7 +91,7 @@ public class Main extends Application {
     }
 
     public void changerWindow(Pane node, int width, int height) {
-        this.stage.setScene(new Scene(new Accueil(), width, height));
+        this.stage.setScene(new Scene(this.accueil, width, height));
         Platform.runLater(() -> this.centrerWindow(this.stage, width, height));
     }
 

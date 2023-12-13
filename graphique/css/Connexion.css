@@ -2,7 +2,6 @@
     -fx-padding: 1em;
     -fx-alignment: CENTER;
     -fx-text-alignment: center;
-    -fx-pref-width: 200em;
 }
 
 .textfield {
@@ -27,6 +26,6 @@
     -fx-background-color: #45a049;
 }
 
-.erreur{
+.erreur {
     -fx-border-color: red;
 }

@@ -18,3 +18,11 @@
     -fx-text-fill: white;
     -fx-pref-width: 20em;
 }
+
+.test {
+    -fx-background-color: black;
+}
+
+.test2 {
+    -fx-background-color: red;
+}

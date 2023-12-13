@@ -27,12 +27,6 @@ public class CliquerConnexion implements EventHandler<ActionEvent> {
         Client client = new Client(this.connexion.getIp().getText(), this.connexion.getPseudo().getText());
         instance.setClient(client);
         client.start();
-        if(client.isConntected()){
-            instance.changerWindow(instance.getAccueil(), 1000, 700);
-            client.demanderPublication();
-        }else{
-            instance.getConnexion().erreurIp();
-        }
 
     }
 

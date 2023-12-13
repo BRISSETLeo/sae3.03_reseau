@@ -31,6 +31,10 @@ public class Client extends Thread {
             DataOutputStream dataOutputStream = new DataOutputStream(this.socket.getOutputStream());
             dataOutputStream.writeUTF(pseudo);
             dataOutputStream.flush();
+            Platform.runLater(() -> {
+                Main.getInstance().changerWindow(Main.getInstance().getAccueil(), 1000, 700);
+            });
+            this.demanderPublication();
             while (!Main.getInstance().windowIsClosed()) {
                 DataInputStream dataInputStream = new DataInputStream(this.socket.getInputStream());
                 if (dataInputStream.available() > 0) {
@@ -42,7 +46,7 @@ public class Client extends Thread {
                         String date = dataInputStream.readUTF();
                         int likes = dataInputStream.readInt();
                         Platform.runLater(() -> Main.getInstance().nouvellePublication(
-                            Arrays.asList(idPublication, nomUser, contenue, date, likes + "")));
+                                Arrays.asList(idPublication, nomUser, contenue, date, likes + "")));
                     } else if (demande.equalsIgnoreCase("Demande de mis à jour des likes")) {
                         String idPublication = dataInputStream.readUTF();
                         int likes = dataInputStream.readInt();
@@ -51,11 +55,9 @@ public class Client extends Thread {
                 }
             }
             this.socket.close();
-        } catch (IOException ignored) {}
-    }
-
-    public boolean isConntected(){
-        return this.socket != null && this.socket.isConnected();
+        } catch (IOException ignored) {
+            Main.getInstance().getConnexion().erreurIp();
+        }
     }
 
     public void demanderPublication() {
