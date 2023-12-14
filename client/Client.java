@@ -27,7 +27,7 @@ public class Client extends Thread {
     public void run() {
 
         try {
-            this.socket = new Socket(ip, 3030);
+            this.socket = new Socket(ip, 10000);
             DataOutputStream dataOutputStream = new DataOutputStream(this.socket.getOutputStream());
             dataOutputStream.writeUTF(pseudo);
             dataOutputStream.flush();
@@ -67,6 +67,7 @@ public class Client extends Thread {
             dataOutputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
         }
     }
 

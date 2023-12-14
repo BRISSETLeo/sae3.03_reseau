@@ -6,16 +6,20 @@ import java.io.IOException;
 import java.net.Socket;
 
 import caches.Publications;
+import sql.ConnexionMySQL;
 import sql.Requete;
 
 public class ServerThread extends Thread {
 
     private String pseudo;
     private Socket socket;
+    private ConnexionMySQL connexionMySQL;
 
-    public ServerThread(String pseudo, Socket socket) throws IOException {
+    public ServerThread(String pseudo, Socket socket, ConnexionMySQL connexionMySQL) throws IOException {
         this.pseudo = pseudo;
         this.socket = socket;
+        this.connexionMySQL = connexionMySQL;
+        Server.putSocket(pseudo, socket);
     }
 
     @Override
@@ -26,16 +30,16 @@ public class ServerThread extends Thread {
                 DataInputStream dataInputStream = new DataInputStream(this.socket.getInputStream());
                 if (dataInputStream.available() > 0) {
                     String message = dataInputStream.readUTF();
-                    System.out.println("\u001B[33m" + "Message reçu de " + "\u001B[32m" + pseudo
-                            + "\u001B[31m : \u001B[36m" + message + "\u001B[37m");
+                    System.out.println(Server.ANSI_PURPLE + "Message reçu de " + Server.ANSI_BLUE + pseudo
+                            + Server.ANSI_RED + " : " + Server.ANSI_BLACK + message);
                     if (message.equalsIgnoreCase("Recherche des publications")) {
                         for (Publications publications : Requete
-                                .getFollowersPublications(Server.getConnexionMySQL(), pseudo)) {
+                                .getFollowersPublications(this.connexionMySQL, pseudo)) {
                             this.envoyerPublicationAuClient(this.socket, publications);
                         }
                     } else if (message.equalsIgnoreCase("Ajout de like")) {
                         String idPublication = dataInputStream.readUTF();
-                        Publications publication = Requete.newLikes(Server.getConnexionMySQL(), idPublication);
+                        Publications publication = Requete.newLikes(this.connexionMySQL, idPublication);
                         for (Socket socket : Server.getSockets().values()) {
                             envoyerMisAJourLike(socket, publication);
                         }
