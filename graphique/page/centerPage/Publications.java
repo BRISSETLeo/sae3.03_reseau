@@ -8,9 +8,12 @@ import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import graphique.Main;
 import graphique.controller.AjouterLike;
 import graphique.page.Accueil;
+import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -24,24 +27,49 @@ import javafx.scene.layout.VBox;
 public class Publications extends VBox {
 
     private static Map<String, Label> likeSave;
-    private static Map<String, Label> dateSave;
+    private static Map<String, Label> labelSave;
+    private static Map<String, String> dateSave;
 
     public Publications() {
         super(20);
         Publications.likeSave = new HashMap<>();
+        Publications.labelSave = new HashMap<>();
         Publications.dateSave = new HashMap<>();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                while (Main.getInstance().getClient() == null || Main.getInstance().getClient().isAlive()) {
+                    for (Entry<String, Label> labelSav : Publications.labelSave.entrySet()) {
+                        String id = labelSav.getKey();
+                        Label label = labelSav.getValue();
+                        Platform.runLater(() -> {
+                            try {
+                                label.setText(formatTimeElapsed(Duration.between(
+                                        sdf.parse(Publications.dateSave.get(id)).toInstant()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toLocalDateTime(),
+                                        LocalDateTime.now())));
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    }
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
     }
 
     public void updateLikes(String idPublication, int nouveauLike) {
         if (Publications.likeSave.containsKey(idPublication)) {
             Publications.likeSave.get(idPublication).setText(nouveauLike + "");
         }
-        /*
-         * if (Publications.dateSave.containsKey(idPublication)) {
-         * Label date = Publications.dateSave.get(idPublication);
-         * date.setText(createDateLabel(date.getText()).getText());
-         * }
-         */
     }
 
     public static void ajouterContenue(List<String> contenues) {
@@ -54,6 +82,8 @@ public class Publications extends VBox {
         HBox likesBox = createLikesHBox(likes, contenues.get(0));
 
         Publications.likeSave.put(contenues.get(0), likes);
+        Publications.labelSave.put(contenues.get(0), date);
+        Publications.dateSave.put(contenues.get(0), contenues.get(3));
 
         VBox conteneur = new VBox(createHeaderHBox(nomUser, date), contenue, likesBox);
         conteneur.getStyleClass().add("conteneur");
@@ -120,24 +150,46 @@ public class Publications extends VBox {
 
         if (seconds < 60) {
             return seconds + "s";
-        } else if (seconds < 3600) {
-            long minutes = seconds / 60;
-            return minutes + "m ";
-        } else if (seconds < 86400) {
-            long hours = seconds / 3600;
-            return hours + "h ";
-        } else if (seconds < 604800) {
-            long days = seconds / 86400;
-            return days + "j";
-        } else if (seconds < 2419200) {
-            long weeks = seconds / 604800;
-            return weeks + "w";
-        } else if (seconds < 29030400) {
-            long months = seconds / 2419200;
-            return months + "mo";
         } else {
-            long years = seconds / 29030400;
-            return years + "y";
+            long minutes = duration.toMinutesPart();
+            long hours = duration.toHoursPart();
+            long days = duration.toDaysPart();
+            long weeks = days / 7;
+            long months = days / 30; // Approximation
+            long years = days / 365; // Approximation
+
+            StringBuilder result = new StringBuilder();
+
+            if (years > 0) {
+                result.append(years).append("y ");
+                days -= years * 365;
+            }
+
+            if (months > 0) {
+                result.append(months).append("mo ");
+                days -= months * 30;
+            }
+
+            if (weeks > 0) {
+                result.append(weeks).append("w ");
+                days -= weeks * 7;
+            }
+
+            if (days > 0) {
+                result.append(days).append("j ");
+            }
+
+            if (hours > 0) {
+                result.append(hours).append("h ");
+            }
+
+            if (minutes > 0) {
+                result.append(minutes).append("m ");
+            }
+
+            result.append(seconds % 60).append("s");
+
+            return result.toString().trim();
         }
     }
 

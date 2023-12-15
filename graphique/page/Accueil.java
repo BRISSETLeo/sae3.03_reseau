@@ -50,8 +50,10 @@ public class Accueil extends BorderPane {
     }
 
     public void setPageRight(VBox vBox) {
-        this.splitPane.getItems().add(vBox);
-        this.splitPane.setDividerPositions(0.7);
+        if (this.splitPane.getItems().size() < 2) {
+            this.splitPane.getItems().add(vBox);
+            this.splitPane.setDividerPositions(0.7);
+        }
     }
 
 }

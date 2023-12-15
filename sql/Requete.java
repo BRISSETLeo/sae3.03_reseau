@@ -66,7 +66,7 @@ public class Requete {
                 sql += ",";
             }
         }
-        sql += ");";
+        sql += ") ORDER BY DATE_MESSAGE DESC;";
         PreparedStatement preparedStatement;
         try {
             preparedStatement = connexionMySQL.getConnection().prepareStatement(sql);
