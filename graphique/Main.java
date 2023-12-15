@@ -1,7 +1,5 @@
 package graphique;
 
-import java.util.List;
-
 import client.Client;
 import graphique.page.Accueil;
 import graphique.page.Connexion;
@@ -95,8 +93,8 @@ public class Main extends Application {
         Platform.runLater(() -> this.centrerWindow(this.stage, width, height));
     }
 
-    public void nouvellePublication(List<String> publication) {
-        Publications.ajouterContenue(publication);
+    public void nouvellePublication(String idPublication, String nomUser, String contenue, String date, String likes) {
+        Publications.ajouterContenue(idPublication, nomUser, contenue, date, likes);
     }
 
     public Accueil getAccueil() {

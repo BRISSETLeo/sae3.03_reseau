@@ -4,7 +4,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Arrays;
 
 import graphique.Main;
 import javafx.application.Platform;
@@ -46,7 +45,7 @@ public class Client extends Thread {
                         String date = dataInputStream.readUTF();
                         int likes = dataInputStream.readInt();
                         Platform.runLater(() -> Main.getInstance().nouvellePublication(
-                                Arrays.asList(idPublication, nomUser, contenue, date, likes + "")));
+                                idPublication, nomUser, contenue, date, likes + ""));
                     } else if (demande.equalsIgnoreCase("Demande de mis à jour des likes")) {
                         String idPublication = dataInputStream.readUTF();
                         int likes = dataInputStream.readInt();

@@ -31,9 +31,8 @@ public class Server {
         ConnexionMySQL connexionMySQL = new ConnexionMySQL();
 
         try {
-            // try (ServerSocket serverSocket = new ServerSocket(10000, 50,
-            // InetAddress.getByName("185.31.40.87"))) {
-            try (ServerSocket serverSocket = new ServerSocket(10000)) {
+            try (ServerSocket serverSocket = new ServerSocket(10000, 50, InetAddress.getByName("185.31.40.87"))) {
+                // try (ServerSocket serverSocket = new ServerSocket(10000)) {
                 System.out.println("Server Socket en attente...");
                 while (true) {
                     Socket socket = serverSocket.accept();

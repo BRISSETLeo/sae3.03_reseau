@@ -6,7 +6,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -72,20 +71,21 @@ public class Publications extends VBox {
         }
     }
 
-    public static void ajouterContenue(List<String> contenues) {
-        Button nomUser = createButton(contenues.get(1), "nomUser");
-        Label contenue = createLabel(contenues.get(2), "contenue");
-        contenue.setWrapText(true);
-        Label date = createDateLabel(contenues.get(3));
+    public static void ajouterContenue(String idPublication, String nomUser, String contenue, String date,
+            String likes) {
+        Button nomUserB = createButton(nomUser, "nomUser");
+        Label contenueL = createLabel(contenue, "contenue");
+        contenueL.setWrapText(true);
+        Label dateL = createDateLabel(date);
 
-        Label likes = createLabel(contenues.get(4), "likes");
-        HBox likesBox = createLikesHBox(likes, contenues.get(0));
+        Label likesL = createLabel(likes, "likes");
+        HBox likesBox = createLikesHBox(likesL, idPublication);
 
-        Publications.likeSave.put(contenues.get(0), likes);
-        Publications.labelSave.put(contenues.get(0), date);
-        Publications.dateSave.put(contenues.get(0), contenues.get(3));
+        Publications.likeSave.put(idPublication, likesL);
+        Publications.labelSave.put(idPublication, dateL);
+        Publications.dateSave.put(idPublication, date);
 
-        VBox conteneur = new VBox(createHeaderHBox(nomUser, date), contenue, likesBox);
+        VBox conteneur = new VBox(createHeaderHBox(nomUserB, dateL), contenueL, likesBox);
         conteneur.getStyleClass().add("conteneur");
 
         Accueil.getContenant().getChildren().add(conteneur);
