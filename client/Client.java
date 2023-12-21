@@ -1,0 +1,84 @@
+package client;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+
+import graphique.Main;
+import javafx.application.Platform;
+
+public class Client extends Thread {
+
+    private Socket socket;
+    private final String ip;
+    private final String pseudo;
+
+    public Client(String ip, String pseudo) {
+
+        this.socket = null;
+        this.ip = ip;
+        this.pseudo = pseudo;
+
+    }
+
+    @Override
+    public void run() {
+
+        try {
+            this.socket = new Socket(ip, 10000);
+            DataOutputStream dataOutputStream = new DataOutputStream(this.socket.getOutputStream());
+            dataOutputStream.writeUTF(pseudo);
+            dataOutputStream.flush();
+            Platform.runLater(() -> {
+                Main.getInstance().changerWindow(Main.getInstance().getAccueil(), 1000, 700);
+            });
+            this.demanderPublication();
+            while (!Main.getInstance().windowIsClosed()) {
+                DataInputStream dataInputStream = new DataInputStream(this.socket.getInputStream());
+                if (dataInputStream.available() > 0) {
+                    String demande = dataInputStream.readUTF();
+                    if (demande.equalsIgnoreCase("Recherche des publications")) {
+                        String idPublication = dataInputStream.readUTF();
+                        String nomUser = dataInputStream.readUTF();
+                        String contenue = dataInputStream.readUTF();
+                        String date = dataInputStream.readUTF();
+                        int likes = dataInputStream.readInt();
+                        Platform.runLater(() -> Main.getInstance().nouvellePublication(
+                                idPublication, nomUser, contenue, date, likes + ""));
+                    } else if (demande.equalsIgnoreCase("Demande de mis à jour des likes")) {
+                        String idPublication = dataInputStream.readUTF();
+                        int likes = dataInputStream.readInt();
+                        Platform.runLater(() -> Main.getInstance().updateLike(idPublication, likes));
+                    }
+                }
+            }
+            this.socket.close();
+        } catch (IOException ignored) {
+            Main.getInstance().getConnexion().erreurIp();
+        }
+    }
+
+    public void demanderPublication() {
+        try {
+            DataOutputStream dataOutputStream = new DataOutputStream(this.socket.getOutputStream());
+            dataOutputStream.writeUTF("Recherche des publications");
+            dataOutputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+        }
+    }
+
+    public void ajouterLike(String idPublication) {
+        try {
+            DataOutputStream dataOutputStream = new DataOutputStream(this.socket.getOutputStream());
+            dataOutputStream.writeUTF("Ajout de like");
+            dataOutputStream.writeUTF(idPublication);
+            dataOutputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+}

@@ -1,0 +1,18 @@
+.navBar {
+    -fx-border-style: solid;
+    -fx-border-width: 0 0.3em 0 0;
+    -fx-border-color: black;
+}
+
+.button {
+    -fx-padding: 1em;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-underline: true;
+    -fx-underline-fill: black;
+}

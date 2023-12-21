@@ -1,9 +1,10 @@
 package graphique.page;
 
 import graphique.controller.CliquerConnexion;
+import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 
 public class Connexion extends VBox {
@@ -35,6 +36,36 @@ public class Connexion extends VBox {
 
     public Button getButton() {
         return this.button;
+    }
+
+    public void erreurIp(){
+        this.ip.getStyleClass().add("erreur");
+        this.ip.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                clearErreurIp();
+            }
+        });
+    }
+
+    public void erreurPseudo(){
+        this.pseudo.getStyleClass().add("erreur");
+        this.pseudo.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                clearErreurPseudo();
+            }
+        });
+    }
+
+    public void clearErreurIp(){
+        this.ip.getStyleClass().remove("erreur");
+        this.ip.setOnAction(null);
+    }
+
+    public void clearErreurPseudo(){
+        this.pseudo.getStyleClass().remove("erreur");
+        this.pseudo.setOnAction(null);
     }
 
 }

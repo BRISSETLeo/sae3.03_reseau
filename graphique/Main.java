@@ -1,17 +1,35 @@
 package graphique;
 
 import client.Client;
+import graphique.page.Accueil;
 import graphique.page.Connexion;
+import graphique.page.centerPage.Publication;
+import graphique.page.centerPage.Publications;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.event.EventHandler;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class Main extends Application {
 
     private Stage stage;
-    private static BorderPane borderPane;
-    private static Client client;
+    private Connexion connexion;
+    private Accueil accueil;
+    private Publications publications;
+    private Publication publication;
+    private Client client;
+    private boolean windowIsClosed;
+
+    private static Main INSTANCE;
+
+    public static Main getInstance() {
+        return INSTANCE;
+    }
 
     public static void main(String[] args) {
         launch(args);
@@ -19,36 +37,84 @@ public class Main extends Application {
 
     @Override
     public void init() throws Exception {
-        borderPane = new BorderPane();
-        borderPane.setCenter(new Connexion());
-
+        INSTANCE = this;
+        this.windowIsClosed = false;
+        this.publications = new Publications();
+        this.publication = new Publication();
+        this.accueil = new Accueil();
+        this.connexion = new Connexion();
     }
 
     @Override
     public void start(Stage stage) throws Exception {
         this.stage = stage;
         stage.setTitle("SysX");
-        Scene scene = new Scene(borderPane, 400, 250);
+        Scene scene = new Scene(this.connexion, 400, 250);
+
+        this.centrerWindow(stage, 400, 250);
+
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                Main.this.windowIsClosed = true;
+            }
+        });
         stage.setScene(scene);
-        scene.getStylesheets().add("graphique/css/Connexion.css");
-        stage.setResizable(false);
+        scene.getStylesheets().addAll("graphique/css/Connexion.css");
+        stage.setResizable(true);
         stage.show();
     }
 
-    public static Client getClient() {
-        return client;
+    public void centrerWindow(Stage stage, int width, int heigh) {
+        Screen screen = Screen.getPrimary();
+        Rectangle2D bounds = screen.getVisualBounds();
+        stage.setX((bounds.getWidth() / 2) - (width / 2));
+        stage.setY((bounds.getHeight() / 2) - (heigh / 2));
     }
 
-    public static void setClient(Client newClient) {
+    public Client getClient() {
+        return this.client;
+    }
+
+    public void setClient(Client newClient) {
         client = newClient;
     }
 
     public Stage getStage() {
-        return this.stage;
+        return stage;
     }
 
-    public static BorderPane getBorderPane() {
-        return borderPane;
+    public boolean windowIsClosed() {
+        return this.windowIsClosed;
+    }
+
+    public void changerWindow(Pane node, int width, int height) {
+        this.stage.setScene(new Scene(this.accueil, width, height));
+        Platform.runLater(() -> this.centrerWindow(this.stage, width, height));
+    }
+
+    public void nouvellePublication(String idPublication, String nomUser, String contenue, String date, String likes) {
+        Publications.ajouterContenue(idPublication, nomUser, contenue, date, likes);
+    }
+
+    public Accueil getAccueil() {
+        return this.accueil;
+    }
+
+    public Publications getPublications() {
+        return this.publications;
+    }
+
+    public Publication getPublication() {
+        return publication;
+    }
+
+    public void updateLike(String idPublication, int nouveauLike) {
+        this.getPublications().updateLikes(idPublication, nouveauLike);
+    }
+
+    public Connexion getConnexion() {
+        return this.connexion;
     }
 
 }

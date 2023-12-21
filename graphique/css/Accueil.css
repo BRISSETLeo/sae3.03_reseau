@@ -1,0 +1,28 @@
+.topBar {
+    -fx-padding: 0 0 0 1em;
+    -fx-border-style: solid;
+    -fx-border-width: 0 0 0.3em 0;
+    -fx-border-color: black;
+}
+
+.containerRechercher {
+    -fx-alignment: center;
+    -fx-alignment-insets: 0 0 0 0;
+}
+
+.recherche {
+    -fx-background-color: rgb(44, 44, 44);
+    -fx-background-radius: 0 1em 1em 0;
+    -fx-font-size: 1.3em;
+    -fx-prompt-text-fill: white;
+    -fx-text-fill: white;
+    -fx-pref-width: 20em;
+}
+
+.test {
+    -fx-background-color: black;
+}
+
+.test2 {
+    -fx-background-color: red;
+}
