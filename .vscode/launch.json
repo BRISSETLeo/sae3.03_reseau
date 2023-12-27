@@ -6,27 +6,40 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Serveur",
+            "request": "launch",
+            "mainClass": "serveur.Serveur",
+            "projectName": "sae3.03_reseau_4fa13ed8"
+        },
+        {
+            "type": "java",
+            "name": "test",
+            "vmArgs": "--module-path ./JavaFX/lib --add-modules javafx.controls",
+            "request": "launch",
+            "mainClass": "test",
+            "projectName": "SAE3.03_RESEAU_2_7190b0ab"
+        },
+        {
+            "type": "java",
+            "name": "test",
+            "request": "launch",
+            "mainClass": "serveur.test",
+            "projectName": "SAE3.03_RESEAU_2_7190b0ab"
+        },
+        {
+            "type": "java",
             "name": "Main",
             "request": "launch",
             "vmArgs": "--module-path ./JavaFX/lib --add-modules javafx.controls",
-            "mainClass": "graphique.Main",
-            "projectName": "sae3.03_reseau_4fa13ed8"
+            "mainClass": "client.Main",
+            "projectName": "SAE3.03_RESEAU_2_7190b0ab"
         },
         {
             "type": "java",
-            "name": "Server",
+            "name": "Serveur",
             "request": "launch",
-            "vmArgs": "--module-path ./JavaFX/lib/mariadb-java-client.jar",
-            "mainClass": "server.Server",
-            "projectName": "sae3.03_reseau_4fa13ed8"
-        },
-        {
-            "type": "java",
-            "name": "Server",
-            "request": "launch",
-            "vmArgs": "--module-path ./JavaFX/lib/mariadb-java-client.jar",
-            "mainClass": "server.Server",
-            "projectName": "sae3.03_reseau_36e92b4d"
+            "mainClass": "serveur.Serveur",
+            "projectName": "SAE3.03_RESEAU_2_7190b0ab"
         }
     ]
 }

@@ -4,79 +4,150 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.List;
 
-import graphique.Main;
-import javafx.application.Platform;
+import caches.ByteManager;
+import caches.Publication;
+import enums.ErreurSocket;
+import requete.*;
 
 public class Client extends Thread {
 
+    private Main main;
+    private String pseudo;
     private Socket socket;
-    private final String ip;
-    private final String pseudo;
+    private DataInputStream in;
+    private DataOutputStream out;
 
-    public Client(String ip, String pseudo) {
-
-        this.socket = null;
-        this.ip = ip;
+    public Client(Main main, String pseudo, String ip) {
+        this.main = main;
         this.pseudo = pseudo;
 
+        try {
+
+            this.socket = new Socket(ip, 8080);
+            this.in = new DataInputStream(this.socket.getInputStream());
+            this.out = new DataOutputStream(this.socket.getOutputStream());
+            super.start();
+            this.main.sauvegarderIdentifiant(ip, this.pseudo);
+            this.out.writeUTF(this.pseudo);
+            this.out.flush();
+
+        } catch (IOException e) {
+
+            if (e.getMessage().equals(ErreurSocket.ERREUR_IP.getErreur())) {
+                this.main.erreurDansAdresse();
+            }
+
+        }
     }
 
     @Override
     public void run() {
 
         try {
-            this.socket = new Socket(ip, 10000);
-            DataOutputStream dataOutputStream = new DataOutputStream(this.socket.getOutputStream());
-            dataOutputStream.writeUTF(pseudo);
-            dataOutputStream.flush();
-            Platform.runLater(() -> {
-                Main.getInstance().changerWindow(Main.getInstance().getAccueil(), 1000, 700);
-            });
-            this.demanderPublication();
-            while (!Main.getInstance().windowIsClosed()) {
-                DataInputStream dataInputStream = new DataInputStream(this.socket.getInputStream());
-                if (dataInputStream.available() > 0) {
-                    String demande = dataInputStream.readUTF();
-                    if (demande.equalsIgnoreCase("Recherche des publications")) {
-                        String idPublication = dataInputStream.readUTF();
-                        String nomUser = dataInputStream.readUTF();
-                        String contenue = dataInputStream.readUTF();
-                        String date = dataInputStream.readUTF();
-                        int likes = dataInputStream.readInt();
-                        Platform.runLater(() -> Main.getInstance().nouvellePublication(
-                                idPublication, nomUser, contenue, date, likes + ""));
-                    } else if (demande.equalsIgnoreCase("Demande de mis à jour des likes")) {
-                        String idPublication = dataInputStream.readUTF();
-                        int likes = dataInputStream.readInt();
-                        Platform.runLater(() -> Main.getInstance().updateLike(idPublication, likes));
+
+            while (true) {
+
+                if (this.socket.isClosed())
+                    break;
+
+                if (in.available() > 0) {
+
+                    String demande = in.readUTF();
+
+                    if (demande.equals(Requete.CREER_COMPTE.getRequete())) {
+
+                        this.main.demanderCreationDeCompte();
+
+                    } else if (demande.equals(Requete.COMPTE_CREE.getRequete())) {
+
+                        this.demanderPublications();
+                        this.main.mettreLaPageAccueil();
+
+                    } else if (demande.equalsIgnoreCase(Requete.AVOIR_PUBLICATIONS.getRequete())) {
+
+                        int arraySize = in.readInt();
+                        byte[] receivedBytes = new byte[arraySize];
+                        in.readFully(receivedBytes);
+
+                        List<Publication> retrievedPublicationList = ByteManager.convertBytesToList(receivedBytes,
+                                Publication.class);
+
+                        for (Publication publication : retrievedPublicationList)
+                            this.main.afficherPublication(publication);
+
+                    } else if (demande.equalsIgnoreCase(Requete.LIKER_PUBLICATION.getRequete())) {
+
+                        int idPublication = in.readInt();
+                        boolean isMe = in.readBoolean();
+                        this.main.ajouterLike(idPublication, isMe);
+
+                    } else if (demande.equalsIgnoreCase(Requete.DISLIKER_PUBLICATION.getRequete())) {
+
+                        int idPublication = in.readInt();
+                        boolean isMe = in.readBoolean();
+                        this.main.removeLike(idPublication, isMe);
+
                     }
+
                 }
+
             }
-            this.socket.close();
-        } catch (IOException ignored) {
-            Main.getInstance().getConnexion().erreurIp();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
         }
     }
 
-    public void demanderPublication() {
+    public void creerCompte() {
         try {
-            DataOutputStream dataOutputStream = new DataOutputStream(this.socket.getOutputStream());
-            dataOutputStream.writeUTF("Recherche des publications");
-            dataOutputStream.flush();
+            this.out.writeUTF(Requete.CREER_COMPTE.getRequete());
+            this.out.flush();
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
         }
     }
 
-    public void ajouterLike(String idPublication) {
+    public void fermer() {
         try {
-            DataOutputStream dataOutputStream = new DataOutputStream(this.socket.getOutputStream());
-            dataOutputStream.writeUTF("Ajout de like");
-            dataOutputStream.writeUTF(idPublication);
-            dataOutputStream.flush();
+            this.out.writeUTF(Requete.FERMER.getRequete());
+            this.out.flush();
+            this.out.close();
+            this.in.close();
+            this.socket.close();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void demanderPublications() {
+        try {
+            this.out.writeUTF(Requete.AVOIR_PUBLICATIONS.getRequete());
+            this.out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void likePublication(int id) {
+        try {
+            this.out.writeUTF(Requete.LIKER_PUBLICATION.getRequete());
+            this.out.writeInt(id);
+            this.out.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void unlikePublication(int id) {
+        try {
+            this.out.writeUTF(Requete.DISLIKER_PUBLICATION.getRequete());
+            this.out.writeInt(id);
+            this.out.flush();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

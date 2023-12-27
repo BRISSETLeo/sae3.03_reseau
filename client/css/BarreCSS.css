@@ -1,0 +1,14 @@
+.positionnement {
+    -fx-alignment: center-left;
+    -fx-pref-width: 200em;
+}
+
+.text-field {
+    -fx-background-color: rgb(44, 44, 44);
+    -fx-background-radius: 0 1em 1em 0;
+    -fx-font-size: 1.3em;
+    -fx-prompt-text-fill: white;
+    -fx-text-fill: white;
+    -fx-pref-width: 20em;
+    -fx-text-align: left;
+}

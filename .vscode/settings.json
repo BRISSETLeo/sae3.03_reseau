@@ -1,28 +1,17 @@
 {
-    "java.project.referencedLibraries": {
-        "include": [
-            "/usr/share/openjfx/lib/javafx.base.jar",
-            "/usr/share/openjfx/lib/javafx.controls.jar",
-            "/usr/share/openjfx/lib/javafx.fxml.jar",
-            "/usr/share/openjfx/lib/javafx.graphics.jar",
-            "/usr/share/openjfx/lib/javafx.media.jar",
-            "/usr/share/openjfx/lib/javafx.swing.jar",
-            "/usr/share/openjfx/lib/javafx.web.jar",
-            "JavaFX\\lib\\javafx.base.jar",
-            "JavaFX\\lib\\javafx.controls.jar",
-            "JavaFX\\lib\\javafx.fxml.jar",
-            "JavaFX\\lib\\javafx.graphics.jar",
-            "JavaFX\\lib\\javafx.media.jar",
-            "JavaFX\\lib\\javafx.swing.jar",
-            "JavaFX\\lib\\javafx.web.jar",
-            "JavaFX\\lib\\javafx-swt.jar",
-            "JavaFX\\lib\\mariadb-java-client.jar"
-        ],
-        "exclude": [
-            "JavaFX/lib/mariadb-java-client.jar"
-        ]
-    },
     "java.project.sourcePaths": [
         "."
+    ],
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "JavaFX\\lib\\javafx.base.jar",
+        "JavaFX\\lib\\javafx.controls.jar",
+        "JavaFX\\lib\\javafx.fxml.jar",
+        "JavaFX\\lib\\javafx.graphics.jar",
+        "JavaFX\\lib\\javafx.media.jar",
+        "JavaFX\\lib\\javafx.swing.jar",
+        "JavaFX\\lib\\javafx.web.jar",
+        "JavaFX\\lib\\javafx-swt.jar",
+        "JavaFX\\lib\\mariadb-java-client.jar"
     ]
 }
