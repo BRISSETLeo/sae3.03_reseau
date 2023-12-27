@@ -1,13 +1,28 @@
--- Insert into UTILISATEUR table
-INSERT INTO UTILISATEUR (NOM_USER) VALUES ('Alice');
-INSERT INTO UTILISATEUR (NOM_USER) VALUES ('Bob');
-INSERT INTO UTILISATEUR (NOM_USER) VALUES ('Charlie');
-INSERT INTO UTILISATEUR (NOM_USER) VALUES ('David');
-INSERT INTO UTILISATEUR (NOM_USER) VALUES ('Eva');
+INSERT INTO `comptes`(`pseudo`) VALUES ('NoCros');
+INSERT INTO `comptes`(`pseudo`) VALUES ('Maxirito');
+INSERT INTO `comptes`(`pseudo`) VALUES ('MisterP');
 
--- Insert into MESSAGE table
-INSERT INTO MESSAGE (NOM_USER, CONTENUE, DATE_MESSAGE, LIKES) VALUES ('Alice', 'Hello followers!', '2023-01-01 12:00:00', 5);
-INSERT INTO MESSAGE (NOM_USER, CONTENUE, DATE_MESSAGE, LIKES) VALUES ('Alice', 'SQL is fun!', '2023-02-15 14:30:00', 8);
-INSERT INTO MESSAGE (NOM_USER, CONTENUE, DATE_MESSAGE, LIKES) VALUES ('Charlie', 'Enjoying the day!', '2023-03-10 09:45:00', 3);
-INSERT INTO MESSAGE (NOM_USER, CONTENUE, DATE_MESSAGE, LIKES) VALUES ('David', 'Coding all night!', '2023-04-05 03:20:00', 12);
-INSERT INTO MESSAGE (NOM_USER, CONTENUE, DATE_MESSAGE, LIKES) VALUES ('Eva', 'Traveling the world!', '2023-05-20 18:00:00', 7);
+INSERT INTO `publications`(`pseudo`,`content`,`date`) VALUES ('NoCros','Salut tout le monde !',"2020-04-01 12:00:00");
+INSERT INTO `publications`(`pseudo`,`content`,`date`) VALUES ('NoCros',"Aujourd'hui c'est chacun pour sois !","2020-05-01 12:00:00");
+
+INSERT INTO `publications`(`pseudo`,`content`,`date`) VALUES ('Maxirito',"Je suis un peu perdu...","2020-06-01 12:00:00");
+INSERT INTO `publications`(`pseudo`,`content`,`date`) VALUES ('Maxirito',"Peux-tu m'expliquer ce qu'il fait ici ?","2020-01-01 12:00:00");
+
+INSERT INTO `publications`(`pseudo`,`content`,`date`) VALUES ('MisterP',"Hey bonjour SysX comment ça va today ?","2021-06-01 12:00:00");
+INSERT INTO `publications`(`pseudo`,`content`,`date`) VALUES ('MisterP',"La vidéo est sortie. Foncez la voir !","2021-06-01 15:30:48");
+
+INSERT INTO `likes`(`pseudo`,`id_publication`) VALUES ('NoCros',1);
+INSERT INTO `likes`(`pseudo`,`id_publication`) VALUES ('NoCros',2);
+INSERT INTO `likes`(`pseudo`,`id_publication`) VALUES ('NoCros',3);
+
+INSERT INTO `likes`(`pseudo`,`id_publication`) VALUES ('Maxirito',1);
+INSERT INTO `likes`(`pseudo`,`id_publication`) VALUES ('Maxirito',2);
+
+INSERT INTO `likes`(`pseudo`,`id_publication`) VALUES ('MisterP',1);
+
+INSERT INTO `commentaires`(`pseudo`,`id_publication`,`content`,`date`) VALUES ('Maxirito',1,"Salut NoCros !","2020-04-01 12:00:00");
+INSERT INTO `commentaires`(`pseudo`,`id_publication`,`content`,`date`) VALUES ('Maxirito',2,"Salut NoCros !","2020-05-01 12:00:00");
+INSERT INTO `commentaires`(`pseudo`,`id_publication`,`content`,`date`) VALUES ('MisterP',2,"Salut NoCros !","2020-01-01 12:00:00");
+
+INSERT INTO `follows` (`pseudo`,`pseudo_follow`) VALUES ('NoCros','Maxirito');
+INSERT INTO `follows` (`pseudo`,`pseudo_follow`) VALUES ('MisterP','Maxirito');

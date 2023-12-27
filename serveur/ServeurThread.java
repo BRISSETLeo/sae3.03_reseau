@@ -1,0 +1,144 @@
+package serveur;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+
+import caches.ByteManager;
+import caches.Compte;
+import enums.Color;
+import requete.Requete;
+
+public class ServeurThread extends Thread {
+
+    private Serveur serveur;
+    private Compte compte;
+    private Socket socket;
+    private DataInputStream in;
+    private DataOutputStream out;
+
+    public ServeurThread(Serveur serveur, String pseudo, Socket socket) throws IOException {
+        this.serveur = serveur;
+        this.socket = socket;
+        this.compte = new Compte(pseudo);
+        this.in = new DataInputStream(this.socket.getInputStream());
+        this.out = new DataOutputStream(this.socket.getOutputStream());
+        if (!this.serveur.getConnexionMySQL().isPseudoAlreadyExists(pseudo)) {
+            this.out.writeUTF(Requete.CREER_COMPTE.getRequete());
+            this.out.flush();
+        } else {
+            this.compte = this.serveur.getConnexionMySQL().getCompteByPseudo(this.compte.getPseudo());
+            this.out.writeUTF(Requete.COMPTE_CREE.getRequete());
+            this.out.flush();
+        }
+    }
+
+    @Override
+    public void run() {
+        try {
+
+            while (true) {
+
+                if (this.socket.isClosed())
+                    break;
+
+                if (in.available() > 0) {
+
+                    String message = in.readUTF();
+
+                    if (message.equals(Requete.AVOIR_PUBLICATIONS.getRequete())) {
+
+                        this.sendAllPublication();
+
+                    } else if (message.equals(Requete.CREER_COMPTE.getRequete())) {
+
+                        this.creerCompte();
+
+                    } else if (message.equals(Requete.FERMER.getRequete())) {
+
+                        this.fermer();
+
+                    } else if (message.equals(Requete.LIKER_PUBLICATION.getRequete())) {
+
+                        this.likerPublication(in.readInt());
+
+                    } else if (message.equals(Requete.DISLIKER_PUBLICATION.getRequete())) {
+
+                        this.dislikerPublication(in.readInt());
+
+                    }
+
+                }
+
+            }
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        }
+
+        System.out.println(
+                Color.BLUE.getCode() + this.compte.getPseudo() + Color.PURPLE.getCode() + " s'est déconnecté au serveur"
+                        + Color.RED.getCode() + "." + Color.RESET.getCode());
+    }
+
+    public Compte getCompte() {
+        return this.compte;
+    }
+
+    private void sendAllPublication() throws IOException {
+        this.out.writeUTF(Requete.AVOIR_PUBLICATIONS.getRequete());
+        byte[] listBytes = ByteManager.convertListToBytes(
+                this.serveur.getConnexionMySQL().getPublicationsForUserAndFollowers(this.compte.getPseudo(), 10));
+        this.out.writeInt(listBytes.length);
+        this.out.write(listBytes);
+        this.out.flush();
+    }
+
+    public void creerCompte() throws IOException {
+        this.serveur.getConnexionMySQL().saveNewCompte(this.compte.getPseudo());
+        this.compte = this.serveur.getConnexionMySQL().getCompteByPseudo(this.compte.getPseudo());
+        this.out.writeUTF(Requete.COMPTE_CREE.getRequete());
+        this.out.flush();
+    }
+
+    private void fermer() throws IOException {
+        this.serveur.removeClient(this);
+        this.out.close();
+        this.in.close();
+        this.socket.close();
+    }
+
+    private void likerPublication(int id) throws IOException {
+        this.serveur.getConnexionMySQL().likePublication(this.compte.getPseudo(), id);
+        for (ServeurThread client : this.serveur.getClients()) {
+            if (client.getCompte().getPseudo().equals(this.compte.getPseudo()) ||
+                    this.serveur.getConnexionMySQL().hasFollowToSenderPublication(client.getCompte().getPseudo(), id)) {
+                client.getOut().writeUTF(Requete.LIKER_PUBLICATION.getRequete());
+                client.getOut().writeInt(id);
+                client.getOut().writeBoolean(client.getCompte().getPseudo().equals(this.compte.getPseudo()));
+                client.getOut().flush();
+            }
+        }
+    }
+
+    private void dislikerPublication(int id) throws IOException {
+        this.serveur.getConnexionMySQL().unlikePublication(this.compte.getPseudo(), id);
+        for (ServeurThread client : this.serveur.getClients()) {
+            if (client.getCompte().getPseudo().equals(this.compte.getPseudo()) ||
+                    this.serveur.getConnexionMySQL().hasFollowToSenderPublication(client.getCompte().getPseudo(), id)) {
+                client.getOut().writeUTF(Requete.DISLIKER_PUBLICATION.getRequete());
+                client.getOut().writeInt(id);
+                client.getOut().writeBoolean(client.getCompte().getPseudo().equals(this.compte.getPseudo()));
+                client.getOut().flush();
+            }
+        }
+    }
+
+    public synchronized DataOutputStream getOut() {
+        return this.out;
+    }
+
+}
