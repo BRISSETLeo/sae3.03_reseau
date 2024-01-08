@@ -9,6 +9,7 @@ import java.io.IOException;
 import caches.Publication;
 import client.graphisme.Accueil;
 import client.graphisme.Connexion;
+import client.graphisme.Message;
 import client.graphisme.Navigation;
 import client.son.Son;
 import enums.CheminIMG;
@@ -31,6 +32,7 @@ public class Main extends Application {
     private Barre barre;
     private Accueil accueil;
     private client.graphisme.Publication publication;
+    private Message message;
     private Son son;
 
     private Image logo;
@@ -45,6 +47,7 @@ public class Main extends Application {
         this.accueil = new Accueil(this);
         this.barre = new Barre();
         this.navigation = new Navigation(this);
+        this.message = new Message(this);
         this.root = new BorderPane(this.connexion);
         this.logo = new Image(CheminIMG.LOGO.getChemin());
         this.publication = new client.graphisme.Publication(this);
@@ -150,6 +153,10 @@ public class Main extends Application {
 
     public void ajouterPagePublication() {
         this.accueil.ajouterPage(this.publication);
+    }
+
+    public void ajouterPageMessage(){
+        this.accueil.ajouterPage(this.message);
     }
 
     public void enleverPage() {

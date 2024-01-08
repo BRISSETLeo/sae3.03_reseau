@@ -142,10 +142,9 @@ public class Accueil extends VBox {
     }
 
     public void ajouterPage(VBox page) {
-        if (this.splitPane.getItems().size() < 2) {
-            this.splitPane.getItems().add(page);
-            this.splitPane.setDividerPositions(0.7);
-        }
+        this.enleverPage();
+        this.splitPane.getItems().add(page);
+        this.splitPane.setDividerPositions(0.7);
     }
 
 }

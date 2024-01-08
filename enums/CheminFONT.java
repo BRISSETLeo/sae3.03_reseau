@@ -2,7 +2,7 @@ package enums;
 
 public enum CheminFONT {
 
-    THE_SMILE("file:./client/css/police/TheSmile.otf");
+    THE_SMILE("file:./client/css/police/Poppins-Regular.ttf");
 
     private String chemin;
 
