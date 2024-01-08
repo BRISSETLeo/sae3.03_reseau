@@ -118,6 +118,7 @@ public class ServeurThread extends Thread {
                     this.serveur.getConnexionMySQL().hasFollowToSenderPublication(client.getCompte().getPseudo(), id)) {
                 client.getOut().writeUTF(Requete.LIKER_PUBLICATION.getRequete());
                 client.getOut().writeInt(id);
+                client.getOut().writeInt(this.serveur.getConnexionMySQL().nbLikePublications(id));
                 client.getOut().writeBoolean(client.getCompte().getPseudo().equals(this.compte.getPseudo()));
                 client.getOut().flush();
             }
@@ -131,6 +132,7 @@ public class ServeurThread extends Thread {
                     this.serveur.getConnexionMySQL().hasFollowToSenderPublication(client.getCompte().getPseudo(), id)) {
                 client.getOut().writeUTF(Requete.DISLIKER_PUBLICATION.getRequete());
                 client.getOut().writeInt(id);
+                client.getOut().writeInt(this.serveur.getConnexionMySQL().nbLikePublications(id));
                 client.getOut().writeBoolean(client.getCompte().getPseudo().equals(this.compte.getPseudo()));
                 client.getOut().flush();
             }

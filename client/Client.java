@@ -80,14 +80,16 @@ public class Client extends Thread {
                     } else if (demande.equalsIgnoreCase(Requete.LIKER_PUBLICATION.getRequete())) {
 
                         int idPublication = in.readInt();
+                        int like = in.readInt();
                         boolean isMe = in.readBoolean();
-                        this.main.ajouterLike(idPublication, isMe);
+                        this.main.ajouterLike(idPublication, like, isMe);
 
                     } else if (demande.equalsIgnoreCase(Requete.DISLIKER_PUBLICATION.getRequete())) {
 
                         int idPublication = in.readInt();
+                        int like = in.readInt();
                         boolean isMe = in.readBoolean();
-                        this.main.removeLike(idPublication, isMe);
+                        this.main.removeLike(idPublication, like, isMe);
 
                     }
 

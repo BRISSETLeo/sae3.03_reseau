@@ -140,12 +140,12 @@ public class Main extends Application {
         this.client.unlikePublication(id);
     }
 
-    public void ajouterLike(int id, boolean isMe) {
-        Platform.runLater(() -> this.accueil.ajouterLike(id, isMe));
+    public void ajouterLike(int id, int like, boolean isMe) {
+        Platform.runLater(() -> this.accueil.ajouterLike(id, like, isMe));
     }
 
-    public void removeLike(int id, boolean isMe) {
-        Platform.runLater(() -> this.accueil.removeLike(id, isMe));
+    public void removeLike(int id, int like, boolean isMe) {
+        Platform.runLater(() -> this.accueil.removeLike(id, like, isMe));
     }
 
     public void ajouterPagePublication() {

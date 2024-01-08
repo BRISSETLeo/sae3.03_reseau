@@ -104,30 +104,24 @@ public class Accueil extends VBox {
         }
     }
 
-    public void ajouterLike(int idPublication, boolean isMe) {
+    public void ajouterLike(int idPublication, int like, boolean isMe) {
         VBox container = this.publications.get(idPublication);
         HBox likeBox = (HBox) container.getChildren().get(2);
         Label likeLabel = (Label) likeBox.getChildren().get(1);
         Button likeButton = (Button) likeBox.getChildren().get(2);
-
-        int likes = Integer.parseInt(likeLabel.getText());
-        likes++;
-        likeLabel.setText(likes + "");
+        likeLabel.setText(like + "");
         if (isMe) {
             likeButton.setGraphic(this.createImageView(CheminIMG.LIKE.getChemin()));
             likeButton.setOnAction(new UnlikeButton(this.main, idPublication));
         }
     }
 
-    public void removeLike(int idPublication, boolean isMe) {
+    public void removeLike(int idPublication, int like, boolean isMe) {
         VBox container = this.publications.get(idPublication);
         HBox likeBox = (HBox) container.getChildren().get(2);
         Label likeLabel = (Label) likeBox.getChildren().get(1);
         Button likeButton = (Button) likeBox.getChildren().get(2);
-
-        int likes = Integer.parseInt(likeLabel.getText());
-        likes--;
-        likeLabel.setText(likes + "");
+        likeLabel.setText(like + "");
         if (isMe) {
             likeButton.setGraphic(this.createImageView(CheminIMG.UNLIKE.getChemin()));
             likeButton.setOnAction(new LikeButton(this.main, idPublication));

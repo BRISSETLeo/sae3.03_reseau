@@ -268,6 +268,9 @@ public class ConnexionMySQL {
     }
 
     public synchronized void likePublication(String pseudo, int idPublication) {
+
+        if(this.hasLikePublication(pseudo, idPublication)) return;
+
         try {
 
             String sqlQuery = "INSERT INTO likes (pseudo, id_publication) VALUES (?, ?);";
@@ -310,7 +313,7 @@ public class ConnexionMySQL {
     public synchronized boolean hasFollowToSenderPublication(String pseudo, int idPublication) {
         try {
 
-            String sqlQuery = "SELECT * FROM follows WHERE pseudo = ? AND pseudo_follow = (SELECT pseudo FROM publications WHERE id_publication = ?);";
+            String sqlQuery = "select f.pseudo, p.pseudo as pseudo_follow from follows f join publications p on p.pseudo = f.pseudo_follow where f.pseudo = ? and id_publication = ?;";
 
             try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
 
@@ -332,6 +335,38 @@ public class ConnexionMySQL {
         }
 
         return false;
+    }
+
+    public synchronized int nbLikePublications(int idPublication){
+
+        try {
+
+            String sqlQuery = "SELECT COUNT(*) AS count FROM likes WHERE id_publication = ?;";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setInt(1, idPublication);
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+
+                    if (resultSet.next()) {
+
+                        int count = resultSet.getInt("count");
+                        return count;
+
+                    }
+
+                }
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return 0;
     }
 
 }
