@@ -14,6 +14,8 @@ public class Son extends Thread {
     private boolean recording;
     private static ByteArrayOutputStream byteArrayOutputStream;
     private Clip clip;
+    private int debut;
+    private int max;
 
     public Son(Main main) {
         this.main = main;
@@ -22,6 +24,8 @@ public class Son extends Thread {
     @Override
     public void run() {
         this.recording = true;
+        this.debut = 0;
+        this.max = 0;
         try {
             AudioFormat format = getAudioFormat();
             DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
@@ -57,6 +61,15 @@ public class Son extends Thread {
 
             byteArrayOutputStream.close();
 
+            byte[] data = this.getAudioData();
+            AudioInputStream audioInputStream = new AudioInputStream(
+                    new ByteArrayInputStream(data), getAudioFormat(), data.length);
+            this.clip = AudioSystem.getClip();
+            this.clip.open(audioInputStream);
+            this.max = this.clip.getMicrosecondLength() / 1_000_000;
+
+            this.main.tempsVocal(this.tempsVocal());
+
         } catch (LineUnavailableException | IOException e) {
             e.printStackTrace();
         }
@@ -88,6 +101,7 @@ public class Son extends Thread {
                     new ByteArrayInputStream(data), getAudioFormat(), data.length);
             this.clip = AudioSystem.getClip();
             this.clip.open(audioInputStream);
+            this.afficherTempsActuelEtMax();
             this.clip.start();
         } catch (LineUnavailableException | IOException e) {
             e.printStackTrace();
@@ -111,6 +125,37 @@ public class Son extends Thread {
         if (this.clip != null && !this.clip.isRunning()) {
             this.clip.start();
         }
+    }
+
+    public void afficherTempsActuelEtMax() {
+        if (this.clip != null) {
+            LineListener listener = new LineListener() {
+                @Override
+                public void update(LineEvent event) {
+                    if (event.getType() == LineEvent.Type.START) {
+                        new Thread(() -> {
+                            while (clip.isRunning()) {
+                                long currentTime = (clip.getMicrosecondPosition() / 1_000_000) + 1;
+                                max = clip.getMicrosecondLength() / 1_000_000;
+                                debut = currentTime;
+                                main.tempsVocal(tempsVocal());
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }).start();
+                    }
+                }
+            };
+
+            this.clip.addLineListener(listener);
+        }
+    }
+
+    private String tempsVocal() {
+        return this.debut + "/" + this.max;
     }
 
 }

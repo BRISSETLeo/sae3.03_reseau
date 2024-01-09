@@ -5,6 +5,8 @@ import client.controle.JouerSon;
 import client.controle.StartVocal;
 import client.controle.StopVocal;
 import client.controle.StopperSon;
+import enums.CheminCSS;
+import enums.CheminFONT;
 import enums.CheminIMG;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
@@ -12,7 +14,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 
 public class Publication extends VBox {
 
@@ -24,6 +29,7 @@ public class Publication extends VBox {
     private HBox vocalBox;
     private Button playButton;
     private Button arretButton;
+    private Label tempsVocal;
 
     public Publication(Main main) {
         this.main = main;
@@ -33,13 +39,8 @@ public class Publication extends VBox {
 
         this.enregistrerVocal = new Button("");
 
-        this.startVocalView = new ImageView(CheminIMG.MICROPHONE.getChemin());
-        this.startVocalView.setFitHeight(20);
-        this.startVocalView.setFitWidth(20);
-
-        this.stopVocalView = new ImageView(CheminIMG.MICROPHONE_2.getChemin());
-        this.stopVocalView.setFitHeight(20);
-        this.stopVocalView.setFitWidth(20);
+        this.startVocalView = this.createImageView(CheminIMG.MICROPHONE.getChemin());
+        this.stopVocalView = this.createImageView(CheminIMG.MICROPHONE_2.getChemin());
 
         this.enregistrerVocal.setGraphic(this.startVocalView);
         this.enregistrerVocal.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
@@ -48,6 +49,7 @@ public class Publication extends VBox {
         this.vocalBox = new HBox();
 
         Label messageVocal = new Label("Message vocal");
+        this.tempsVocal = new Label();
         this.playButton = new Button();
         this.playButton.setOnAction(new JouerSon(this.main));
         this.arretButton = new Button();
@@ -62,12 +64,21 @@ public class Publication extends VBox {
         this.arretButton.setGraphic(arretImg);
         this.arretButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 
-        this.vocalBox.getChildren().addAll(messageVocal, this.playButton, this.arretButton);
+        this.vocalBox.getChildren().addAll(messageVocal, this.tempsVocal, this.playButton, this.arretButton);
         this.vocalBox.setVisible(false);
 
         Button publier = new Button("Publier");
+        publier.getStyleClass().add("publier");
 
-        this.getChildren().addAll(publication, this.enregistrerVocal, this.vocalBox, publier);
+        Region region = new Region();
+        VBox.setVgrow(region, Priority.ALWAYS);
+
+        Font font = Font.loadFont(CheminFONT.THE_SMILE.getChemin(), 15);
+        publier.setFont(font);
+        this.publication.setFont(font);
+
+        super.getStylesheets().add(CheminCSS.PUBLICATION.getChemin());
+        super.getChildren().addAll(publication, this.enregistrerVocal, this.vocalBox, region, publier);
     }
 
     public void changerEnregistrerVocal() {
@@ -89,6 +100,10 @@ public class Publication extends VBox {
 
     public void messageVocal() {
         this.vocalBox.setVisible(true);
+    }
+
+    public void tempsVocal(String temps) {
+        this.tempsVocal.setText(temps);
     }
 
 }

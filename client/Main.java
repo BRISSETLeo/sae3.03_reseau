@@ -155,7 +155,7 @@ public class Main extends Application {
         this.accueil.ajouterPage(this.publication);
     }
 
-    public void ajouterPageMessage(){
+    public void ajouterPageMessage() {
         this.accueil.ajouterPage(this.message);
     }
 
@@ -195,6 +195,10 @@ public class Main extends Application {
 
     public void reprendreSon() {
         this.son.reprendreSon();
+    }
+
+    public void tempsVocal(String temps) {
+        Platform.runLater(() -> this.publication.tempsVocal(temps));
     }
 
 }

@@ -2,10 +2,10 @@ package serveur.sql;
 
 public enum InformationsBD {
 
-    URLBD("servinfo-maria"),
-    NOMBASE("DBbrisset"),
-    NOMUTILISATEUR("brisset"),
-    MOTDEPASSE("brisset");
+    URLBD("localhost"),
+    NOMBASE("nocros_sysx2"),
+    NOMUTILISATEUR("root"),
+    MOTDEPASSE("");
 
     /*
      * URLBD("mysql-nocros.alwaysdata.net"),

@@ -1,0 +1,15 @@
+* {
+    -fx-alignment: center;
+}
+
+.publier {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+    -fx-pref-width: 10em;
+}
+
+.publier:hover {
+    -fx-text-fill: white;
+    -fx-background-color: black;
+}
