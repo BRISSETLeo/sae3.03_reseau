@@ -15,7 +15,6 @@ import client.controle.StopperSon;
 import enums.CheminCSS;
 import enums.CheminFONT;
 import enums.CheminIMG;
-import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -120,28 +119,27 @@ public class Publication extends VBox {
         this.tempsVocal.setText(temps);
     }
 
-    int MAX_BARS = 30;
-    int barIndex = 0;
-
     private void playAudio(byte[] audioData) {
         try {
+            int maxBars = 30;
+            int barIndex = 0;
             AudioInputStream audioInputStream = new AudioInputStream(
                     new ByteArrayInputStream(audioData), this.main.getAudioFormat(), audioData.length);
-
-            // Obtenir le format audio du flux d'entrée
             AudioFormat audioFormat = audioInputStream.getFormat();
-            int frameSize = audioFormat.getFrameSize();
-
-            byte[] buffer = new byte[1024 * frameSize]; // Ajustez la taille du tampon selon vos besoins
+            byte[] buffer = new byte[1024 * audioFormat.getFrameSize()];
 
             int bytesRead;
-            int samplesPerSecond = (int) audioFormat.getSampleRate();
-            int samplesPerBar = Math.max(1, samplesPerSecond / MAX_BARS);
+            int samplesPerBar = Math.max(1, (int) audioFormat.getSampleRate() / maxBars);
 
             this.vocalBox.getChildren().clear();
-            barIndex = 0;
-            while ((bytesRead = audioInputStream.read(buffer)) != -1 && barIndex < MAX_BARS) {
-                processAudioBuffer(buffer, bytesRead, samplesPerBar, audioFormat);
+            while ((bytesRead = audioInputStream.read(buffer)) != -1 && barIndex < maxBars) {
+                this.processAudioBuffer(buffer, bytesRead, samplesPerBar, audioFormat);
+            }
+
+            if(this.vocalBox.getChildren().size() == 0){
+                this.drawBar(0.1);
+                this.drawBar(0.3);
+                this.drawBar(0.1);
             }
 
             audioInputStream.close();
@@ -169,9 +167,7 @@ public class Publication extends VBox {
         }
 
         double averageAmplitude = sum / samplesPerBar;
-        drawBar(averageAmplitude);
-
-        barIndex++;
+        this.drawBar(averageAmplitude);
     }
 
     private void drawBar(double amplitude) {
