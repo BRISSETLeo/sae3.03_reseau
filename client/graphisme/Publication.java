@@ -1,14 +1,11 @@
 package client.graphisme;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.UnsupportedAudioFileException;
 
 import client.Main;
 import client.controle.JouerSon;
@@ -18,6 +15,7 @@ import client.controle.StopperSon;
 import enums.CheminCSS;
 import enums.CheminFONT;
 import enums.CheminIMG;
+import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -60,7 +58,7 @@ public class Publication extends VBox {
         this.enregistrerVocal.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         this.enregistrerVocal.setOnAction(new StartVocal(this.main));
 
-        this.vocalBox = new HBox();
+        this.vocalBox = new HBox(2);
 
         this.tempsVocal = new Label();
         this.playButton = new Button();
@@ -77,7 +75,8 @@ public class Publication extends VBox {
         this.arretButton.setGraphic(arretImg);
         this.arretButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 
-        this.vocalBox.getChildren().addAll(this.tempsVocal, this.playButton, this.arretButton);
+        // this.vocalBox.getChildren().addAll(this.tempsVocal, this.playButton,
+        // this.arretButton);
         this.vocalBox.setVisible(false);
 
         Button publier = new Button("Publier");
@@ -111,9 +110,10 @@ public class Publication extends VBox {
         return img;
     }
 
-    public void messageVocal(byte[] audio) {
+    public void messageVocal(byte[] audio, String temps) {
         this.playAudio(audio);
         this.vocalBox.setVisible(true);
+        this.tempsVocal(temps);
     }
 
     public void tempsVocal(String temps) {
@@ -124,31 +124,31 @@ public class Publication extends VBox {
     int barIndex = 0;
 
     private void playAudio(byte[] audioData) {
-    try {
-        // Convertir le tableau de bytes en un flux d'entrée audio
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(audioData);
-        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(byteArrayInputStream);
+        try {
+            AudioInputStream audioInputStream = new AudioInputStream(
+                    new ByteArrayInputStream(audioData), this.main.getAudioFormat(), audioData.length);
 
-        // Obtenir le format audio du flux d'entrée
-        AudioFormat audioFormat = audioInputStream.getFormat();
-        int frameSize = audioFormat.getFrameSize();
+            // Obtenir le format audio du flux d'entrée
+            AudioFormat audioFormat = audioInputStream.getFormat();
+            int frameSize = audioFormat.getFrameSize();
 
-        byte[] buffer = new byte[1024 * frameSize]; // Ajustez la taille du tampon selon vos besoins
+            byte[] buffer = new byte[1024 * frameSize]; // Ajustez la taille du tampon selon vos besoins
 
-        int bytesRead;
-        int samplesPerSecond = (int) audioFormat.getSampleRate();
-        int samplesPerBar = Math.max(1, samplesPerSecond / MAX_BARS);
+            int bytesRead;
+            int samplesPerSecond = (int) audioFormat.getSampleRate();
+            int samplesPerBar = Math.max(1, samplesPerSecond / MAX_BARS);
 
-        while ((bytesRead = audioInputStream.read(buffer)) != -1 && barIndex < MAX_BARS) {
-            // Appeler la méthode pour traiter le tampon audio
-            processAudioBuffer(buffer, bytesRead, samplesPerBar, audioFormat);
+            this.vocalBox.getChildren().clear();
+            barIndex = 0;
+            while ((bytesRead = audioInputStream.read(buffer)) != -1 && barIndex < MAX_BARS) {
+                processAudioBuffer(buffer, bytesRead, samplesPerBar, audioFormat);
+            }
+
+            audioInputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        audioInputStream.close();
-    } catch (UnsupportedAudioFileException | IOException e) {
-        e.printStackTrace();
     }
-}
 
     private void processAudioBuffer(byte[] buffer, int bytesRead, int samplesPerBar, AudioFormat audioFormat) {
         int sampleSize = audioFormat.getSampleSizeInBits() / 8;
@@ -175,13 +175,11 @@ public class Publication extends VBox {
     }
 
     private void drawBar(double amplitude) {
-        double barHeight = amplitude * 1000;
-        double barWidth = 1000 / MAX_BARS;
-        double x = barIndex * barWidth + barIndex;
-        double y = 1000 - barHeight;
-
-        Rectangle bar = new Rectangle(x, y, barWidth, barHeight);
-
+        double barHeight = amplitude * 100;
+        if (barHeight < 1)
+            return;
+        double barWidth = 3;
+        Rectangle bar = new Rectangle(barWidth, barHeight);
         this.vocalBox.getChildren().add(bar);
     }
 

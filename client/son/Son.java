@@ -60,7 +60,7 @@ public class Son extends Thread {
             byteArrayOutputStream.close();
 
             byte[] data = this.getAudioData();
-            this.main.nouveauVocal(data);
+            this.main.nouveauVocal(data, this.tempsVocal());
             AudioInputStream audioInputStream = new AudioInputStream(
                     new ByteArrayInputStream(data), getAudioFormat(), data.length);
             this.clip = AudioSystem.getClip();
@@ -74,7 +74,7 @@ public class Son extends Thread {
         }
     }
 
-    private AudioFormat getAudioFormat() {
+    public AudioFormat getAudioFormat() {
         float sampleRate = 44100;
         int sampleSizeInBits = 16;
         int channels = 1;

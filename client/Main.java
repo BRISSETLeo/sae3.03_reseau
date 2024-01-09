@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import javax.sound.sampled.AudioFormat;
+
 import caches.Publication;
 import client.graphisme.Accueil;
 import client.graphisme.Connexion;
@@ -177,8 +179,8 @@ public class Main extends Application {
         Platform.runLater(() -> this.publication.changerEnregistrerVocal());
     }
 
-    public void nouveauVocal(byte[] audio) {
-        this.publication.messageVocal(audio);
+    public void nouveauVocal(byte[] audio, String temps) {
+        Platform.runLater(() -> this.publication.messageVocal(audio, temps));
     }
 
     public void jouerSon() {
@@ -199,6 +201,10 @@ public class Main extends Application {
 
     public void tempsVocal(String temps) {
         Platform.runLater(() -> this.publication.tempsVocal(temps));
+    }
+
+    public AudioFormat getAudioFormat() {
+        return this.son.getAudioFormat();
     }
 
 }
