@@ -2,6 +2,18 @@
     -fx-alignment: center;
 }
 
+Label {
+    -fx-padding: 1em;
+}
+
+.black-rectangle {
+    -fx-fill: black;
+}
+
+.grey-rectangle {
+    -fx-fill: rgb(83, 83, 83);
+}
+
 .publier {
     -fx-background-color: transparent;
     -fx-border-color: transparent;

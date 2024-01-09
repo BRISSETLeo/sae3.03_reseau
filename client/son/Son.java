@@ -7,6 +7,9 @@ import client.Main;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Son extends Thread {
 
@@ -14,8 +17,7 @@ public class Son extends Thread {
     private boolean recording;
     private static ByteArrayOutputStream byteArrayOutputStream;
     private Clip clip;
-    private int debut;
-    private int max;
+    private List<Double> intensities;
 
     public Son(Main main) {
         this.main = main;
@@ -23,9 +25,9 @@ public class Son extends Thread {
 
     @Override
     public void run() {
+        if (this.clip != null && this.clip.isRunning())
+            return;
         this.recording = true;
-        this.debut = 0;
-        this.max = 0;
         try {
             AudioFormat format = getAudioFormat();
             DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
@@ -59,15 +61,7 @@ public class Son extends Thread {
 
             byteArrayOutputStream.close();
 
-            byte[] data = this.getAudioData();
-            this.main.nouveauVocal(data, this.tempsVocal());
-            AudioInputStream audioInputStream = new AudioInputStream(
-                    new ByteArrayInputStream(data), getAudioFormat(), data.length);
-            this.clip = AudioSystem.getClip();
-            this.clip.open(audioInputStream);
-            this.max = (int) (this.clip.getMicrosecondLength() / 1_000_000);
-
-            this.main.tempsVocal(this.tempsVocal());
+            this.playAudio(this.getAudioData());
 
         } catch (LineUnavailableException | IOException e) {
             e.printStackTrace();
@@ -92,6 +86,8 @@ public class Son extends Thread {
     }
 
     public void jouerSon() {
+        if (this.recording)
+            return;
         if (byteArrayOutputStream == null || this.clip != null && this.clip.isRunning())
             return;
         try {
@@ -100,7 +96,7 @@ public class Son extends Thread {
                     new ByteArrayInputStream(data), getAudioFormat(), data.length);
             this.clip = AudioSystem.getClip();
             this.clip.open(audioInputStream);
-            this.afficherTempsActuelEtMax();
+            this.updateSon();
             this.clip.start();
         } catch (LineUnavailableException | IOException e) {
             e.printStackTrace();
@@ -110,7 +106,6 @@ public class Son extends Thread {
     public void arreterSon() {
         if (this.clip != null && this.clip.isRunning()) {
             this.clip.stop();
-            this.clip.close();
         }
     }
 
@@ -120,13 +115,17 @@ public class Son extends Thread {
         }
     }
 
+    public boolean isEcouteSon() {
+        return this.clip != null && this.clip.isRunning();
+    }
+
     public void reprendreSon() {
         if (this.clip != null && !this.clip.isRunning()) {
             this.clip.start();
         }
     }
 
-    public void afficherTempsActuelEtMax() {
+    public void updateSon() {
         if (this.clip != null) {
             LineListener listener = new LineListener() {
                 @Override
@@ -134,15 +133,13 @@ public class Son extends Thread {
                     if (event.getType() == LineEvent.Type.START) {
                         new Thread(() -> {
                             while (clip.isRunning()) {
-                                long currentTime = (clip.getMicrosecondPosition() / 1_000_000) + 1;
-                                max = (int) (clip.getMicrosecondLength() / 1_000_000);
-                                debut = (int) currentTime;
-                                main.tempsVocal(tempsVocal());
                                 try {
                                     Thread.sleep(1000);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
+                                Son.this.main.updateSon((int) (clip.getMicrosecondLength() / 1_000_000),
+                                        (int) (clip.getMicrosecondPosition() / 1_000_000));
                             }
                         }).start();
                     }
@@ -153,8 +150,60 @@ public class Son extends Thread {
         }
     }
 
-    private String tempsVocal() {
-        return this.debut + "/" + this.max;
+    private void playAudio(byte[] audioData) {
+        this.intensities = new ArrayList<>();
+        try {
+            AudioInputStream audioInputStream = new AudioInputStream(
+                    new ByteArrayInputStream(audioData), this.main.getAudioFormat(), audioData.length);
+            AudioFormat audioFormat = audioInputStream.getFormat();
+            byte[] buffer = new byte[1024 * audioFormat.getFrameSize()];
+
+            int bytesRead;
+            int totalMilliseconds = (int) (audioInputStream.getFrameLength() / audioFormat.getFrameRate() * 1000);
+
+            while ((bytesRead = audioInputStream.read(buffer)) != -1) {
+                int samplesPerBar = (int) audioFormat.getSampleRate() * bytesRead
+                        / (audioFormat.getFrameSize() * totalMilliseconds);
+                this.processAudioBuffer(buffer, bytesRead, samplesPerBar, audioFormat);
+            }
+
+            this.drawBars();
+
+            audioInputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void processAudioBuffer(byte[] buffer, int bytesRead, int samplesPerBar, AudioFormat audioFormat) {
+        int sampleSize = audioFormat.getSampleSizeInBits() / 8;
+        ByteBuffer byteBuffer = ByteBuffer.wrap(buffer, 0, bytesRead);
+
+        for (int i = 0; i < samplesPerBar && byteBuffer.remaining() >= sampleSize; i++) {
+            double sampleValue;
+
+            if (sampleSize == 1) {
+                sampleValue = byteBuffer.get() / 128.0;
+            } else {
+                sampleValue = byteBuffer.getShort() / 32768.0;
+            }
+
+            intensities.add(Math.abs(sampleValue));
+        }
+    }
+
+    private void drawBars() {
+        int groupSize = intensities.size() / 30;
+        List<Double> averages = new ArrayList<>();
+        for (int i = 0; i < 30; i++) {
+            double sum = 0;
+            for (int j = i * groupSize; j < (i + 1) * groupSize; j++) {
+                sum += intensities.get(j);
+            }
+            double averageAmplitude = sum / groupSize;
+            averages.add(averageAmplitude);
+        }
+        this.main.nouveauVocal(averages);
     }
 
 }

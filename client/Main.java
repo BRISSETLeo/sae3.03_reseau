@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 import javax.sound.sampled.AudioFormat;
 
@@ -179,32 +180,40 @@ public class Main extends Application {
         Platform.runLater(() -> this.publication.changerEnregistrerVocal());
     }
 
-    public void nouveauVocal(byte[] audio, String temps) {
-        Platform.runLater(() -> this.publication.messageVocal(audio, temps));
+    public void nouveauVocal(List<Double> averages) {
+        Platform.runLater(() -> this.publication.messageVocal(averages));
     }
 
     public void jouerSon() {
-        this.son.jouerSon();
+        if (!this.son.isEcouteSon()) {
+            this.son.jouerSon();
+            this.publication.jouerSon();
+        }
     }
 
     public void arreterSon() {
         this.son.arreterSon();
+        this.publication.arreterSon();
     }
 
     public void mettreEnPauseSon() {
-        this.son.mettreEnPauseSon();
+        if (this.son.isEcouteSon()) {
+            this.son.mettreEnPauseSon();
+            this.publication.mettreEnPauseSon();
+        }
     }
 
     public void reprendreSon() {
         this.son.reprendreSon();
-    }
-
-    public void tempsVocal(String temps) {
-        Platform.runLater(() -> this.publication.tempsVocal(temps));
+        this.publication.reprendreSon();
     }
 
     public AudioFormat getAudioFormat() {
         return this.son.getAudioFormat();
+    }
+
+    public void updateSon(int nbSecMax, int nbSecActuel) {
+        Platform.runLater(() -> this.publication.updateSon(nbSecMax, nbSecActuel));
     }
 
 }
