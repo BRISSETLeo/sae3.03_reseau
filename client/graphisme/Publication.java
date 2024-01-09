@@ -3,7 +3,8 @@ package client.graphisme;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -118,7 +119,9 @@ public class Publication extends VBox {
 
     public void tempsVocal(String temps) {
         this.tempsVocal.setText(temps);
-    }
+    }    
+
+    private List<Double> intensities = new ArrayList<>();
 
     private void playAudio(byte[] audioData) {
         try {
@@ -126,39 +129,28 @@ public class Publication extends VBox {
                     new ByteArrayInputStream(audioData), this.main.getAudioFormat(), audioData.length);
             AudioFormat audioFormat = audioInputStream.getFormat();
             byte[] buffer = new byte[1024 * audioFormat.getFrameSize()];
-    
+
             int bytesRead;
             int totalMilliseconds = (int) (audioInputStream.getFrameLength() / audioFormat.getFrameRate() * 1000);
-    
+
             this.vocalBox.getChildren().clear();
-    
-            int nbBars = 0;
 
             while ((bytesRead = audioInputStream.read(buffer)) != -1) {
                 int samplesPerBar = (int) audioFormat.getSampleRate() * bytesRead / (audioFormat.getFrameSize() * totalMilliseconds);
-                this.processAudioBuffer(buffer, bytesRead, samplesPerBar, audioFormat);;
-                nbBars += 1;
+                this.processAudioBuffer(buffer, bytesRead, samplesPerBar, audioFormat);
             }
-    
-            if (this.vocalBox.getChildren().isEmpty()) {
-                // Ajouter des barres par défaut si nécessaire
-                for (int i = 0; i < nbBars; ++i) {
-                    this.drawBar(new Random().nextDouble(0.1, 0.4));
-                }
-            }
-    
+
+            this.drawBars();
+
             audioInputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    
 
     private void processAudioBuffer(byte[] buffer, int bytesRead, int samplesPerBar, AudioFormat audioFormat) {
         int sampleSize = audioFormat.getSampleSizeInBits() / 8;
         ByteBuffer byteBuffer = ByteBuffer.wrap(buffer, 0, bytesRead);
-
-        double sum = 0;
 
         for (int i = 0; i < samplesPerBar && byteBuffer.remaining() >= sampleSize; i++) {
             double sampleValue;
@@ -169,11 +161,24 @@ public class Publication extends VBox {
                 sampleValue = byteBuffer.getShort() / 32768.0;
             }
 
-            sum += Math.abs(sampleValue);
+            intensities.add(Math.abs(sampleValue));
         }
+        System.out.println(intensities.size());
+    }
 
-        double averageAmplitude = sum / samplesPerBar;
-        this.drawBar(averageAmplitude);
+    private void drawBars() {
+        this.vocalBox.getChildren().clear();
+
+        int groupSize = intensities.size() / 30;
+        for (int i = 0; i < 30; i++) {
+            double sum = 0;
+            for (int j = i * groupSize; j < (i + 1) * groupSize; j++) {
+                sum += intensities.get(j);
+            }
+            double averageAmplitude = sum / groupSize;
+            System.out.println(averageAmplitude);
+            this.drawBar(averageAmplitude);
+        }
     }
 
     private void drawBar(double amplitude) {
