@@ -177,8 +177,8 @@ public class Main extends Application {
         Platform.runLater(() -> this.publication.changerEnregistrerVocal());
     }
 
-    public void nouveauVocal() {
-        this.publication.messageVocal();
+    public void nouveauVocal(byte[] audio) {
+        this.publication.messageVocal(audio);
     }
 
     public void jouerSon() {

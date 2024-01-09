@@ -1,5 +1,15 @@
 package client.graphisme;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import client.Main;
 import client.controle.JouerSon;
 import client.controle.StartVocal;
@@ -17,15 +27,19 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
 public class Publication extends VBox {
 
+    private Main main;
+
     private TextArea publication;
     private Button enregistrerVocal;
-    private Main main;
+
     private ImageView startVocalView;
     private ImageView stopVocalView;
+
     private HBox vocalBox;
     private Button playButton;
     private Button arretButton;
@@ -48,7 +62,6 @@ public class Publication extends VBox {
 
         this.vocalBox = new HBox();
 
-        Label messageVocal = new Label("Message vocal");
         this.tempsVocal = new Label();
         this.playButton = new Button();
         this.playButton.setOnAction(new JouerSon(this.main));
@@ -64,7 +77,7 @@ public class Publication extends VBox {
         this.arretButton.setGraphic(arretImg);
         this.arretButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 
-        this.vocalBox.getChildren().addAll(messageVocal, this.tempsVocal, this.playButton, this.arretButton);
+        this.vocalBox.getChildren().addAll(this.tempsVocal, this.playButton, this.arretButton);
         this.vocalBox.setVisible(false);
 
         Button publier = new Button("Publier");
@@ -98,12 +111,78 @@ public class Publication extends VBox {
         return img;
     }
 
-    public void messageVocal() {
+    public void messageVocal(byte[] audio) {
+        this.playAudio(audio);
         this.vocalBox.setVisible(true);
     }
 
     public void tempsVocal(String temps) {
         this.tempsVocal.setText(temps);
+    }
+
+    int MAX_BARS = 30;
+    int barIndex = 0;
+
+    private void playAudio(byte[] audioData) {
+    try {
+        // Convertir le tableau de bytes en un flux d'entrée audio
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(audioData);
+        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(byteArrayInputStream);
+
+        // Obtenir le format audio du flux d'entrée
+        AudioFormat audioFormat = audioInputStream.getFormat();
+        int frameSize = audioFormat.getFrameSize();
+
+        byte[] buffer = new byte[1024 * frameSize]; // Ajustez la taille du tampon selon vos besoins
+
+        int bytesRead;
+        int samplesPerSecond = (int) audioFormat.getSampleRate();
+        int samplesPerBar = Math.max(1, samplesPerSecond / MAX_BARS);
+
+        while ((bytesRead = audioInputStream.read(buffer)) != -1 && barIndex < MAX_BARS) {
+            // Appeler la méthode pour traiter le tampon audio
+            processAudioBuffer(buffer, bytesRead, samplesPerBar, audioFormat);
+        }
+
+        audioInputStream.close();
+    } catch (UnsupportedAudioFileException | IOException e) {
+        e.printStackTrace();
+    }
+}
+
+    private void processAudioBuffer(byte[] buffer, int bytesRead, int samplesPerBar, AudioFormat audioFormat) {
+        int sampleSize = audioFormat.getSampleSizeInBits() / 8;
+        ByteBuffer byteBuffer = ByteBuffer.wrap(buffer, 0, bytesRead);
+
+        double sum = 0;
+
+        for (int i = 0; i < samplesPerBar && byteBuffer.remaining() >= sampleSize; i++) {
+            double sampleValue;
+
+            if (sampleSize == 1) {
+                sampleValue = byteBuffer.get() / 128.0;
+            } else {
+                sampleValue = byteBuffer.getShort() / 32768.0;
+            }
+
+            sum += Math.abs(sampleValue);
+        }
+
+        double averageAmplitude = sum / samplesPerBar;
+        drawBar(averageAmplitude);
+
+        barIndex++;
+    }
+
+    private void drawBar(double amplitude) {
+        double barHeight = amplitude * 1000;
+        double barWidth = 1000 / MAX_BARS;
+        double x = barIndex * barWidth + barIndex;
+        double y = 1000 - barHeight;
+
+        Rectangle bar = new Rectangle(x, y, barWidth, barHeight);
+
+        this.vocalBox.getChildren().add(bar);
     }
 
 }

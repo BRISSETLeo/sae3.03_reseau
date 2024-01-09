@@ -57,16 +57,15 @@ public class Son extends Thread {
             line.stop();
             line.close();
 
-            this.main.nouveauVocal();
-
             byteArrayOutputStream.close();
 
             byte[] data = this.getAudioData();
+            this.main.nouveauVocal(data);
             AudioInputStream audioInputStream = new AudioInputStream(
                     new ByteArrayInputStream(data), getAudioFormat(), data.length);
             this.clip = AudioSystem.getClip();
             this.clip.open(audioInputStream);
-            this.max = this.clip.getMicrosecondLength() / 1_000_000;
+            this.max = (int) (this.clip.getMicrosecondLength() / 1_000_000);
 
             this.main.tempsVocal(this.tempsVocal());
 
@@ -136,8 +135,8 @@ public class Son extends Thread {
                         new Thread(() -> {
                             while (clip.isRunning()) {
                                 long currentTime = (clip.getMicrosecondPosition() / 1_000_000) + 1;
-                                max = clip.getMicrosecondLength() / 1_000_000;
-                                debut = currentTime;
+                                max = (int) (clip.getMicrosecondLength() / 1_000_000);
+                                debut = (int) currentTime;
                                 main.tempsVocal(tempsVocal());
                                 try {
                                     Thread.sleep(1000);
