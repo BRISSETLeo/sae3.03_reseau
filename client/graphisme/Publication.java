@@ -3,6 +3,7 @@ package client.graphisme;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Random;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -121,32 +122,37 @@ public class Publication extends VBox {
 
     private void playAudio(byte[] audioData) {
         try {
-            int maxBars = 30;
-            int barIndex = 0;
             AudioInputStream audioInputStream = new AudioInputStream(
                     new ByteArrayInputStream(audioData), this.main.getAudioFormat(), audioData.length);
             AudioFormat audioFormat = audioInputStream.getFormat();
             byte[] buffer = new byte[1024 * audioFormat.getFrameSize()];
-
+    
             int bytesRead;
-            int samplesPerBar = Math.max(1, (int) audioFormat.getSampleRate() / maxBars);
-
+            int totalMilliseconds = (int) (audioInputStream.getFrameLength() / audioFormat.getFrameRate() * 1000);
+    
             this.vocalBox.getChildren().clear();
-            while ((bytesRead = audioInputStream.read(buffer)) != -1 && barIndex < maxBars) {
-                this.processAudioBuffer(buffer, bytesRead, samplesPerBar, audioFormat);
-            }
+    
+            int nbBars = 0;
 
-            if(this.vocalBox.getChildren().size() == 0){
-                this.drawBar(0.1);
-                this.drawBar(0.3);
-                this.drawBar(0.1);
+            while ((bytesRead = audioInputStream.read(buffer)) != -1) {
+                int samplesPerBar = (int) audioFormat.getSampleRate() * bytesRead / (audioFormat.getFrameSize() * totalMilliseconds);
+                this.processAudioBuffer(buffer, bytesRead, samplesPerBar, audioFormat);;
+                nbBars += 1;
             }
-
+    
+            if (this.vocalBox.getChildren().isEmpty()) {
+                // Ajouter des barres par défaut si nécessaire
+                for (int i = 0; i < nbBars; ++i) {
+                    this.drawBar(new Random().nextDouble(0.1, 0.4));
+                }
+            }
+    
             audioInputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+    
 
     private void processAudioBuffer(byte[] buffer, int bytesRead, int samplesPerBar, AudioFormat audioFormat) {
         int sampleSize = audioFormat.getSampleSizeInBits() / 8;
