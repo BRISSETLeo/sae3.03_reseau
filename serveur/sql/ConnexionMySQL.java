@@ -13,6 +13,7 @@ import java.util.List;
 
 import caches.Commentaire;
 import caches.Compte;
+import caches.MessageC;
 import caches.Publication;
 
 public class ConnexionMySQL {
@@ -485,6 +486,62 @@ public class ConnexionMySQL {
         }
 
         return comptes;
+    }
+
+    public synchronized List<MessageC> getMessages(String pseudo){
+        List<MessageC> messages = new ArrayList<>();
+
+        try {
+
+            String sqlQuery = "SELECT" +
+                    " m.id_message," +
+                    " m.pseudo," +
+                    " m.pseudo_dest," +
+                    " m.content," +
+                    " m.vocal," +
+                    " m.date," +
+                    " m.photo" +
+                    " FROM" +
+                    " messages m" +
+                    " WHERE" +
+                    " m.pseudo = ?" +
+                    " OR m.pseudo_dest = ?" +
+                    " ORDER BY" +
+                    " m.date ASC;";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setString(1, pseudo);
+                statement.setString(2, pseudo);
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+
+                    while (resultSet.next()) {
+
+                        int idMessage = resultSet.getInt("id_message");
+                        String pseudo1 = resultSet.getString("pseudo");
+                        String pseudo2 = resultSet.getString("pseudo_dest");
+                        String content = resultSet.getString("content");
+                        Blob vocal = resultSet.getBlob("vocal");
+                        Timestamp date = resultSet.getTimestamp("date");
+                        Blob photo = resultSet.getBlob("photo");
+
+                        MessageC message = new MessageC(idMessage, pseudo1, pseudo2, content, vocal, date, photo);
+                        messages.add(message);
+
+                    }
+
+                }
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return messages;
     }
 
 }

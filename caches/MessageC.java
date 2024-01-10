@@ -1,23 +1,23 @@
 package caches;
 
 import java.io.Serializable;
+import java.sql.Blob;
 import java.sql.Timestamp;
 
-public class Message implements Serializable {
+public class MessageC implements Serializable {
 
     private int idMessage;
-    private String pseudo;
     private String message;
     private Timestamp date;
     private String pseudoExpediteur;
     private String pseudoDestinataire;
     private String content;
-    private byte vocal;
-    private byte photo;
+    private Blob vocal;
+    private Blob photo;
 
 
-    public Message(int idMessage, String pseudoExpediteur, String pseudoDestinataire, String content, byte vocal, 
-    Timestamp date, byte photo){
+    public MessageC(int idMessage, String pseudoExpediteur, String pseudoDestinataire, String content, Blob vocal, 
+    Timestamp date, Blob photo){
         this.idMessage = idMessage;
         this.pseudoExpediteur = pseudoExpediteur;
         this.pseudoDestinataire = pseudoDestinataire;
@@ -25,10 +25,6 @@ public class Message implements Serializable {
         this.vocal = vocal;
         this.date = date;
         this.photo = photo;
-    }
-
-    public String getPseudo() {
-        return this.pseudo;
     }
 
     public String getMessage() {
@@ -51,21 +47,16 @@ public class Message implements Serializable {
         return this.content;
     }
 
-    public byte getVocal() {
+    public Blob getVocal() {
         return this.vocal;
     }
 
-    public byte getPhoto() {
+    public Blob getPhoto() {
         return this.photo;
     }
 
     public int getIdMessage() {
         return this.idMessage;
-    }
-
-    @Override
-    public String toString() {
-        return this.pseudo + " : " + this.message + " (" + this.date + ")";
     }
     
 }

@@ -87,6 +87,9 @@ public class ServeurThread extends Thread {
                         
                         this.avoirCompte();
 
+                    } else if (message.equals(Requete.VOIR_MESSAGES.getRequete())) {
+
+                        this.voirMessages();
                     }
 
                 }
@@ -177,6 +180,15 @@ public class ServeurThread extends Thread {
         this.out.writeUTF(Requete.AVOIR_FOLLOW.getRequete());
         byte[] listBytes = ByteManager.convertListToBytes(
                 this.serveur.getConnexionMySQL().getFollow(this.compte.getPseudo()));
+        this.out.writeInt(listBytes.length);
+        this.out.write(listBytes);
+        this.out.flush();
+    }
+
+    public void voirMessages() throws IOException {
+        this.out.writeUTF(Requete.VOIR_MESSAGES.getRequete());
+        byte[] listBytes = ByteManager.convertListToBytes(
+                this.serveur.getConnexionMySQL().getMessages(this.compte.getPseudo()));
         this.out.writeInt(listBytes.length);
         this.out.write(listBytes);
         this.out.flush();

@@ -8,6 +8,7 @@ import java.util.List;
 
 import caches.ByteManager;
 import caches.Compte;
+import caches.MessageC;
 import caches.Publication;
 import enums.ErreurSocket;
 import requete.*;
@@ -113,6 +114,18 @@ public class Client extends Thread {
 
                         this.main.afficherPublication(publication, true);
 
+                    } else if (demande.equals(Requete.VOIR_MESSAGES.getRequete())){
+
+                        int arraySize = this.in.readInt();
+                        byte[] receivedBytes = new byte[arraySize];
+                        this.in.readFully(receivedBytes);
+
+                        List<MessageC> retrievedMessageCList = ByteManager.convertBytesToList(receivedBytes,
+                                MessageC.class);
+
+                        for (MessageC msg : retrievedMessageCList)
+                            this.main.afficherMessage(msg);
+
                     }
                     
 
@@ -195,6 +208,15 @@ public class Client extends Thread {
                 this.out.writeInt(vocal.length);
                 this.out.write(vocal);
             }
+            this.out.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getMessages(){
+        try {
+            this.out.writeUTF(Requete.VOIR_MESSAGES.getRequete());
             this.out.flush();
         } catch (Exception e) {
             e.printStackTrace();

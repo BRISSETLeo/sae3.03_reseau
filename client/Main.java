@@ -10,6 +10,7 @@ import java.util.List;
 import javax.sound.sampled.AudioFormat;
 
 import caches.Compte;
+import caches.MessageC;
 import caches.Publication;
 import client.graphisme.Accueil;
 import client.graphisme.Connexion;
@@ -216,6 +217,7 @@ public class Main extends Application {
     }
 
     public void afficherMessage(){
+        this.client.getMessages();
         this.root.setCenter(this.messagerie);
     }
 
@@ -248,6 +250,10 @@ public class Main extends Application {
 
     public void afficherCompte(Compte compte) {
         Platform.runLater(() -> this.message.ajouterCompte(compte));
+    }
+
+    public void afficherMessage(MessageC message) {
+        Platform.runLater(() -> this.messagerie.ajouterMessage(message));
     }
 
 }

@@ -22,6 +22,8 @@ public enum Requete {
 
     AVOIR_FOLLOW("AvoirFollow"),
 
+    VOIR_MESSAGES("VoirMessages"),
+
     FERMER("Fermer");
 
     private final String requete;
