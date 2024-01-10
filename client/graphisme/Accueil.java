@@ -16,6 +16,7 @@ import client.controle.UnlikeButton;
 import enums.CheminCSS;
 import enums.CheminFONT;
 import enums.CheminIMG;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -59,7 +60,7 @@ public class Accueil extends VBox {
     public void ajouterPublication(Publication publication) {
         VBox container = new VBox();
         container.getStyleClass().add("container");
-        
+
         Blob vocal = publication.getVocal();
 
         Label pseudoLabel = new Label(publication.getPseudo());
@@ -87,11 +88,12 @@ public class Accueil extends VBox {
         HBox pseudoDateBox = new HBox(pseudoLabel, region, dateLabel);
         HBox likeBox = new HBox(region2, likeLabel, likeButton);
 
-        if(vocal != null){
+        if (vocal != null) {
             try {
                 int blobLength = (int) vocal.length();
                 byte[] bytes = vocal.getBytes(1, blobLength);
                 HBox hBox = new HBox(2);
+                hBox.setAlignment(Pos.CENTER_LEFT);
                 for (Double amplitude : this.main.playAudio(bytes)) {
                     this.drawBar(hBox, amplitude);
                 }
@@ -100,7 +102,7 @@ public class Accueil extends VBox {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }else{
+        } else {
             container.getChildren().addAll(pseudoDateBox, contentLabel, likeBox);
         }
 
@@ -112,8 +114,9 @@ public class Accueil extends VBox {
     }
 
     private void drawBar(HBox hBox, double amplitude) {
-        double barHeight = amplitude * 100;
-        if(amplitude == 0) barHeight = 5;
+        double barHeight = amplitude * 80;
+        if (amplitude == 0 || barHeight < 1)
+            return;
         double barWidth = 3;
         Rectangle bar = new Rectangle(barWidth, barHeight);
         bar.getStyleClass().add("black-rectangle");

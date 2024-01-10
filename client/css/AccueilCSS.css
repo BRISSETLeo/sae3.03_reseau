@@ -2,6 +2,18 @@
     -fx-padding: 2em;
 }
 
+.vocal {
+    -fx-alignement: center;
+}
+
+.black-rectangle {
+    -fx-fill: black;
+}
+
+.grey-rectangle {
+    -fx-fill: rgb(83, 83, 83);
+}
+
 Button {
     -fx-background-color: transparent;
     -fx-border-color: transparent;

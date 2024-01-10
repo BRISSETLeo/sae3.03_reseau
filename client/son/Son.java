@@ -82,7 +82,7 @@ public class Son extends Thread {
     }
 
     public byte[] getAudioData() {
-        if(Son.byteArrayOutputStream != null){
+        if (Son.byteArrayOutputStream != null) {
             return byteArrayOutputStream.toByteArray();
         }
         return null;

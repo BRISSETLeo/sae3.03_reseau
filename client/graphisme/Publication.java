@@ -143,13 +143,18 @@ public class Publication extends VBox {
         this.vocalBox.getChildren().clear();
         this.combinaisonVocal.setVisible(true);
         for (Double average : averages) {
-            this.drawBar(average);
+            this.drawBar(average, false);
         }
+
     }
 
-    private void drawBar(double amplitude) {
-        double barHeight = amplitude * 100;
-        if(amplitude == 0) barHeight = 5;
+    private void drawBar(double amplitude, boolean vocalVide) {
+        double barHeight = 5;
+        if (!vocalVide) {
+            barHeight = amplitude * 100;
+            if (amplitude == 0 || barHeight < 1)
+                return;
+        }
         double barWidth = 3;
         Rectangle bar = new Rectangle(barWidth, barHeight);
         bar.getStyleClass().add("black-rectangle");
