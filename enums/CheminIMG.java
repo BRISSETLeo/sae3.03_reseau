@@ -2,19 +2,19 @@ package enums;
 
 public enum CheminIMG {
 
-    LOGO("./client/images/sysx.png"),
-    ACCUEIL("./client/images/accueil.png"),
-    NOTIFICATION("./client/images/notification.png"),
-    MESSAGE("./client/images/message.png"),
-    PUBLICATION("./client/images/publication.png"),
-    LIKE("./client/images/like.png"),
-    UNLIKE("./client/images/unlike.png"),
-    MICROPHONE("./client/images/microphone.png"),
-    MICROPHONE_2("./client/images/microphone_2.png"),
-    PLAY("./client/images/play.png"),
-    PAUSE("./client/images/pause.png"),
-    STOP("./client/images/stop.png"),
-    NO_PP("./client/images/nopp.png"),;
+    LOGO("./client/static/images/sysx.png"),
+    ACCUEIL("./client/static/images/accueil.png"),
+    NOTIFICATION("./client/static/images/notification.png"),
+    MESSAGE("./client/static/images/message.png"),
+    PUBLICATION("./client/static/images/publication.png"),
+    LIKE("./client/static/images/like.png"),
+    UNLIKE("./client/static/images/unlike.png"),
+    MICROPHONE("./client/static/images/microphone.png"),
+    MICROPHONE_2("./client/static/images/microphone_2.png"),
+    PLAY("./client/static/images/play.png"),
+    PAUSE("./client/static/images/pause.png"),
+    STOP("./client/static/images/stop.png"),
+    NO_PP("./client/static/images/nopp.png"),;
 
     private String chemin;
 
