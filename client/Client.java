@@ -77,7 +77,7 @@ public class Client extends Thread {
                                 Publication.class);
 
                         for (Publication publication : retrievedPublicationList)
-                            this.main.afficherPublication(publication);
+                            this.main.afficherPublication(publication, false);
 
                     } else if (demande.equals(Requete.LIKER_PUBLICATION.getRequete())) {
 
@@ -111,7 +111,7 @@ public class Client extends Thread {
 
                         Publication publication = ByteManager.fromBytes(receivedBytes, Publication.class);
 
-                        this.main.afficherPublication(publication);
+                        this.main.afficherPublication(publication, true);
 
                     }
                     
@@ -190,12 +190,10 @@ public class Client extends Thread {
         try {
             this.out.writeUTF(Requete.PUBLIER_PUBLICATION.getRequete());
             this.out.writeUTF(text);
+            this.out.writeBoolean(vocal != null);
             if(vocal != null){
                 this.out.writeInt(vocal.length);
                 this.out.write(vocal);
-            }else{
-                this.out.writeInt(0);
-                this.out.write(0);
             }
             this.out.flush();
         } catch (Exception e) {

@@ -4,7 +4,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Arrays;
 
 import caches.ByteManager;
 import caches.Compte;
@@ -72,8 +71,15 @@ public class ServeurThread extends Thread {
                     } else if(message.equals(Requete.PUBLIER_PUBLICATION.getRequete())){
 
                         String text = this.in.readUTF();
-                        byte[] receivedBytes = new byte[this.in.readInt()];
-                        in.readFully(receivedBytes);
+                        boolean hasVocal = this.in.readBoolean();
+                        
+                        byte[] receivedBytes = null;
+
+                        if(hasVocal){
+                            int arraySize = this.in.readInt();
+                            receivedBytes = new byte[arraySize];
+                            this.in.readFully(receivedBytes);
+                        }
 
                         this.publierPublication(text, receivedBytes);
 

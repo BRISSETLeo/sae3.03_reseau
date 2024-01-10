@@ -57,7 +57,7 @@ public class Accueil extends VBox {
         super.getChildren().add(this.splitPane);
     }
 
-    public void ajouterPublication(Publication publication) {
+    public void ajouterPublication(Publication publication, boolean hasNewPublication) {
         VBox container = new VBox();
         container.getStyleClass().add("container");
 
@@ -90,14 +90,18 @@ public class Accueil extends VBox {
         if (vocal != null) {
             try {
                 int blobLength = (int) vocal.length();
-                byte[] bytes = vocal.getBytes(1, blobLength);
-                HBox hBox = new HBox(2);
-                hBox.setAlignment(Pos.CENTER_LEFT);
-                for (Double amplitude : this.main.playAudio(bytes)) {
-                    this.drawBar(hBox, amplitude);
+                if(blobLength > 1){
+                    byte[] bytes = vocal.getBytes(1, blobLength);
+                    HBox hBox = new HBox(2);
+                    hBox.setAlignment(Pos.CENTER_LEFT);
+                    for (Double amplitude : this.main.playAudio(bytes)) {
+                        this.drawBar(hBox, amplitude);
+                    }
+                    this.vocalBox.add(hBox);
+                    container.getChildren().addAll(pseudoDateBox, contentLabel, hBox, likeBox);
+                }else{
+                    container.getChildren().addAll(pseudoDateBox, contentLabel, likeBox);
                 }
-                this.vocalBox.add(hBox);
-                container.getChildren().addAll(pseudoDateBox, contentLabel, hBox, likeBox);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -105,7 +109,12 @@ public class Accueil extends VBox {
             container.getChildren().addAll(pseudoDateBox, contentLabel, likeBox);
         }
 
-        this.contenant.getChildren().add(container);
+        if(hasNewPublication){
+            this.contenant.getChildren().add(0,container);
+        }else{
+            this.contenant.getChildren().add(container);
+        }
+
 
         this.publications.put(publication.getIdPublication(), container);
 
@@ -140,6 +149,9 @@ public class Accueil extends VBox {
     public void ajouterLike(int idPublication, int like, boolean isMe) {
         VBox container = this.publications.get(idPublication);
         HBox likeBox = (HBox) container.getChildren().get(2);
+        if(container.getChildren().size() == 4){
+            likeBox = (HBox) container.getChildren().get(3);
+        }
         Label likeLabel = (Label) likeBox.getChildren().get(1);
         Button likeButton = (Button) likeBox.getChildren().get(2);
         likeLabel.setText(like + "");
@@ -152,6 +164,9 @@ public class Accueil extends VBox {
     public void removeLike(int idPublication, int like, boolean isMe) {
         VBox container = this.publications.get(idPublication);
         HBox likeBox = (HBox) container.getChildren().get(2);
+        if(container.getChildren().size() == 4){
+            likeBox = (HBox) container.getChildren().get(3);
+        }
         Label likeLabel = (Label) likeBox.getChildren().get(1);
         Button likeButton = (Button) likeBox.getChildren().get(2);
         likeLabel.setText(like + "");

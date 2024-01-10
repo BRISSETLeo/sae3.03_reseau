@@ -114,8 +114,8 @@ public class Main extends Application {
         });
     }
 
-    public void afficherPublication(Publication publication) {
-        Platform.runLater(() -> this.accueil.ajouterPublication(publication));
+    public void afficherPublication(Publication publication, boolean hasNewPublication) {
+        Platform.runLater(() -> this.accueil.ajouterPublication(publication, hasNewPublication));
     }
 
     public void sauvegarderIdentifiant(String ip, String pseudo) {
@@ -216,7 +216,6 @@ public class Main extends Application {
     }
 
     public void afficherMessage(){
-        System.out.println("afficher message");
         this.root.setCenter(this.messagerie);
     }
 
@@ -234,14 +233,14 @@ public class Main extends Application {
     }
 
     public void publierPublication(){
-            String text = this.publication.getPublication().getText();
-            byte[] vocal = this.son.getAudioData();
-            if(text.length() == 0 && vocal == null){
-                this.publication.erreur();
-                return;
-            }
-            this.client.publierPublication(text,vocal);
+        String text = this.publication.getPublication().getText();
+        byte[] vocal = this.son.getAudioData();
+        if(text.length() == 0 && vocal == null){
+            this.publication.erreur();
+            return;
         }
+        this.client.publierPublication(text,vocal);
+    }
 
     public List<Double> playAudio(byte[] audio){
         return this.son.playAudio(audio);
