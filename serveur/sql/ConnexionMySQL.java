@@ -340,6 +340,33 @@ public class ConnexionMySQL {
         return false;
     }
 
+    public synchronized boolean isOwnerPublication(String pseudo, int idPublication) {
+        try {
+
+            String sqlQuery = "SELECT * FROM publications WHERE pseudo = ? AND id_publication = ?;";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setString(1, pseudo);
+                statement.setInt(2, idPublication);
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+
+                    return resultSet.next();
+
+                }
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return false;
+    }
+
     public synchronized int nbLikePublications(int idPublication){
 
         try {

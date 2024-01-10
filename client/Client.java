@@ -222,5 +222,9 @@ public class Client extends Thread {
             e.printStackTrace();
         }
     }
+    
+    public String getPseudo() {
+        return this.pseudo;
+    }
 
 }

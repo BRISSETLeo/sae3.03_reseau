@@ -136,12 +136,13 @@ public class ServeurThread extends Thread {
 
     private void likerPublication(int id) throws IOException {
         this.serveur.getConnexionMySQL().likePublication(this.compte.getPseudo(), id);
-        for (ServeurThread client : this.serveur.getClients()) {
-            if (client.getCompte().getPseudo().equals(this.compte.getPseudo()) ||
+        int nbLike = this.serveur.getConnexionMySQL().nbLikePublications(id);
+        for (ServeurThread client : this.serveur.getClients()) { 
+            if (this.serveur.getConnexionMySQL().isOwnerPublication(client.getCompte().getPseudo(),id) ||
                     this.serveur.getConnexionMySQL().hasFollowToSenderPublication(client.getCompte().getPseudo(), id)) {
                 client.getOut().writeUTF(Requete.LIKER_PUBLICATION.getRequete());
                 client.getOut().writeInt(id);
-                client.getOut().writeInt(this.serveur.getConnexionMySQL().nbLikePublications(id));
+                client.getOut().writeInt(nbLike);
                 client.getOut().writeBoolean(client.getCompte().getPseudo().equals(this.compte.getPseudo()));
                 client.getOut().flush();
             }
@@ -150,12 +151,13 @@ public class ServeurThread extends Thread {
 
     private void dislikerPublication(int id) throws IOException {
         this.serveur.getConnexionMySQL().unlikePublication(this.compte.getPseudo(), id);
-        for (ServeurThread client : this.serveur.getClients()) {
-            if (client.getCompte().getPseudo().equals(this.compte.getPseudo()) ||
+        int nbLike = this.serveur.getConnexionMySQL().nbLikePublications(id);
+        for (ServeurThread client : this.serveur.getClients()) { 
+            if (this.serveur.getConnexionMySQL().isOwnerPublication(client.getCompte().getPseudo(),id) ||
                     this.serveur.getConnexionMySQL().hasFollowToSenderPublication(client.getCompte().getPseudo(), id)) {
                 client.getOut().writeUTF(Requete.DISLIKER_PUBLICATION.getRequete());
                 client.getOut().writeInt(id);
-                client.getOut().writeInt(this.serveur.getConnexionMySQL().nbLikePublications(id));
+                client.getOut().writeInt(nbLike);
                 client.getOut().writeBoolean(client.getCompte().getPseudo().equals(this.compte.getPseudo()));
                 client.getOut().flush();
             }

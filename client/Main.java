@@ -256,4 +256,8 @@ public class Main extends Application {
         Platform.runLater(() -> this.messagerie.ajouterMessage(message));
     }
 
+    public String getPseudo(){
+        return this.client.getPseudo();
+    }
+
 }

@@ -87,6 +87,15 @@ public class Accueil extends VBox {
         HBox pseudoDateBox = new HBox(compteBox, region, dateLabel);
         HBox likeBox = new HBox(region2, likeLabel, likeButton);
 
+        if(publication.getCompte().getPseudo().equals(this.main.getPseudo())){
+            Button supprimerPublication = new Button("Supprimer la publication");
+            likeBox.getChildren().add(0, supprimerPublication);
+        }
+
+        likeBox.setAlignment(Pos.CENTER_LEFT);
+
+        container.getChildren().addAll(pseudoDateBox, contentLabel);
+
         if (vocal != null) {
             try {
                 int blobLength = (int) vocal.length();
@@ -98,16 +107,14 @@ public class Accueil extends VBox {
                         this.drawBar(hBox, amplitude);
                     }
                     this.vocalBox.add(hBox);
-                    container.getChildren().addAll(pseudoDateBox, contentLabel, hBox, likeBox);
-                }else{
-                    container.getChildren().addAll(pseudoDateBox, contentLabel, likeBox);
+                    container.getChildren().add(hBox);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        } else {
-            container.getChildren().addAll(pseudoDateBox, contentLabel, likeBox);
         }
+        
+        container.getChildren().add(likeBox);
 
         if(hasNewPublication){
             this.contenant.getChildren().add(0,container);
