@@ -20,6 +20,8 @@ public enum Requete {
 
     PUBLIER_PUBLICATION("PublierPublication"),
 
+    AVOIR_FOLLOW("AvoirFollow"),
+
     FERMER("Fermer");
 
     private final String requete;

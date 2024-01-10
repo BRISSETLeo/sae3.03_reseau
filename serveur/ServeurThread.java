@@ -75,6 +75,10 @@ public class ServeurThread extends Thread {
 
                         this.publierPublication(text, receivedBytes);
 
+                    } else if (message.equals(Requete.AVOIR_FOLLOW.getRequete())) {
+                        
+                        this.avoirCompte();
+
                     }
 
                 }
@@ -149,6 +153,15 @@ public class ServeurThread extends Thread {
 
     public void publierPublication(String text, byte[] vocal){
         this.serveur.getConnexionMySQL().publierPublication(this.compte.getPseudo(),text,vocal);
+    }
+
+    public void avoirCompte() throws IOException {
+        this.out.writeUTF(Requete.AVOIR_FOLLOW.getRequete());
+        byte[] listBytes = ByteManager.convertListToBytes(
+                this.serveur.getConnexionMySQL().getFollow(this.compte.getPseudo()));
+        this.out.writeInt(listBytes.length);
+        this.out.write(listBytes);
+        this.out.flush();
     }
 
     public synchronized DataOutputStream getOut() {

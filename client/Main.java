@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.sound.sampled.AudioFormat;
 
+import caches.Compte;
 import caches.Publication;
 import client.graphisme.Accueil;
 import client.graphisme.Connexion;
@@ -222,6 +223,10 @@ public class Main extends Application {
 
     public List<Double> playAudio(byte[] audio){
         return this.son.playAudio(audio);
+    }
+
+    public void afficherCompte(Compte compte) {
+        Platform.runLater(() -> this.message.ajouterCompte(compte));
     }
 
 }

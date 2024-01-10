@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.List;
 
 import caches.ByteManager;
+import caches.Compte;
 import caches.Publication;
 import enums.ErreurSocket;
 import requete.*;
@@ -63,9 +64,10 @@ public class Client extends Thread {
                     } else if (demande.equals(Requete.COMPTE_CREE.getRequete())) {
 
                         this.demanderPublications();
+                        this.demanderComptes();
                         this.main.mettreLaPageAccueil();
 
-                    } else if (demande.equalsIgnoreCase(Requete.AVOIR_PUBLICATIONS.getRequete())) {
+                    } else if (demande.equals(Requete.AVOIR_PUBLICATIONS.getRequete())) {
 
                         int arraySize = this.in.readInt();
                         byte[] receivedBytes = new byte[arraySize];
@@ -77,21 +79,36 @@ public class Client extends Thread {
                         for (Publication publication : retrievedPublicationList)
                             this.main.afficherPublication(publication);
 
-                    } else if (demande.equalsIgnoreCase(Requete.LIKER_PUBLICATION.getRequete())) {
+                    } else if (demande.equals(Requete.LIKER_PUBLICATION.getRequete())) {
 
                         int idPublication = this.in.readInt();
                         int like = this.in.readInt();
                         boolean isMe = this.in.readBoolean();
                         this.main.ajouterLike(idPublication, like, isMe);
 
-                    } else if (demande.equalsIgnoreCase(Requete.DISLIKER_PUBLICATION.getRequete())) {
+                    } else if (demande.equals(Requete.DISLIKER_PUBLICATION.getRequete())) {
 
                         int idPublication = this.in.readInt();
                         int like = this.in.readInt();
                         boolean isMe = this.in.readBoolean();
                         this.main.removeLike(idPublication, like, isMe);
 
-                    }
+                    } else if (demande.equals(Requete.AVOIR_FOLLOW.getRequete())) {
+
+                        System.out.println("Requete.AVOIR_COMPTES.getRequete()");
+                        
+                        int arraySize = this.in.readInt();
+                        byte[] receivedBytes = new byte[arraySize];
+                        this.in.readFully(receivedBytes);
+
+                        System.out.println("receivedBytes: " + receivedBytes.length);
+
+                        List<Compte> comptes = ByteManager.convertBytesToList(receivedBytes, Compte.class);
+                        for (Compte compte : comptes)
+                            this.main.afficherCompte(compte);
+
+                    } 
+                    
 
                 }
 
@@ -128,6 +145,15 @@ public class Client extends Thread {
     public void demanderPublications() {
         try {
             this.out.writeUTF(Requete.AVOIR_PUBLICATIONS.getRequete());
+            this.out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void demanderComptes() {
+        try {
+            this.out.writeUTF(Requete.AVOIR_FOLLOW.getRequete());
             this.out.flush();
         } catch (IOException e) {
             e.printStackTrace();

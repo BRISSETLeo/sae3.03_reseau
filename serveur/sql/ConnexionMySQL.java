@@ -393,4 +393,48 @@ public class ConnexionMySQL {
 
     }
 
+    public synchronized List<Compte> getFollow(String pseudo){
+        List<Compte> comptes = new ArrayList<>();
+
+        try {
+
+            String sqlQuery = "SELECT" +
+                    " c.pseudo," +
+                    " c.image" +
+                    " FROM" +
+                    " follows f" +
+                    " JOIN" +
+                    " comptes c ON f.pseudo_follow = c.pseudo" +
+                    " WHERE" +
+                    " f.pseudo = ?;";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setString(1, pseudo);
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+
+                    while (resultSet.next()) {
+
+                        String pseud = resultSet.getString("pseudo");
+                        Blob image = resultSet.getBlob("image");
+
+                        Compte compte = new Compte(pseud, image);
+                        comptes.add(compte);
+
+                    }
+
+                }
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return comptes;
+    }
+
 }

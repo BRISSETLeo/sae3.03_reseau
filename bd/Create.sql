@@ -43,3 +43,16 @@ CREATE TABLE IF NOT EXISTS `follows`(
     FOREIGN KEY (`pseudo`) REFERENCES `comptes`(`pseudo`),
     FOREIGN KEY (`pseudo_follow`) REFERENCES `comptes`(`pseudo`)
 );
+
+CREATE TABLE IF NOT EXISTS `messages`(
+    `id_message` INT NOT NULL AUTO_INCREMENT,
+    `pseudo` VARCHAR(30) NOT NULL,
+    `pseudo_dest` VARCHAR(30) NOT NULL,
+    `content` TEXT DEFAULT NULL,
+    `vocal` LONGBLOB DEFAULT NULL,
+    `date` TIMESTAMP NOT NULL,
+    `photo` LONGBLOB DEFAULT NULL,
+    PRIMARY KEY (`id_message`),
+    FOREIGN KEY (`pseudo`) REFERENCES `comptes`(`pseudo`),
+    FOREIGN KEY (`pseudo_dest`) REFERENCES `comptes`(`pseudo`)
+);
