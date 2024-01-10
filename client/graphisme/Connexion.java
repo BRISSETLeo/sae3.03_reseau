@@ -3,6 +3,7 @@ package client.graphisme;
 import java.util.Optional;
 
 import client.controle.*;
+import client.graphisme.affichage.TextFieldF;
 import enums.*;
 import client.Main;
 import enums.CheminIMG;
@@ -13,7 +14,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 
 public class Connexion extends HBox {
 
@@ -27,11 +27,8 @@ public class Connexion extends HBox {
 
         ImageView logo = new ImageView(CheminIMG.LOGO.getChemin());
 
-        this.pseudoField = new TextField();
-        this.pseudoField.setPromptText("Identifiant (Ex: Noah)");
-
-        this.adresseField = new TextField();
-        this.adresseField.setPromptText("Adresse IP (Ex:127.0.0.1)");
+        this.pseudoField = new TextFieldF("Identifiant (Ex: Noah)");
+        this.adresseField = new TextFieldF("Adresse IP (Ex:127.0.0.1)");
 
         String identifiant = this.main.demanderIdentifiant();
         if (identifiant != null) {
@@ -42,11 +39,7 @@ public class Connexion extends HBox {
 
         Button connexionButton = new Button("Se connecter");
         connexionButton.setOnAction(new ConnexionC(this.main, this));
-
-        Font font = Font.loadFont(CheminFONT.THE_SMILE.getChemin(), 30);
-        this.pseudoField.setFont(font);
-        this.adresseField.setFont(font);
-        connexionButton.setFont(Font.loadFont(CheminFONT.THE_SMILE.getChemin(), 50));
+        connexionButton.setFont(FontP.FONT_50.getFont());
 
         super.getStylesheets().add(CheminCSS.PAGE_CONNEXION.getChemin());
         super.getChildren().addAll(logo, new VBox(50, this.pseudoField, this.adresseField, connexionButton));

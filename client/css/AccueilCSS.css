@@ -14,7 +14,7 @@
     -fx-fill: rgb(83, 83, 83);
 }
 
-Button {
+ButtonG {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
     -fx-cursor: hand;

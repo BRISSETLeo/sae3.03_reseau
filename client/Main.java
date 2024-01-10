@@ -22,6 +22,10 @@ import enums.CheminIMG;
 import javafx.application.Application;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import client.graphisme.Barre;
 import javafx.application.Platform;
 import javafx.geometry.Rectangle2D;
@@ -30,6 +34,8 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class Main extends Application {
+
+    public static String fontPath = "file:./client/css/police/Poppins-Regular.ttf";
 
     private Client client;
     private BorderPane root;
@@ -159,10 +165,12 @@ public class Main extends Application {
     }
 
     public void ajouterPagePublication() {
+        this.enleverPage();
         this.accueil.ajouterPage(this.publication);
     }
 
     public void ajouterPageMessage() {
+        this.enleverPage();
         this.accueil.ajouterPage(this.message);
     }
 
@@ -173,14 +181,14 @@ public class Main extends Application {
     public void startVocal() {
         this.publication.resetSon();
         this.son.start();
-        this.publication.changerEnregistrerVocal();
+        this.publication.mettreEnregistrementButtonAOn();
     }
 
     public void aucunSon() {
         Platform.runLater(() -> this.publication.aucunSon());
     }
-    
-    public void resetSon(){
+
+    public void resetSon() {
         Platform.runLater(() -> this.publication.resetSon());
     }
 
@@ -190,7 +198,7 @@ public class Main extends Application {
     }
 
     public void vocalFini() {
-        Platform.runLater(() -> this.publication.changerEnregistrerVocal());
+        Platform.runLater(() -> this.publication.mettreEnregistrementButtonAOff());
     }
 
     public void nouveauVocal(List<Double> averages) {
@@ -216,7 +224,7 @@ public class Main extends Application {
         }
     }
 
-    public void afficherMessage(){
+    public void afficherMessage() {
         this.client.getMessages();
         this.root.setCenter(this.messagerie);
     }
@@ -234,17 +242,17 @@ public class Main extends Application {
         Platform.runLater(() -> this.publication.updateSon(nbSecMax, nbSecActuel));
     }
 
-    public void publierPublication(){
+    public void publierPublication() {
         String text = this.publication.getPublication().getText();
         byte[] vocal = this.son.getAudioData();
-        if(text.length() == 0 && vocal == null){
+        if (text.length() == 0 && vocal == null) {
             this.publication.erreur();
             return;
         }
-        this.client.publierPublication(text,vocal);
+        this.client.publierPublication(text, vocal);
     }
 
-    public List<Double> playAudio(byte[] audio){
+    public List<Double> playAudio(byte[] audio) {
         return this.son.playAudio(audio);
     }
 
@@ -256,8 +264,15 @@ public class Main extends Application {
         Platform.runLater(() -> this.messagerie.ajouterMessage(message));
     }
 
-    public String getPseudo(){
+    public String getPseudo() {
         return this.client.getPseudo();
+    }
+
+    public static Region createRegion() {
+        Region region = new Region();
+        HBox.setHgrow(region, Priority.ALWAYS);
+        VBox.setVgrow(region, Priority.ALWAYS);
+        return region;
     }
 
 }

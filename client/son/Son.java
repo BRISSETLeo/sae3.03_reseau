@@ -25,9 +25,9 @@ public class Son extends Thread {
 
     @Override
     public void run() {
-        if (this.clip != null && this.clip.isRunning())
-            return;
         this.recording = true;
+        if (this.clip != null)
+            this.clip.stop();
         try {
             AudioFormat format = getAudioFormat();
             DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
@@ -62,7 +62,8 @@ public class Son extends Thread {
             Son.byteArrayOutputStream.close();
 
             byte[] audioData = this.getAudioData();
-            if(audioData == null) return;
+            if (audioData == null)
+                return;
 
             boolean isSilent = true;
             for (byte sample : audioData) {

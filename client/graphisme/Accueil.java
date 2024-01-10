@@ -13,22 +13,20 @@ import caches.Publication;
 import client.Main;
 import client.controle.LikeButton;
 import client.controle.UnlikeButton;
+import client.graphisme.affichage.ButtonG;
+import client.graphisme.affichage.ImageViewS;
+import client.graphisme.affichage.LabelF;
 import enums.CheminCSS;
-import enums.CheminFONT;
 import enums.CheminIMG;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
-import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
 
 public class Accueil extends VBox {
 
@@ -39,12 +37,17 @@ public class Accueil extends VBox {
     private Map<Integer, VBox> commentaires;
     private List<HBox> vocalBox;
 
+    private Image likePubli;
+    private Image unlikePubli;
+
     public Accueil(Main main) {
         this.main = main;
+        this.contenant = new VBox();
         this.publications = new HashMap<>();
         this.commentaires = new HashMap<>();
-        this.contenant = new VBox();
         this.vocalBox = new ArrayList<>();
+        this.likePubli = new ImageViewS(CheminIMG.LIKE.getChemin()).getImage();
+        this.unlikePubli = new ImageViewS(CheminIMG.UNLIKE.getChemin()).getImage();
 
         ScrollPane scrollPane = new ScrollPane(this.contenant);
         scrollPane.setFitToWidth(true);
@@ -61,45 +64,42 @@ public class Accueil extends VBox {
         VBox container = new VBox();
         container.getStyleClass().add("container");
 
-        Blob vocal = publication.getVocal();
+        Label contentLabel = new LabelF(publication.getContent()).setWrapText();
 
-        HBox compteBox = new CompteBox(publication.getCompte());
-        Label dateLabel = new Label(new SimpleDateFormat("dd-MM-YYYY HH:mm:ss").format(publication.getDate()));
-        Label contentLabel = new Label(publication.getContent());
-        contentLabel.setWrapText(true);
+        ButtonG likeButton = new ButtonG();
 
-        Label likeLabel = new Label(publication.getLikes() + "");
-        Button likeButton = new Button();
-        likeButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        this.mettreAJourLikeButton(likeButton, publication);
 
-        this.createButton(likeButton, publication);
+        container.getChildren().addAll(new HBox(new CompteBox(publication.getCompte()), Main.createRegion(),
+                new LabelF(new SimpleDateFormat("dd-MM-YYYY HH:mm:ss").format(publication.getDate()))), contentLabel);
 
-        Font font = Font.loadFont(CheminFONT.THE_SMILE.getChemin(), 20);
-        dateLabel.setFont(font);
-        contentLabel.setFont(font);
-        likeLabel.setFont(font);
+        this.setupVocal(publication.getVocal(), container);
 
-        Region region = new Region();
-        HBox.setHgrow(region, Priority.ALWAYS);
-        Region region2 = new Region();
-        HBox.setHgrow(region2, Priority.ALWAYS);
+        HBox likeBox = new HBox(Main.createRegion(), new LabelF(publication.getLikes() + ""), likeButton);
+        likeBox.setAlignment(Pos.CENTER_LEFT);
 
-        HBox pseudoDateBox = new HBox(compteBox, region, dateLabel);
-        HBox likeBox = new HBox(region2, likeLabel, likeButton);
-
-        if(publication.getCompte().getPseudo().equals(this.main.getPseudo())){
+        if (publication.getCompte().getPseudo().equals(this.main.getPseudo())) {
             Button supprimerPublication = new Button("Supprimer la publication");
             likeBox.getChildren().add(0, supprimerPublication);
         }
 
-        likeBox.setAlignment(Pos.CENTER_LEFT);
+        container.getChildren().add(likeBox);
 
-        container.getChildren().addAll(pseudoDateBox, contentLabel);
+        if (hasNewPublication)
+            this.contenant.getChildren().add(0, container);
+        else
+            this.contenant.getChildren().add(container);
 
+        this.publications.put(publication.getIdPublication(), container);
+
+        publication.getCommentaires().forEach(c -> this.ajouterCommentaire(c));
+    }
+
+    private void setupVocal(Blob vocal, VBox container) {
         if (vocal != null) {
             try {
                 int blobLength = (int) vocal.length();
-                if(blobLength > 1){
+                if (blobLength > 1) {
                     byte[] bytes = vocal.getBytes(1, blobLength);
                     HBox hBox = new HBox(2);
                     hBox.setAlignment(Pos.CENTER_LEFT);
@@ -113,19 +113,6 @@ public class Accueil extends VBox {
                 e.printStackTrace();
             }
         }
-        
-        container.getChildren().add(likeBox);
-
-        if(hasNewPublication){
-            this.contenant.getChildren().add(0,container);
-        }else{
-            this.contenant.getChildren().add(container);
-        }
-
-
-        this.publications.put(publication.getIdPublication(), container);
-
-        publication.getCommentaires().forEach(c -> this.ajouterCommentaire(c));
     }
 
     private void drawBar(HBox hBox, double amplitude) {
@@ -143,51 +130,53 @@ public class Accueil extends VBox {
         this.commentaires.put(commentaire.getIdCommentaire(), container);
     }
 
-    private void createButton(Button likeButton, Publication publication) {
-        if (publication.isCallerIsLiker()) {
-            likeButton.setOnAction(new UnlikeButton(this.main, publication.getIdPublication()));
-            likeButton.setGraphic(this.createImageView(CheminIMG.LIKE.getChemin()));
-        } else {
-            likeButton.setOnAction(new LikeButton(this.main, publication.getIdPublication()));
-            likeButton.setGraphic(this.createImageView(CheminIMG.UNLIKE.getChemin()));
-        }
+    private void mettreAJourLikeButton(ButtonG likeButton, int idPublication) {
+        if (((ImageViewS) likeButton.getGraphic()).getImage().equals(this.likePubli))
+            this.mettreLikeButtonAUnlike(likeButton, idPublication);
+        else
+            this.mettreLikeButtonALike(likeButton, idPublication);
+    }
+
+    private void mettreAJourLikeButton(ButtonG likeButton, Publication publication) {
+        int idPublication = publication.getIdPublication();
+        if (publication.isCallerIsLiker())
+            this.mettreLikeButtonALike(likeButton, idPublication);
+        else
+            this.mettreLikeButtonAUnlike(likeButton, idPublication);
+    }
+
+    private void mettreLikeButtonAUnlike(ButtonG likeButton, int idPublication) {
+        likeButton.setOnAction(new LikeButton(this.main, idPublication));
+        likeButton.setGraphic(this.unlikePubli);
+    }
+
+    private void mettreLikeButtonALike(ButtonG likeButton, int idPublication) {
+        likeButton.setOnAction(new UnlikeButton(this.main, idPublication));
+        likeButton.setGraphic(this.likePubli);
     }
 
     public void ajouterLike(int idPublication, int like, boolean isMe) {
-        VBox container = this.publications.get(idPublication);
-        HBox likeBox = (HBox) container.getChildren().get(2);
-        if(container.getChildren().size() == 4){
-            likeBox = (HBox) container.getChildren().get(3);
-        }
-        Label likeLabel = (Label) likeBox.getChildren().get(1);
-        Button likeButton = (Button) likeBox.getChildren().get(2);
-        likeLabel.setText(like + "");
-        if (isMe) {
-            likeButton.setGraphic(this.createImageView(CheminIMG.LIKE.getChemin()));
-            likeButton.setOnAction(new UnlikeButton(this.main, idPublication));
-        }
+        this.mettreAJourLike(this.recupererLikeBox(idPublication), like, idPublication, isMe);
     }
 
     public void removeLike(int idPublication, int like, boolean isMe) {
-        VBox container = this.publications.get(idPublication);
-        HBox likeBox = (HBox) container.getChildren().get(2);
-        if(container.getChildren().size() == 4){
-            likeBox = (HBox) container.getChildren().get(3);
-        }
-        Label likeLabel = (Label) likeBox.getChildren().get(1);
-        Button likeButton = (Button) likeBox.getChildren().get(2);
-        likeLabel.setText(like + "");
-        if (isMe) {
-            likeButton.setGraphic(this.createImageView(CheminIMG.UNLIKE.getChemin()));
-            likeButton.setOnAction(new LikeButton(this.main, idPublication));
-        }
+        this.mettreAJourLike(this.recupererLikeBox(idPublication), like, idPublication, isMe);
     }
 
-    private ImageView createImageView(String chemin) {
-        ImageView imageView = new ImageView(chemin);
-        imageView.setFitHeight(25);
-        imageView.setFitWidth(25);
-        return imageView;
+    private HBox recupererLikeBox(int idPublication) {
+        VBox container = this.publications.get(idPublication);
+        return (HBox) container.getChildren().get(container.getChildren().size() - 1);
+    }
+
+    private void mettreAJourLike(HBox likeBox, int like, int idPublication, boolean isMe) {
+        int deb = 1;
+        if (likeBox.getChildren().size() == 4)
+            deb = 2;
+        LabelF likeLabel = (LabelF) likeBox.getChildren().get(deb);
+        ButtonG likeButton = (ButtonG) likeBox.getChildren().get(deb + 1);
+        likeLabel.setText(like + "");
+        if (isMe)
+            this.mettreAJourLikeButton(likeButton, idPublication);
     }
 
     public void enleverPage() {
@@ -197,7 +186,6 @@ public class Accueil extends VBox {
     }
 
     public void ajouterPage(VBox page) {
-        this.enleverPage();
         this.splitPane.getItems().add(page);
         this.splitPane.setDividerPositions(0.7);
     }

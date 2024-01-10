@@ -1,12 +1,11 @@
 package client.graphisme;
 
 import enums.CheminCSS;
-import enums.CheminFONT;
+import enums.FontP;
 import enums.CheminIMG;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.scene.text.Font;
 
 public class Barre extends HBox {
 
@@ -23,7 +22,7 @@ public class Barre extends HBox {
         this.rechercheField = new TextField();
         this.rechercheField.setPromptText("Rechercher...");
 
-        this.rechercheField.setFont(Font.loadFont(CheminFONT.THE_SMILE.getChemin(), 30));
+        this.rechercheField.setFont(FontP.FONT_20.getFont());
 
         super.getStyleClass().add("positionnement");
         super.getStylesheets().add(CheminCSS.BARRE.getChemin());

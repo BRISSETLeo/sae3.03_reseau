@@ -10,101 +10,83 @@ import client.controle.StartVocal;
 import client.controle.StopVocal;
 import client.controle.StopperSon;
 import client.controle.Unpause;
+import client.graphisme.affichage.ButtonF;
+import client.graphisme.affichage.ButtonG;
+import client.graphisme.affichage.ImageViewS;
+import client.graphisme.affichage.LabelF;
+import client.graphisme.affichage.TextAreaPubli;
 import enums.CheminCSS;
-import enums.CheminFONT;
 import enums.CheminIMG;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextFormatter;
-import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
 
 public class Publication extends VBox {
 
     private Main main;
 
-    private Button enregistrerVocal;
+    private ButtonG enregistrerVocal;
 
-    private ImageView startVocalView;
-    private ImageView stopVocalView;
+    private Image startVocalView;
+    private Image stopVocalView;
+    private Image playImg;
+    private Image pauseImg;
 
     private VBox combinaisonVocal;
     private HBox vocalBox;
 
-    private Button playPauseButton;
-    private Button arretButton;
+    private ButtonG playPauseButton;
+    private ButtonG arretButton;
 
-    private ImageView playImg;
-    private ImageView pauseImg;
-
-    private TextArea publication;
+    private TextAreaPubli publication;
 
     private Label erreur;
     private Label aucunSon;
 
+    private JouerSon jouerSon;
+    private PauseSon pauseSon;
+    private Unpause unpauseSon;
+
+    private StartVocal startVocal;
+    private StopVocal stopVocal;
+
     public Publication(Main main) {
         this.main = main;
 
-        this.publication = new TextArea();
-        this.publication.setPromptText("Contenu de la publication..");
         int maxLength = 500;
 
+        this.publication = new TextAreaPubli(maxLength);
         this.aucunSon = new Label("Aucun son n'a été enregistré.");
+        this.erreur = new Label("Vous ne pouvez pas publier si aucun des champs n'est rempli.");
+        this.startVocalView = new Image(CheminIMG.MICROPHONE.getChemin());
+        this.stopVocalView = new Image(CheminIMG.MICROPHONE_2.getChemin());
+        this.playImg = new Image(CheminIMG.PLAY.getChemin());
+        this.pauseImg = new Image(CheminIMG.PAUSE.getChemin());
+        this.enregistrerVocal = new ButtonG(this.startVocalView);
+        this.playPauseButton = new ButtonG(this.playImg);
+        this.arretButton = new ButtonG(new ImageViewS(CheminIMG.STOP.getChemin()));
+        this.combinaisonVocal = new VBox(2);
+        this.vocalBox = new HBox(2);
+        this.jouerSon = new JouerSon(this.main);
+        this.pauseSon = new PauseSon(this.main);
+        this.unpauseSon = new Unpause(this.main);
+        this.startVocal = new StartVocal(this.main);
+        this.stopVocal = new StopVocal(this.main);
 
         Label label = new Label("0/" + maxLength);
-
-        TextFormatter<String> textFormatter = new TextFormatter<>(change -> {
-            if (change.isContentChange()) {
-                if (change.getControlNewText().length() <= maxLength) {
-                    return change;
-                }
-                return null;
-            }
-            return change;
-        });
         this.publication.textProperty().addListener((observable, oldValue, newValue) -> {
             label.setText(newValue.length() + "/" + maxLength);
         });
-        this.publication.setWrapText(true);
-        this.publication.setTextFormatter(textFormatter);
 
-        this.enregistrerVocal = new Button("");
-
-        this.startVocalView = this.createImageView(CheminIMG.MICROPHONE.getChemin());
-        this.stopVocalView = this.createImageView(CheminIMG.MICROPHONE_2.getChemin());
-
-        this.enregistrerVocal.setGraphic(this.startVocalView);
-        this.enregistrerVocal.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        this.enregistrerVocal.setOnAction(new StartVocal(this.main));
-
-        this.combinaisonVocal = new VBox(2);
-        this.vocalBox = new HBox(2);
-
-        this.playPauseButton = new Button();
-        this.playPauseButton.setOnAction(new JouerSon(this.main));
-        this.arretButton = new Button();
+        this.enregistrerVocal.setOnAction(this.startVocal);
+        this.playPauseButton.setOnAction(this.jouerSon);
         this.arretButton.setOnAction(new StopperSon(this.main));
 
-        this.playImg = this.createImageView(CheminIMG.PLAY.getChemin());
-        this.pauseImg = this.createImageView(CheminIMG.PAUSE.getChemin());
-        ImageView arretImg = this.createImageView(CheminIMG.STOP.getChemin());
-
-        this.playPauseButton.setGraphic(this.playImg);
-        this.playPauseButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-
-        this.arretButton.setGraphic(arretImg);
-        this.arretButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-
-        this.erreur = new Label("Vous ne pouvez pas publier si aucun des champs n'est rempli.");
-        this.erreur.setStyle("-fx-text-fill: red;");
+        this.erreur.getStyleClass().add("erreur");
         this.erreur.setVisible(false);
         this.erreur.setWrapText(true);
 
@@ -112,45 +94,27 @@ public class Publication extends VBox {
                 this.arretButton));
         this.combinaisonVocal.setVisible(false);
 
-        Button publier = new Button("Publier");
+        ButtonF publier = new ButtonF("Publier");
         publier.getStyleClass().add("publier");
         publier.setOnAction(new PublierPublication(this.main));
 
-        Region vRegion = new Region();
-        VBox.setVgrow(vRegion, Priority.ALWAYS);
-
-        Region hRegion = new Region();
-        HBox.setHgrow(hRegion, Priority.ALWAYS);
-
-        Label pubiLabel = new Label("Publication");
-
         this.aucunSon.setVisible(false);
 
-        Font font = Font.loadFont(CheminFONT.THE_SMILE.getChemin(), 20);
-        pubiLabel.setFont(font);
-        publier.setFont(font);
-
         super.getStylesheets().add(CheminCSS.PUBLICATION.getChemin());
-        super.getChildren().addAll(pubiLabel, this.publication, new HBox(this.enregistrerVocal, this.aucunSon, hRegion, label),
-                this.combinaisonVocal, vRegion,
+        super.getChildren().addAll(new LabelF("Publication"), this.publication,
+                new HBox(this.enregistrerVocal, this.aucunSon, Main.createRegion(), label),
+                this.combinaisonVocal, Main.createRegion(),
                 this.erreur, publier);
     }
 
-    public void changerEnregistrerVocal() {
-        if (this.enregistrerVocal.getGraphic().equals(this.stopVocalView)) {
-            this.enregistrerVocal.setGraphic(this.startVocalView);
-            this.enregistrerVocal.setOnAction(new StartVocal(this.main));
-        } else {
-            this.enregistrerVocal.setGraphic(this.stopVocalView);
-            this.enregistrerVocal.setOnAction(new StopVocal(this.main));
-        }
+    public void mettreEnregistrementButtonAOff() {
+        this.enregistrerVocal.setOnAction(this.startVocal);
+        this.enregistrerVocal.setGraphic(this.startVocalView);
     }
 
-    private ImageView createImageView(String chemin) {
-        ImageView img = new ImageView(chemin);
-        img.setFitHeight(20);
-        img.setFitWidth(20);
-        return img;
+    public void mettreEnregistrementButtonAOn() {
+        this.enregistrerVocal.setOnAction(this.stopVocal);
+        this.enregistrerVocal.setGraphic(this.stopVocalView);
     }
 
     public void messageVocal(List<Double> averages) {
@@ -159,7 +123,6 @@ public class Publication extends VBox {
         for (Double average : averages) {
             this.drawBar(average, false);
         }
-
     }
 
     private void drawBar(double amplitude, boolean vocalVide) {
@@ -176,7 +139,6 @@ public class Publication extends VBox {
     }
 
     public void updateSon(int nbSecMax, int nbSecActuel) {
-
         int nbBarMax = this.vocalBox.getChildren().size();
 
         int partColoration = nbBarMax / (nbSecMax + 1);
@@ -194,7 +156,6 @@ public class Publication extends VBox {
         if (nbSecMax == nbSecActuel) {
             this.arreterSon();
         }
-
     }
 
     public void jouerSon() {
@@ -215,13 +176,13 @@ public class Publication extends VBox {
     }
 
     public void mettreEnPauseSon() {
+        this.playPauseButton.setOnAction(this.unpauseSon);
         this.playPauseButton.setGraphic(this.playImg);
-        this.playPauseButton.setOnAction(new Unpause(this.main));
     }
 
     public void reprendreSon() {
+        this.playPauseButton.setOnAction(this.pauseSon);
         this.playPauseButton.setGraphic(this.pauseImg);
-        this.playPauseButton.setOnAction(new PauseSon(this.main));
     }
 
     public TextArea getPublication() {
@@ -232,15 +193,17 @@ public class Publication extends VBox {
         this.erreur.setVisible(true);
     }
 
-    public void aucunSon(){
+    public void aucunSon() {
         this.aucunSon.setVisible(true);
     }
 
-    public void resetSon(){
+    public void resetSon() {
+        this.vocalBox.getChildren().clear();
+        this.combinaisonVocal.setVisible(false);
         this.aucunSon.setVisible(false);
     }
 
-    public void reset(){
+    public void reset() {
         this.publication.setText("");
         this.vocalBox.getChildren().clear();
         this.combinaisonVocal.setVisible(false);

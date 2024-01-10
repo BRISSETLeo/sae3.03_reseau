@@ -6,6 +6,10 @@ Label {
     -fx-padding: 1em;
 }
 
+.erreur {
+    -fx-text-fill: red;
+}
+
 .black-rectangle {
     -fx-fill: black;
 }
@@ -26,6 +30,6 @@ Label {
     -fx-background-color: black;
 }
 
-TextArea{
+TextArea {
     -fx-background-color: transparent;
 }

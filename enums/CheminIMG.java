@@ -13,7 +13,8 @@ public enum CheminIMG {
     MICROPHONE_2("./client/images/microphone_2.png"),
     PLAY("./client/images/play.png"),
     PAUSE("./client/images/pause.png"),
-    STOP("./client/images/stop.png");
+    STOP("./client/images/stop.png"),
+    NO_PP("./client/images/nopp.png"),;
 
     private String chemin;
 
