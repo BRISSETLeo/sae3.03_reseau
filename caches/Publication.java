@@ -8,7 +8,7 @@ import java.util.List;
 public class Publication implements Serializable {
 
     private final int idPublication;
-    private final String pseudo;
+    private final Compte compte;
     private final String content;
     private final Blob vocal;
     private final Timestamp date;
@@ -17,12 +17,12 @@ public class Publication implements Serializable {
     private final boolean callerIsLiker;
     private final List<Commentaire> commentaires;
 
-    public Publication(int idPublication, String pseudo, String content, Blob vocal, Timestamp date, Blob photo,
+    public Publication(int idPublication, Compte compte, String content, Blob vocal, Timestamp date, Blob photo,
             int likes,
             boolean callerIsLiker, List<Commentaire> commentaires) {
         this.commentaires = commentaires;
         this.idPublication = idPublication;
-        this.pseudo = pseudo;
+        this.compte = compte;
         this.content = content;
         this.vocal = vocal;
         this.date = date;
@@ -35,8 +35,8 @@ public class Publication implements Serializable {
         return this.idPublication;
     }
 
-    public String getPseudo() {
-        return this.pseudo;
+    public Compte getCompte() {
+        return this.compte;
     }
 
     public String getContent() {

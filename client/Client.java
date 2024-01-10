@@ -94,14 +94,10 @@ public class Client extends Thread {
                         this.main.removeLike(idPublication, like, isMe);
 
                     } else if (demande.equals(Requete.AVOIR_FOLLOW.getRequete())) {
-
-                        System.out.println("Requete.AVOIR_COMPTES.getRequete()");
                         
                         int arraySize = this.in.readInt();
                         byte[] receivedBytes = new byte[arraySize];
                         this.in.readFully(receivedBytes);
-
-                        System.out.println("receivedBytes: " + receivedBytes.length);
 
                         List<Compte> comptes = ByteManager.convertBytesToList(receivedBytes, Compte.class);
                         for (Compte compte : comptes)

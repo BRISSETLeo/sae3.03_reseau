@@ -79,6 +79,7 @@ public class ConnexionMySQL {
 
                         int idPublication = resultSet.getInt("id_publication");
                         String pseudo = resultSet.getString("pseudo");
+                        Compte compte = this.getCompteByPseudo(pseudo);
                         String content = resultSet.getString("content");
                         Blob vocal = resultSet.getBlob("vocal");
                         Timestamp date = resultSet.getTimestamp("date");
@@ -87,7 +88,7 @@ public class ConnexionMySQL {
                         boolean callerIsLiker = this.hasLikePublication(pseudoToCheck, idPublication);
                         List<Commentaire> commentaires = this.getCommentairesForPublication(idPublication);
 
-                        Publication publication = new Publication(idPublication, pseudo, content, vocal, date, photo,
+                        Publication publication = new Publication(idPublication, compte, content, vocal, date, photo,
                                 likes,
                                 callerIsLiker, commentaires);
                         publications.add(publication);

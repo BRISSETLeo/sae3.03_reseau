@@ -63,7 +63,7 @@ public class Accueil extends VBox {
 
         Blob vocal = publication.getVocal();
 
-        Label pseudoLabel = new Label(publication.getPseudo());
+        HBox compteBox = new CompteBox(publication.getCompte());
         Label dateLabel = new Label(new SimpleDateFormat("dd-MM-YYYY HH:mm:ss").format(publication.getDate()));
         Label contentLabel = new Label(publication.getContent());
         contentLabel.setWrapText(true);
@@ -75,7 +75,6 @@ public class Accueil extends VBox {
         this.createButton(likeButton, publication);
 
         Font font = Font.loadFont(CheminFONT.THE_SMILE.getChemin(), 20);
-        pseudoLabel.setFont(font);
         dateLabel.setFont(font);
         contentLabel.setFont(font);
         likeLabel.setFont(font);
@@ -85,7 +84,7 @@ public class Accueil extends VBox {
         Region region2 = new Region();
         HBox.setHgrow(region2, Priority.ALWAYS);
 
-        HBox pseudoDateBox = new HBox(pseudoLabel, region, dateLabel);
+        HBox pseudoDateBox = new HBox(compteBox, region, dateLabel);
         HBox likeBox = new HBox(region2, likeLabel, likeButton);
 
         if (vocal != null) {
