@@ -18,6 +18,8 @@ public enum Requete {
     AJOUTER_FOLLOW("AjouterFollow"),
     RETIRER_FOLLOW("RetirerFollow"),
 
+    PUBLIER_PUBLICATION("PublierPublication"),
+
     FERMER("Fermer");
 
     private final String requete;

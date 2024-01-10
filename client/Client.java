@@ -54,7 +54,7 @@ public class Client extends Thread {
 
                 if (in.available() > 0) {
 
-                    String demande = in.readUTF();
+                    String demande = this.in.readUTF();
 
                     if (demande.equals(Requete.CREER_COMPTE.getRequete())) {
 
@@ -67,9 +67,9 @@ public class Client extends Thread {
 
                     } else if (demande.equalsIgnoreCase(Requete.AVOIR_PUBLICATIONS.getRequete())) {
 
-                        int arraySize = in.readInt();
+                        int arraySize = this.in.readInt();
                         byte[] receivedBytes = new byte[arraySize];
-                        in.readFully(receivedBytes);
+                        this.in.readFully(receivedBytes);
 
                         List<Publication> retrievedPublicationList = ByteManager.convertBytesToList(receivedBytes,
                                 Publication.class);
@@ -79,16 +79,16 @@ public class Client extends Thread {
 
                     } else if (demande.equalsIgnoreCase(Requete.LIKER_PUBLICATION.getRequete())) {
 
-                        int idPublication = in.readInt();
-                        int like = in.readInt();
-                        boolean isMe = in.readBoolean();
+                        int idPublication = this.in.readInt();
+                        int like = this.in.readInt();
+                        boolean isMe = this.in.readBoolean();
                         this.main.ajouterLike(idPublication, like, isMe);
 
                     } else if (demande.equalsIgnoreCase(Requete.DISLIKER_PUBLICATION.getRequete())) {
 
-                        int idPublication = in.readInt();
-                        int like = in.readInt();
-                        boolean isMe = in.readBoolean();
+                        int idPublication = this.in.readInt();
+                        int like = this.in.readInt();
+                        boolean isMe = this.in.readBoolean();
                         this.main.removeLike(idPublication, like, isMe);
 
                     }
@@ -148,6 +148,23 @@ public class Client extends Thread {
         try {
             this.out.writeUTF(Requete.DISLIKER_PUBLICATION.getRequete());
             this.out.writeInt(id);
+            this.out.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void publierPublication(String text, byte[] vocal){
+        try {
+            this.out.writeUTF(Requete.PUBLIER_PUBLICATION.getRequete());
+            this.out.writeUTF(text);
+            if(vocal != null){
+                this.out.writeInt(vocal.length);
+                this.out.write(vocal);
+            }else{
+                this.out.writeInt(0);
+                this.out.write(0);
+            }
             this.out.flush();
         } catch (Exception e) {
             e.printStackTrace();

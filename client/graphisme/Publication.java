@@ -5,6 +5,7 @@ import java.util.List;
 import client.Main;
 import client.controle.JouerSon;
 import client.controle.PauseSon;
+import client.controle.PublierPublication;
 import client.controle.StartVocal;
 import client.controle.StopVocal;
 import client.controle.StopperSon;
@@ -44,11 +45,13 @@ public class Publication extends VBox {
     private ImageView playImg;
     private ImageView pauseImg;
 
+    private TextArea publication;
+
     public Publication(Main main) {
         this.main = main;
 
-        TextArea publication = new TextArea();
-        publication.setPromptText("Contenu de la publication..");
+        this.publication = new TextArea();
+        this.publication.setPromptText("Contenu de la publication..");
         int maxLength = 500;
 
         Label label = new Label("0/" + maxLength);
@@ -62,11 +65,11 @@ public class Publication extends VBox {
             }
             return change;
         });
-        publication.textProperty().addListener((observable, oldValue, newValue) -> {
+        this.publication.textProperty().addListener((observable, oldValue, newValue) -> {
             label.setText(newValue.length() + "/" + maxLength);
         });
-        publication.setWrapText(true);
-        publication.setTextFormatter(textFormatter);
+        this.publication.setWrapText(true);
+        this.publication.setTextFormatter(textFormatter);
 
         this.enregistrerVocal = new Button("");
 
@@ -101,6 +104,7 @@ public class Publication extends VBox {
 
         Button publier = new Button("Publier");
         publier.getStyleClass().add("publier");
+        publier.setOnAction(new PublierPublication(this.main));
 
         Region vRegion = new Region();
         VBox.setVgrow(vRegion, Priority.ALWAYS);
@@ -110,10 +114,10 @@ public class Publication extends VBox {
 
         Font font = Font.loadFont(CheminFONT.THE_SMILE.getChemin(), 15);
         publier.setFont(font);
-        publication.setFont(font);
+        this.publication.setFont(font);
 
         super.getStylesheets().add(CheminCSS.PUBLICATION.getChemin());
-        super.getChildren().addAll(publication, new HBox(this.enregistrerVocal, hRegion, label),
+        super.getChildren().addAll(this.publication, new HBox(this.enregistrerVocal, hRegion, label),
                 this.combinaisonVocal, vRegion,
                 publier);
     }
@@ -145,8 +149,7 @@ public class Publication extends VBox {
 
     private void drawBar(double amplitude) {
         double barHeight = amplitude * 100;
-        if (barHeight < 1)
-            return;
+        if(amplitude == 0) barHeight = 5;
         double barWidth = 3;
         Rectangle bar = new Rectangle(barWidth, barHeight);
         bar.getStyleClass().add("black-rectangle");
@@ -200,6 +203,10 @@ public class Publication extends VBox {
     public void reprendreSon() {
         this.playPauseButton.setGraphic(this.pauseImg);
         this.playPauseButton.setOnAction(new PauseSon(this.main));
+    }
+
+    public TextArea getPublication() {
+        return this.publication;
     }
 
 }

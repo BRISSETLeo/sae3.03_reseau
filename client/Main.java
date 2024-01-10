@@ -216,4 +216,12 @@ public class Main extends Application {
         Platform.runLater(() -> this.publication.updateSon(nbSecMax, nbSecActuel));
     }
 
+    public void publierPublication(){
+        this.client.publierPublication(this.publication.getPublication().getText(), this.son.getAudioData());
+    }
+
+    public List<Double> playAudio(byte[] audio){
+        return this.son.playAudio(audio);
+    }
+
 }

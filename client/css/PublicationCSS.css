@@ -25,3 +25,7 @@ Label {
     -fx-text-fill: white;
     -fx-background-color: black;
 }
+
+TextArea{
+    -fx-background-color: transparent;
+}

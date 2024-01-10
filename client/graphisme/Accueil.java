@@ -1,7 +1,11 @@
 package client.graphisme;
 
+import java.sql.Blob;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import caches.Commentaire;
@@ -22,6 +26,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
 public class Accueil extends VBox {
@@ -31,16 +36,17 @@ public class Accueil extends VBox {
     private VBox contenant;
     private Map<Integer, VBox> publications;
     private Map<Integer, VBox> commentaires;
+    private List<HBox> vocalBox;
 
     public Accueil(Main main) {
         this.main = main;
         this.publications = new HashMap<>();
         this.commentaires = new HashMap<>();
         this.contenant = new VBox();
+        this.vocalBox = new ArrayList<>();
 
         ScrollPane scrollPane = new ScrollPane(this.contenant);
         scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(true);
 
         this.splitPane = new SplitPane();
         this.splitPane.getItems().add(scrollPane);
@@ -53,6 +59,8 @@ public class Accueil extends VBox {
     public void ajouterPublication(Publication publication) {
         VBox container = new VBox();
         container.getStyleClass().add("container");
+        
+        Blob vocal = publication.getVocal();
 
         Label pseudoLabel = new Label(publication.getPseudo());
         Label dateLabel = new Label(new SimpleDateFormat("dd-MM-YYYY HH:mm:ss").format(publication.getDate()));
@@ -71,7 +79,6 @@ public class Accueil extends VBox {
         contentLabel.setFont(font);
         likeLabel.setFont(font);
 
-        // Ajouter la photo
         Region region = new Region();
         HBox.setHgrow(region, Priority.ALWAYS);
         Region region2 = new Region();
@@ -80,13 +87,37 @@ public class Accueil extends VBox {
         HBox pseudoDateBox = new HBox(pseudoLabel, region, dateLabel);
         HBox likeBox = new HBox(region2, likeLabel, likeButton);
 
-        container.getChildren().addAll(pseudoDateBox, contentLabel, likeBox);
+        if(vocal != null){
+            try {
+                int blobLength = (int) vocal.length();
+                byte[] bytes = vocal.getBytes(1, blobLength);
+                HBox hBox = new HBox(2);
+                for (Double amplitude : this.main.playAudio(bytes)) {
+                    this.drawBar(hBox, amplitude);
+                }
+                this.vocalBox.add(hBox);
+                container.getChildren().addAll(pseudoDateBox, contentLabel, hBox, likeBox);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }else{
+            container.getChildren().addAll(pseudoDateBox, contentLabel, likeBox);
+        }
 
         this.contenant.getChildren().add(container);
 
         this.publications.put(publication.getIdPublication(), container);
 
         publication.getCommentaires().forEach(c -> this.ajouterCommentaire(c));
+    }
+
+    private void drawBar(HBox hBox, double amplitude) {
+        double barHeight = amplitude * 100;
+        if(amplitude == 0) barHeight = 5;
+        double barWidth = 3;
+        Rectangle bar = new Rectangle(barWidth, barHeight);
+        bar.getStyleClass().add("black-rectangle");
+        hBox.getChildren().add(bar);
     }
 
     private void ajouterCommentaire(Commentaire commentaire) {

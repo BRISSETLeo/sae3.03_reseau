@@ -61,7 +61,7 @@ public class Son extends Thread {
 
             byteArrayOutputStream.close();
 
-            this.playAudio(this.getAudioData());
+            this.main.nouveauVocal(this.playAudio(this.getAudioData()));
 
         } catch (LineUnavailableException | IOException e) {
             e.printStackTrace();
@@ -82,7 +82,10 @@ public class Son extends Thread {
     }
 
     public byte[] getAudioData() {
-        return byteArrayOutputStream.toByteArray();
+        if(Son.byteArrayOutputStream != null){
+            return byteArrayOutputStream.toByteArray();
+        }
+        return null;
     }
 
     public void jouerSon() {
@@ -150,7 +153,7 @@ public class Son extends Thread {
         }
     }
 
-    private void playAudio(byte[] audioData) {
+    public List<Double> playAudio(byte[] audioData) {
         this.intensities = new ArrayList<>();
         try {
             AudioInputStream audioInputStream = new AudioInputStream(
@@ -167,12 +170,15 @@ public class Son extends Thread {
                 this.processAudioBuffer(buffer, bytesRead, samplesPerBar, audioFormat);
             }
 
-            this.drawBars();
+            List<Double> averages = this.drawBars();
 
             audioInputStream.close();
+
+            return averages;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     private void processAudioBuffer(byte[] buffer, int bytesRead, int samplesPerBar, AudioFormat audioFormat) {
@@ -192,7 +198,7 @@ public class Son extends Thread {
         }
     }
 
-    private void drawBars() {
+    private List<Double> drawBars() {
         int groupSize = intensities.size() / 30;
         List<Double> averages = new ArrayList<>();
         for (int i = 0; i < 30; i++) {
@@ -203,7 +209,7 @@ public class Son extends Thread {
             double averageAmplitude = sum / groupSize;
             averages.add(averageAmplitude);
         }
-        this.main.nouveauVocal(averages);
+        return averages;
     }
 
 }

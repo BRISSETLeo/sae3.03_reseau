@@ -10,14 +10,14 @@ public class Publication implements Serializable {
     private final int idPublication;
     private final String pseudo;
     private final String content;
-    private final byte vocal;
+    private final Blob vocal;
     private final Timestamp date;
     private final Blob photo;
     private final int likes;
     private final boolean callerIsLiker;
     private final List<Commentaire> commentaires;
 
-    public Publication(int idPublication, String pseudo, String content, byte vocal, Timestamp date, Blob photo,
+    public Publication(int idPublication, String pseudo, String content, Blob vocal, Timestamp date, Blob photo,
             int likes,
             boolean callerIsLiker, List<Commentaire> commentaires) {
         this.commentaires = commentaires;
@@ -59,7 +59,7 @@ public class Publication implements Serializable {
         return this.callerIsLiker;
     }
 
-    public byte getVocal() {
+    public Blob getVocal() {
         return this.vocal;
     }
 

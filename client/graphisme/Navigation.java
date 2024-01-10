@@ -14,6 +14,7 @@ public class Navigation extends VBox {
 
     public Navigation(Main main) {
         Button accueil = new Button("Accueil");
+        accueil.setOnAction(new client.controle.Accueil(main));
         Button notif = new Button("Notifications");
         Button msg = new Button("Messages");
         msg.setOnAction(new client.controle.Message(main));

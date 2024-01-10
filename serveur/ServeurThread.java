@@ -43,9 +43,9 @@ public class ServeurThread extends Thread {
                 if (this.socket.isClosed())
                     break;
 
-                if (in.available() > 0) {
+                if (this.in.available() > 0) {
 
-                    String message = in.readUTF();
+                    String message = this.in.readUTF();
 
                     if (message.equals(Requete.AVOIR_PUBLICATIONS.getRequete())) {
 
@@ -61,11 +61,19 @@ public class ServeurThread extends Thread {
 
                     } else if (message.equals(Requete.LIKER_PUBLICATION.getRequete())) {
 
-                        this.likerPublication(in.readInt());
+                        this.likerPublication(this.in.readInt());
 
                     } else if (message.equals(Requete.DISLIKER_PUBLICATION.getRequete())) {
 
-                        this.dislikerPublication(in.readInt());
+                        this.dislikerPublication(this.in.readInt());
+
+                    } else if(message.equals(Requete.PUBLIER_PUBLICATION.getRequete())){
+
+                        String text = this.in.readUTF();
+                        byte[] receivedBytes = new byte[this.in.readInt()];
+                        in.readFully(receivedBytes);
+
+                        this.publierPublication(text, receivedBytes);
 
                     }
 
@@ -137,6 +145,10 @@ public class ServeurThread extends Thread {
                 client.getOut().flush();
             }
         }
+    }
+
+    public void publierPublication(String text, byte[] vocal){
+        this.serveur.getConnexionMySQL().publierPublication(this.compte.getPseudo(),text,vocal);
     }
 
     public synchronized DataOutputStream getOut() {

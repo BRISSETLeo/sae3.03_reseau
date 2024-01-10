@@ -80,7 +80,7 @@ public class ConnexionMySQL {
                         int idPublication = resultSet.getInt("id_publication");
                         String pseudo = resultSet.getString("pseudo");
                         String content = resultSet.getString("content");
-                        byte vocal = resultSet.getByte("vocal");
+                        Blob vocal = resultSet.getBlob("vocal");
                         Timestamp date = resultSet.getTimestamp("date");
                         Blob photo = resultSet.getBlob("photo");
                         int likes = resultSet.getInt("total_likes");
@@ -367,6 +367,30 @@ public class ConnexionMySQL {
         }
 
         return 0;
+    }
+
+    public void publierPublication(String pseudo, String text, byte[] vocal) {
+        try {
+
+            String sqlQuery = "INSERT INTO publications (pseudo, content, vocal, date, photo) VALUES (?, ?, ?, ?, ?);";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setString(1, pseudo);
+                statement.setString(2, text);
+                statement.setBytes(3, vocal);
+                statement.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+                statement.setBytes(5, null);
+                statement.executeUpdate();
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+
     }
 
 }
