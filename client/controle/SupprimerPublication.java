@@ -4,18 +4,20 @@ import client.Main;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
-public class Accueil implements EventHandler<ActionEvent> {
+public class SupprimerPublication implements EventHandler<ActionEvent> {
 
     private Main main;
+    private int id;
 
-    public Accueil(Main main) {
+    public SupprimerPublication(Main main, int id) {
         this.main = main;
+        this.id = id;
     }
 
     @Override
     public void handle(ActionEvent event) {
 
-        this.main.enleverPage();
+        this.main.supprimerPublication(this.id);
 
     }
 

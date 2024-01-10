@@ -12,13 +12,16 @@ import caches.Commentaire;
 import caches.Publication;
 import client.Main;
 import client.controle.LikeButton;
+import client.controle.SupprimerPublication;
 import client.controle.UnlikeButton;
 import client.graphisme.affichage.ButtonG;
 import client.graphisme.affichage.ImageViewS;
 import client.graphisme.affichage.LabelF;
 import enums.CheminCSS;
 import enums.CheminIMG;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -27,6 +30,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
 public class Accueil extends VBox {
 
@@ -80,19 +84,35 @@ public class Accueil extends VBox {
 
         if (publication.getCompte().getPseudo().equals(this.main.getPseudo())) {
             Button supprimerPublication = new Button("Supprimer la publication");
+            supprimerPublication.setOnAction(new SupprimerPublication(this.main, publication.getIdPublication()));
             likeBox.getChildren().add(0, supprimerPublication);
         }
 
         container.getChildren().add(likeBox);
 
-        if (hasNewPublication)
+        if (hasNewPublication) {
+            container.setTranslateY(-100);
             this.contenant.getChildren().add(0, container);
-        else
+            TranslateTransition transition = new TranslateTransition(Duration.seconds(1), container);
+            transition.setToY(0);
+            transition.play();
+        } else
             this.contenant.getChildren().add(container);
 
         this.publications.put(publication.getIdPublication(), container);
 
         publication.getCommentaires().forEach(c -> this.ajouterCommentaire(c));
+    }
+
+    public void removePublication(int idPublication) {
+        VBox container = this.publications.get(idPublication);
+        TranslateTransition transition = new TranslateTransition(Duration.seconds(1), container);
+        transition.setToY(-100);
+        transition.setOnFinished(e -> {
+            this.contenant.getChildren().remove(container);
+            this.publications.remove(idPublication);
+        });
+        transition.play();
     }
 
     private void setupVocal(Blob vocal, VBox container) {
@@ -188,6 +208,15 @@ public class Accueil extends VBox {
     public void ajouterPage(VBox page) {
         this.splitPane.getItems().add(page);
         this.splitPane.setDividerPositions(0.7);
+    }
+
+    public boolean demanderSupprimerPublication(int idPublication) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.getDialogPane().getStylesheets().add(CheminCSS.ALERT.getChemin());
+        alert.setTitle("Supprimer la publication");
+        alert.setHeaderText("Voulez-vous vraiment supprimer cette publication ?");
+        alert.setContentText("Cette action est irréversible.");
+        return alert.showAndWait().get().getButtonData().isDefaultButton();
     }
 
 }

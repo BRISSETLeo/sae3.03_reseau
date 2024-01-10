@@ -14,8 +14,13 @@
     -fx-fill: rgb(83, 83, 83);
 }
 
-ButtonG {
+ButtonG,
+Button {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
     -fx-cursor: hand;
+}
+
+Button:hover {
+    -fx-text-fill: red;
 }

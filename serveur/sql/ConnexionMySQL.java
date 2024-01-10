@@ -272,7 +272,8 @@ public class ConnexionMySQL {
 
     public synchronized void likePublication(String pseudo, int idPublication) {
 
-        if(this.hasLikePublication(pseudo, idPublication)) return;
+        if (this.hasLikePublication(pseudo, idPublication))
+            return;
 
         try {
 
@@ -367,7 +368,7 @@ public class ConnexionMySQL {
         return false;
     }
 
-    public synchronized int nbLikePublications(int idPublication){
+    public synchronized int nbLikePublications(int idPublication) {
 
         try {
 
@@ -428,50 +429,69 @@ public class ConnexionMySQL {
 
     }
 
-    public Publication getPublication(){
-            
+    public Publication getPublication() {
+
         try {
-    
-                String sqlQuery = "SELECT * FROM publications WHERE id_publication = (SELECT MAX(id_publication) FROM publications);";
-    
-                try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
-    
-                    try (ResultSet resultSet = statement.executeQuery()) {
-    
-                        if (resultSet.next()) {
-    
-                            int idPublication = resultSet.getInt("id_publication");
-                            String pseudo = resultSet.getString("pseudo");
-                            Compte compte = this.getCompteByPseudo(pseudo);
-                            String content = resultSet.getString("content");
-                            Blob vocal = resultSet.getBlob("vocal");
-                            Timestamp date = resultSet.getTimestamp("date");
-                            Blob photo = resultSet.getBlob("photo");
-                            int likes = 0;
-                            boolean callerIsLiker = false;
-                            List<Commentaire> commentaires = Arrays.asList();
-    
-                            Publication publication = new Publication(idPublication, compte, content, vocal, date, photo,
-                                    likes,
-                                    callerIsLiker, commentaires);
-                            return publication;
-    
-                        }
-    
+
+            String sqlQuery = "SELECT * FROM publications WHERE id_publication = (SELECT MAX(id_publication) FROM publications);";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+
+                    if (resultSet.next()) {
+
+                        int idPublication = resultSet.getInt("id_publication");
+                        String pseudo = resultSet.getString("pseudo");
+                        Compte compte = this.getCompteByPseudo(pseudo);
+                        String content = resultSet.getString("content");
+                        Blob vocal = resultSet.getBlob("vocal");
+                        Timestamp date = resultSet.getTimestamp("date");
+                        Blob photo = resultSet.getBlob("photo");
+                        int likes = 0;
+                        boolean callerIsLiker = false;
+                        List<Commentaire> commentaires = Arrays.asList();
+
+                        Publication publication = new Publication(idPublication, compte, content, vocal, date, photo,
+                                likes,
+                                callerIsLiker, commentaires);
+                        return publication;
+
                     }
-    
+
                 }
-    
-            } catch (SQLException e) {
-    
-                e.printStackTrace();
-    
+
             }
-    
-            return null;
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return null;
     }
 
-    public synchronized List<Compte> getFollow(String pseudo){
+    public synchronized void supprimerPublication(int idPublication) {
+        try {
+
+            String sqlQuery = "DELETE FROM publications WHERE id_publication = ?;";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setInt(1, idPublication);
+                statement.executeUpdate();
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+    }
+
+    public synchronized List<Compte> getFollow(String pseudo) {
         List<Compte> comptes = new ArrayList<>();
 
         try {
@@ -515,7 +535,7 @@ public class ConnexionMySQL {
         return comptes;
     }
 
-    public synchronized List<MessageC> getMessages(String pseudo){
+    public synchronized List<MessageC> getMessages(String pseudo) {
         List<MessageC> messages = new ArrayList<>();
 
         try {

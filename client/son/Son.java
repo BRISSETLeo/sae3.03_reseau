@@ -29,7 +29,7 @@ public class Son extends Thread {
         if (this.clip != null)
             this.clip.stop();
         try {
-            AudioFormat format = getAudioFormat();
+            AudioFormat format = this.getAudioFormat();
             DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
 
             if (!AudioSystem.isLineSupported(info)) {

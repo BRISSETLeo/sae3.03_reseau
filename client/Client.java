@@ -66,7 +66,7 @@ public class Client extends Thread {
 
                         this.demanderPublications();
                         this.demanderComptes();
-                        this.main.mettreLaPageAccueil();
+                        this.main.mettrePage();
 
                     } else if (demande.equals(Requete.AVOIR_PUBLICATIONS.getRequete())) {
 
@@ -95,7 +95,7 @@ public class Client extends Thread {
                         this.main.removeLike(idPublication, like, isMe);
 
                     } else if (demande.equals(Requete.AVOIR_FOLLOW.getRequete())) {
-                        
+
                         int arraySize = this.in.readInt();
                         byte[] receivedBytes = new byte[arraySize];
                         this.in.readFully(receivedBytes);
@@ -104,7 +104,7 @@ public class Client extends Thread {
                         for (Compte compte : comptes)
                             this.main.afficherCompte(compte);
 
-                    } else if(demande.equals(Requete.PUBLIER_PUBLICATION.getRequete())){
+                    } else if (demande.equals(Requete.PUBLIER_PUBLICATION.getRequete())) {
 
                         int arraySize = this.in.readInt();
                         byte[] receivedBytes = new byte[arraySize];
@@ -114,7 +114,7 @@ public class Client extends Thread {
 
                         this.main.afficherPublication(publication, true);
 
-                    } else if (demande.equals(Requete.VOIR_MESSAGES.getRequete())){
+                    } else if (demande.equals(Requete.VOIR_MESSAGES.getRequete())) {
 
                         int arraySize = this.in.readInt();
                         byte[] receivedBytes = new byte[arraySize];
@@ -126,8 +126,13 @@ public class Client extends Thread {
                         for (MessageC msg : retrievedMessageCList)
                             this.main.afficherMessage(msg);
 
+                    } else if (demande.equals(Requete.SUPPRIMER_PUBLICATION.getRequete())) {
+
+                        int idPublication = this.in.readInt();
+
+                        this.main.removePublication(idPublication);
+
                     }
-                    
 
                 }
 
@@ -199,12 +204,12 @@ public class Client extends Thread {
         }
     }
 
-    public void publierPublication(String text, byte[] vocal){
+    public void publierPublication(String text, byte[] vocal) {
         try {
             this.out.writeUTF(Requete.PUBLIER_PUBLICATION.getRequete());
             this.out.writeUTF(text);
             this.out.writeBoolean(vocal != null);
-            if(vocal != null){
+            if (vocal != null) {
                 this.out.writeInt(vocal.length);
                 this.out.write(vocal);
             }
@@ -214,7 +219,7 @@ public class Client extends Thread {
         }
     }
 
-    public void getMessages(){
+    public void getMessages() {
         try {
             this.out.writeUTF(Requete.VOIR_MESSAGES.getRequete());
             this.out.flush();
@@ -222,7 +227,17 @@ public class Client extends Thread {
             e.printStackTrace();
         }
     }
-    
+
+    public void supprimerPublication(int idPublication) {
+        try {
+            this.out.writeUTF(Requete.SUPPRIMER_PUBLICATION.getRequete());
+            this.out.writeInt(idPublication);
+            this.out.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public String getPseudo() {
         return this.pseudo;
     }

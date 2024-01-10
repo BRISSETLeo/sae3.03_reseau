@@ -79,6 +79,7 @@ public class Publication extends VBox {
 
         Label label = new Label("0/" + maxLength);
         this.publication.textProperty().addListener((observable, oldValue, newValue) -> {
+            this.enleverErreur();
             label.setText(newValue.length() + "/" + maxLength);
         });
 
@@ -200,7 +201,12 @@ public class Publication extends VBox {
     public void resetSon() {
         this.vocalBox.getChildren().clear();
         this.combinaisonVocal.setVisible(false);
+        this.enleverErreur();
         this.aucunSon.setVisible(false);
+    }
+
+    public void enleverErreur() {
+        this.erreur.setVisible(false);
     }
 
     public void reset() {

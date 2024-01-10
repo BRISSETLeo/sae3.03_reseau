@@ -68,14 +68,14 @@ public class ServeurThread extends Thread {
 
                         this.dislikerPublication(this.in.readInt());
 
-                    } else if(message.equals(Requete.PUBLIER_PUBLICATION.getRequete())){
+                    } else if (message.equals(Requete.PUBLIER_PUBLICATION.getRequete())) {
 
                         String text = this.in.readUTF();
                         boolean hasVocal = this.in.readBoolean();
-                        
+
                         byte[] receivedBytes = null;
 
-                        if(hasVocal){
+                        if (hasVocal) {
                             int arraySize = this.in.readInt();
                             receivedBytes = new byte[arraySize];
                             this.in.readFully(receivedBytes);
@@ -84,12 +84,17 @@ public class ServeurThread extends Thread {
                         this.publierPublication(text, receivedBytes);
 
                     } else if (message.equals(Requete.AVOIR_FOLLOW.getRequete())) {
-                        
+
                         this.avoirCompte();
 
                     } else if (message.equals(Requete.VOIR_MESSAGES.getRequete())) {
 
                         this.voirMessages();
+
+                    } else if (message.equals(Requete.SUPPRIMER_PUBLICATION.getRequete())) {
+
+                        this.supprimerPublication(this.in.readInt());
+
                     }
 
                 }
@@ -137,8 +142,8 @@ public class ServeurThread extends Thread {
     private void likerPublication(int id) throws IOException {
         this.serveur.getConnexionMySQL().likePublication(this.compte.getPseudo(), id);
         int nbLike = this.serveur.getConnexionMySQL().nbLikePublications(id);
-        for (ServeurThread client : this.serveur.getClients()) { 
-            if (this.serveur.getConnexionMySQL().isOwnerPublication(client.getCompte().getPseudo(),id) ||
+        for (ServeurThread client : this.serveur.getClients()) {
+            if (this.serveur.getConnexionMySQL().isOwnerPublication(client.getCompte().getPseudo(), id) ||
                     this.serveur.getConnexionMySQL().hasFollowToSenderPublication(client.getCompte().getPseudo(), id)) {
                 client.getOut().writeUTF(Requete.LIKER_PUBLICATION.getRequete());
                 client.getOut().writeInt(id);
@@ -152,8 +157,8 @@ public class ServeurThread extends Thread {
     private void dislikerPublication(int id) throws IOException {
         this.serveur.getConnexionMySQL().unlikePublication(this.compte.getPseudo(), id);
         int nbLike = this.serveur.getConnexionMySQL().nbLikePublications(id);
-        for (ServeurThread client : this.serveur.getClients()) { 
-            if (this.serveur.getConnexionMySQL().isOwnerPublication(client.getCompte().getPseudo(),id) ||
+        for (ServeurThread client : this.serveur.getClients()) {
+            if (this.serveur.getConnexionMySQL().isOwnerPublication(client.getCompte().getPseudo(), id) ||
                     this.serveur.getConnexionMySQL().hasFollowToSenderPublication(client.getCompte().getPseudo(), id)) {
                 client.getOut().writeUTF(Requete.DISLIKER_PUBLICATION.getRequete());
                 client.getOut().writeInt(id);
@@ -164,12 +169,14 @@ public class ServeurThread extends Thread {
         }
     }
 
-    public void publierPublication(String text, byte[] vocal) throws IOException{
-        Publication publication = this.serveur.getConnexionMySQL().publierPublication(this.compte.getPseudo(),text,vocal);
+    public void publierPublication(String text, byte[] vocal) throws IOException {
+        Publication publication = this.serveur.getConnexionMySQL().publierPublication(this.compte.getPseudo(), text,
+                vocal);
         byte[] bytes = ByteManager.getBytes(publication);
         for (ServeurThread client : this.serveur.getClients()) {
             if (client.getCompte().getPseudo().equals(this.compte.getPseudo()) ||
-                    this.serveur.getConnexionMySQL().hasFollowToSenderPublication(client.getCompte().getPseudo(), publication.getIdPublication())) {
+                    this.serveur.getConnexionMySQL().hasFollowToSenderPublication(client.getCompte().getPseudo(),
+                            publication.getIdPublication())) {
                 client.getOut().writeUTF(Requete.PUBLIER_PUBLICATION.getRequete());
                 client.getOut().writeInt(bytes.length);
                 client.getOut().write(bytes);
@@ -194,6 +201,17 @@ public class ServeurThread extends Thread {
         this.out.writeInt(listBytes.length);
         this.out.write(listBytes);
         this.out.flush();
+    }
+
+    public void supprimerPublication(int idPublication) throws IOException {
+        for (ServeurThread client : this.serveur.getClients()) {
+            if (this.serveur.getConnexionMySQL().isOwnerPublication(client.getCompte().getPseudo(), idPublication)) {
+                client.getOut().writeUTF(Requete.SUPPRIMER_PUBLICATION.getRequete());
+                client.getOut().writeInt(idPublication);
+                client.getOut().flush();
+            }
+        }
+        this.serveur.getConnexionMySQL().supprimerPublication(idPublication);
     }
 
     public synchronized DataOutputStream getOut() {

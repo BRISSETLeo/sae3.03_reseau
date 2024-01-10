@@ -113,16 +113,22 @@ public class Main extends Application {
         this.client.fermer();
     }
 
-    public void mettreLaPageAccueil() {
+    public void mettrePage() {
         Platform.runLater(() -> {
             this.root.setTop(this.barre);
+            this.afficherPageAccueil();
             this.root.setLeft(this.navigation);
-            this.root.setCenter(this.accueil);
         });
+    }
+
+    public void afficherPageAccueil() {
+        this.root.setCenter(this.accueil);
     }
 
     public void afficherPublication(Publication publication, boolean hasNewPublication) {
         Platform.runLater(() -> this.accueil.ajouterPublication(publication, hasNewPublication));
+        if (hasNewPublication && this.client.getPseudo().equals(publication.getCompte().getPseudo()))
+            Platform.runLater(() -> this.resetPublication());
     }
 
     public void sauvegarderIdentifiant(String ip, String pseudo) {
@@ -175,6 +181,7 @@ public class Main extends Application {
     }
 
     public void enleverPage() {
+        this.afficherPageAccueil();
         this.accueil.enleverPage();
     }
 
@@ -190,6 +197,10 @@ public class Main extends Application {
 
     public void resetSon() {
         Platform.runLater(() -> this.publication.resetSon());
+    }
+
+    public void resetPublication() {
+        Platform.runLater(() -> this.publication.reset());
     }
 
     public void stopVocal() {
@@ -273,6 +284,16 @@ public class Main extends Application {
         HBox.setHgrow(region, Priority.ALWAYS);
         VBox.setVgrow(region, Priority.ALWAYS);
         return region;
+    }
+
+    public void supprimerPublication(int idPublication) {
+        boolean isAccepted = this.accueil.demanderSupprimerPublication(idPublication);
+        if (isAccepted)
+            this.client.supprimerPublication(idPublication);
+    }
+
+    public void removePublication(int idPublication) {
+        Platform.runLater(() -> this.accueil.removePublication(idPublication));
     }
 
 }
