@@ -41,7 +41,7 @@ public class Son extends Thread {
             line.open(format);
             line.start();
 
-            byteArrayOutputStream = new ByteArrayOutputStream();
+            Son.byteArrayOutputStream = new ByteArrayOutputStream();
 
             byte[] buffer = new byte[1024];
             long time = System.currentTimeMillis();
@@ -51,7 +51,7 @@ public class Son extends Thread {
                 if (bytesRead == -1) {
                     break;
                 }
-                byteArrayOutputStream.write(buffer, 0, bytesRead);
+                Son.byteArrayOutputStream.write(buffer, 0, bytesRead);
             }
 
             this.main.vocalFini();
@@ -59,9 +59,25 @@ public class Son extends Thread {
             line.stop();
             line.close();
 
-            byteArrayOutputStream.close();
+            Son.byteArrayOutputStream.close();
 
-            this.main.nouveauVocal(this.playAudio(this.getAudioData()));
+            byte[] audioData = this.getAudioData();
+            if(audioData == null) return;
+
+            boolean isSilent = true;
+            for (byte sample : audioData) {
+                if (sample != 0) {
+                    isSilent = false;
+                    break;
+                }
+            }
+
+            if (isSilent) {
+                Son.byteArrayOutputStream = null;
+                this.main.aucunSon();
+            } else {
+                this.main.nouveauVocal(this.playAudio(audioData));
+            }
 
         } catch (LineUnavailableException | IOException e) {
             e.printStackTrace();

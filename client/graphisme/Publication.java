@@ -47,12 +47,17 @@ public class Publication extends VBox {
 
     private TextArea publication;
 
+    private Label erreur;
+    private Label aucunSon;
+
     public Publication(Main main) {
         this.main = main;
 
         this.publication = new TextArea();
         this.publication.setPromptText("Contenu de la publication..");
         int maxLength = 500;
+
+        this.aucunSon = new Label("Aucun son n'a été enregistré.");
 
         Label label = new Label("0/" + maxLength);
 
@@ -98,6 +103,11 @@ public class Publication extends VBox {
         this.arretButton.setGraphic(arretImg);
         this.arretButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 
+        this.erreur = new Label("Vous ne pouvez pas publier si aucun des champs n'est rempli.");
+        this.erreur.setStyle("-fx-text-fill: red;");
+        this.erreur.setVisible(false);
+        this.erreur.setWrapText(true);
+
         this.combinaisonVocal.getChildren().addAll(this.vocalBox, new HBox(2, this.playPauseButton,
                 this.arretButton));
         this.combinaisonVocal.setVisible(false);
@@ -112,14 +122,18 @@ public class Publication extends VBox {
         Region hRegion = new Region();
         HBox.setHgrow(hRegion, Priority.ALWAYS);
 
-        Font font = Font.loadFont(CheminFONT.THE_SMILE.getChemin(), 15);
+        Label pubiLabel = new Label("Publication");
+
+        this.aucunSon.setVisible(false);
+
+        Font font = Font.loadFont(CheminFONT.THE_SMILE.getChemin(), 20);
+        pubiLabel.setFont(font);
         publier.setFont(font);
-        this.publication.setFont(font);
 
         super.getStylesheets().add(CheminCSS.PUBLICATION.getChemin());
-        super.getChildren().addAll(this.publication, new HBox(this.enregistrerVocal, hRegion, label),
+        super.getChildren().addAll(pubiLabel, this.publication, new HBox(this.enregistrerVocal, this.aucunSon, hRegion, label),
                 this.combinaisonVocal, vRegion,
-                publier);
+                this.erreur, publier);
     }
 
     public void changerEnregistrerVocal() {
@@ -212,6 +226,26 @@ public class Publication extends VBox {
 
     public TextArea getPublication() {
         return this.publication;
+    }
+
+    public void erreur() {
+        this.erreur.setVisible(true);
+    }
+
+    public void aucunSon(){
+        this.aucunSon.setVisible(true);
+    }
+
+    public void resetSon(){
+        this.aucunSon.setVisible(false);
+    }
+
+    public void reset(){
+        this.publication.setText("");
+        this.vocalBox.getChildren().clear();
+        this.combinaisonVocal.setVisible(false);
+        this.erreur.setVisible(false);
+        this.aucunSon.setVisible(false);
     }
 
 }

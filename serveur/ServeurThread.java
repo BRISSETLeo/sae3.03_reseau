@@ -4,9 +4,11 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Arrays;
 
 import caches.ByteManager;
 import caches.Compte;
+import caches.Publication;
 import enums.Color;
 import requete.Requete;
 
@@ -151,8 +153,18 @@ public class ServeurThread extends Thread {
         }
     }
 
-    public void publierPublication(String text, byte[] vocal){
-        this.serveur.getConnexionMySQL().publierPublication(this.compte.getPseudo(),text,vocal);
+    public void publierPublication(String text, byte[] vocal) throws IOException{
+        Publication publication = this.serveur.getConnexionMySQL().publierPublication(this.compte.getPseudo(),text,vocal);
+        byte[] bytes = ByteManager.getBytes(publication);
+        for (ServeurThread client : this.serveur.getClients()) {
+            if (client.getCompte().getPseudo().equals(this.compte.getPseudo()) ||
+                    this.serveur.getConnexionMySQL().hasFollowToSenderPublication(client.getCompte().getPseudo(), publication.getIdPublication())) {
+                client.getOut().writeUTF(Requete.PUBLIER_PUBLICATION.getRequete());
+                client.getOut().writeInt(bytes.length);
+                client.getOut().write(bytes);
+                client.getOut().flush();
+            }
+        }
     }
 
     public void avoirCompte() throws IOException {

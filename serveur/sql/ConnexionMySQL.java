@@ -370,7 +370,8 @@ public class ConnexionMySQL {
         return 0;
     }
 
-    public void publierPublication(String pseudo, String text, byte[] vocal) {
+    public Publication publierPublication(String pseudo, String text, byte[] vocal) {
+
         try {
 
             String sqlQuery = "INSERT INTO publications (pseudo, content, vocal, date, photo) VALUES (?, ?, ?, ?, ?);";

@@ -170,8 +170,17 @@ public class Main extends Application {
     }
 
     public void startVocal() {
+        this.publication.resetSon();
         this.son.start();
         this.publication.changerEnregistrerVocal();
+    }
+
+    public void aucunSon() {
+        Platform.runLater(() -> this.publication.aucunSon());
+    }
+    
+    public void resetSon(){
+        Platform.runLater(() -> this.publication.resetSon());
     }
 
     public void stopVocal() {
@@ -225,8 +234,14 @@ public class Main extends Application {
     }
 
     public void publierPublication(){
-        this.client.publierPublication(this.publication.getPublication().getText(), this.son.getAudioData());
-    }
+            String text = this.publication.getPublication().getText();
+            byte[] vocal = this.son.getAudioData();
+            if(text.length() == 0 && vocal == null){
+                this.publication.erreur();
+                return;
+            }
+            this.client.publierPublication(text,vocal);
+        }
 
     public List<Double> playAudio(byte[] audio){
         return this.son.playAudio(audio);

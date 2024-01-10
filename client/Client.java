@@ -103,7 +103,17 @@ public class Client extends Thread {
                         for (Compte compte : comptes)
                             this.main.afficherCompte(compte);
 
-                    } 
+                    } else if(demande.equals(Requete.PUBLIER_PUBLICATION.getRequete())){
+
+                        int arraySize = this.in.readInt();
+                        byte[] receivedBytes = new byte[arraySize];
+                        this.in.readFully(receivedBytes);
+
+                        Publication publication = ByteManager.fromBytes(receivedBytes, Publication.class);
+
+                        this.main.afficherPublication(publication);
+
+                    }
                     
 
                 }
