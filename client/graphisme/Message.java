@@ -2,6 +2,7 @@ package client.graphisme;
 
 import caches.Compte;
 import client.Main;
+import client.controle.AfficherMessage;
 import client.controle.NewPublication;
 import enums.CheminCSS;
 import enums.CheminFONT;
@@ -18,7 +19,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 
 public class Message extends VBox {
 
@@ -36,17 +36,15 @@ public class Message extends VBox {
 
     public void ajouterCompte(Compte compte) {
 
-        HBox container = new HBox();
 
-        Label pseudoLabel = new Label(compte.getPseudo());
-        pseudoLabel.setFont(Font.loadFont(CheminFONT.THE_SMILE.getChemin(), 20));
-
-        container.getChildren().addAll(pseudoLabel);
+        HBox compteBox = new CompteBox(compte);
+        super.getStylesheets().add(CheminCSS.COMPTEBOX.getChemin());
+        compteBox.setOnMouseClicked(new AfficherMessage(this.main));
         
-        HBox.setMargin(pseudoLabel, new Insets(0, 0, 0, 10));
-        HBox.setHgrow(pseudoLabel, Priority.ALWAYS);
+        HBox.setMargin(compteBox, new Insets(10, 10, 10, 10));
+        HBox.setHgrow(compteBox, Priority.ALWAYS);
 
-        super.getChildren().add(container);
+        super.getChildren().add(compteBox);
     }
 
 

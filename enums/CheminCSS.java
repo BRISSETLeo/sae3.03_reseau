@@ -7,7 +7,8 @@ public enum CheminCSS {
     NABIGATION("./client/css/NavigationCSS.css"),
     BARRE("./client/css/BarreCSS.css"),
     ACCUEIL("./client/css/AccueilCSS.css"),
-    PUBLICATION("./client/css/PublicationCSS.css");
+    PUBLICATION("./client/css/PublicationCSS.css"),
+    COMPTEBOX("./client/css/CompteBoxCSS.css");
 
     private String chemin;
 

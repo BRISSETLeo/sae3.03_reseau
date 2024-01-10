@@ -16,6 +16,7 @@ import client.graphisme.Connexion;
 import client.graphisme.Message;
 import client.graphisme.Navigation;
 import client.son.Son;
+import client.graphisme.Messagerie;
 import enums.CheminIMG;
 import javafx.application.Application;
 import javafx.scene.image.Image;
@@ -38,7 +39,7 @@ public class Main extends Application {
     private client.graphisme.Publication publication;
     private Message message;
     private Son son;
-
+    private Messagerie messagerie;
     private Image logo;
 
     public static void main(String[] args) {
@@ -51,6 +52,7 @@ public class Main extends Application {
         this.accueil = new Accueil(this);
         this.barre = new Barre();
         this.navigation = new Navigation(this);
+        this.messagerie = new Messagerie(this);
         this.message = new Message(this);
         this.root = new BorderPane(this.connexion);
         this.logo = new Image(CheminIMG.LOGO.getChemin());
@@ -202,6 +204,11 @@ public class Main extends Application {
             this.son.mettreEnPauseSon();
             this.publication.mettreEnPauseSon();
         }
+    }
+
+    public void afficherMessage(){
+        System.out.println("afficher message");
+        this.root.setCenter(this.messagerie);
     }
 
     public void reprendreSon() {
