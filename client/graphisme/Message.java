@@ -24,7 +24,7 @@ public class Message extends VBox {
     public void ajouterCompte(Compte compte) {
         HBox compteBox = new CompteBox(compte);
         super.getStylesheets().add(CheminCSS.COMPTEBOX.getChemin());
-        compteBox.setOnMouseClicked(new AfficherMessage(this.main));
+        compteBox.setOnMouseClicked(new AfficherMessage(this.main, compte.getPseudo()));
 
         HBox.setMargin(compteBox, new Insets(10, 10, 10, 10));
         HBox.setHgrow(compteBox, Priority.ALWAYS);

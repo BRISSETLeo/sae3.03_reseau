@@ -2,6 +2,7 @@ package client.graphisme;
 
 import client.Main;
 import client.controle.NewPublication;
+import client.controle.NotificationC;
 import client.graphisme.affichage.ButtonF;
 import client.graphisme.affichage.ImageViewS;
 import enums.CheminCSS;
@@ -16,6 +17,7 @@ public class Navigation extends VBox {
         accueil.setOnAction(new client.controle.Accueil(main));
 
         ButtonF notif = new ButtonF("Notifications");
+        notif.setOnAction(new NotificationC(main));
 
         ButtonF msg = new ButtonF("Messages");
         msg.setOnAction(new client.controle.Message(main));

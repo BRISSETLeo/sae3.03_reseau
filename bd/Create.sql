@@ -56,3 +56,25 @@ CREATE TABLE IF NOT EXISTS `messages`(
     FOREIGN KEY (`pseudo`) REFERENCES `comptes`(`pseudo`),
     FOREIGN KEY (`pseudo_dest`) REFERENCES `comptes`(`pseudo`)
 );
+
+CREATE TABLE IF NOT EXISTS `typeNotif`(
+    `type` VARCHAR(30) NOT NULL,
+    PRIMARY KEY (`type`)
+);
+
+CREATE TABLE IF NOT EXISTS `notifications`(
+    `id_notification` INT NOT NULL AUTO_INCREMENT,
+    `pseudo` VARCHAR(30) NOT NULL,
+    `pseudo_notif` VARCHAR(30) NOT NULL,
+    `type` VARCHAR(30) NOT NULL,
+    `id` INT DEFAULT NULL,
+    `date` TIMESTAMP NOT NULL,
+    `lu` BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (`id_notification`),
+    FOREIGN KEY (`pseudo`) REFERENCES `comptes`(`pseudo`),
+    FOREIGN KEY (`pseudo_notif`) REFERENCES `comptes`(`pseudo`),
+    FOREIGN KEY (`id`) REFERENCES `publications`(`id_publication`),
+    FOREIGN KEY (`id`) REFERENCES `commentaires`(`id_commentaire`),
+    FOREIGN KEY (`id`) REFERENCES `messages`(`id_message`),
+    FOREIGN KEY (`type`) REFERENCES `typeNotif`(`type`)
+);

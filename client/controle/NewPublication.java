@@ -15,7 +15,7 @@ public class NewPublication implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
 
-        this.main.ajouterPagePublication();
+        this.main.afficherPagePublication();
 
     }
 

@@ -25,7 +25,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -35,7 +34,6 @@ import javafx.util.Duration;
 public class Accueil extends VBox {
 
     private Main main;
-    private SplitPane splitPane;
     private VBox contenant;
     private Map<Integer, VBox> publications;
     private Map<Integer, VBox> commentaires;
@@ -56,12 +54,8 @@ public class Accueil extends VBox {
         ScrollPane scrollPane = new ScrollPane(this.contenant);
         scrollPane.setFitToWidth(true);
 
-        this.splitPane = new SplitPane();
-        this.splitPane.getItems().add(scrollPane);
-        this.splitPane.setDividerPositions(1);
-
         super.getStylesheets().add(CheminCSS.ACCUEIL.getChemin());
-        super.getChildren().add(this.splitPane);
+        super.getChildren().add(scrollPane);
     }
 
     public void ajouterPublication(Publication publication, boolean hasNewPublication) {
@@ -197,17 +191,6 @@ public class Accueil extends VBox {
         likeLabel.setText(like + "");
         if (isMe)
             this.mettreAJourLikeButton(likeButton, idPublication);
-    }
-
-    public void enleverPage() {
-        if (this.splitPane.getItems().size() > 1) {
-            this.splitPane.getItems().remove(1);
-        }
-    }
-
-    public void ajouterPage(VBox page) {
-        this.splitPane.getItems().add(page);
-        this.splitPane.setDividerPositions(0.7);
     }
 
     public boolean demanderSupprimerPublication(int idPublication) {

@@ -23,4 +23,9 @@ public class Messagerie extends VBox {
         super.getChildren().add(new Label(message.getContent()));
         super.getChildren().add(new Label(message.getDate() + ""));
     }
+
+    public void clear() {
+        super.getChildren().clear();
+    }
+
 }

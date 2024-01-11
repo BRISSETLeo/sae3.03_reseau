@@ -9,6 +9,7 @@ import java.util.List;
 import caches.ByteManager;
 import caches.Compte;
 import caches.MessageC;
+import caches.Notification;
 import caches.Publication;
 import enums.ErreurSocket;
 import requete.*;
@@ -66,6 +67,7 @@ public class Client extends Thread {
 
                         this.demanderPublications();
                         this.demanderComptes();
+                        this.demanderNotifications();
                         this.main.mettrePage();
 
                     } else if (demande.equals(Requete.AVOIR_PUBLICATIONS.getRequete())) {
@@ -131,6 +133,18 @@ public class Client extends Thread {
                         int idPublication = this.in.readInt();
 
                         this.main.removePublication(idPublication);
+
+                    } else if (demande.equals(Requete.VOIR_NOTIFICATIONS.getRequete())) {
+
+                        int arraySize = this.in.readInt();
+                        byte[] receivedBytes = new byte[arraySize];
+                        this.in.readFully(receivedBytes);
+
+                        List<Notification> retrievedNotificationList = ByteManager.convertBytesToList(receivedBytes,
+                                Notification.class);
+
+                        for (Notification notification : retrievedNotificationList)
+                            this.main.afficherNotification(notification);
 
                     }
 
@@ -219,9 +233,10 @@ public class Client extends Thread {
         }
     }
 
-    public void getMessages() {
+    public void getMessages(String pseudo) {
         try {
             this.out.writeUTF(Requete.VOIR_MESSAGES.getRequete());
+            this.out.writeUTF(pseudo);
             this.out.flush();
         } catch (Exception e) {
             e.printStackTrace();
@@ -232,6 +247,15 @@ public class Client extends Thread {
         try {
             this.out.writeUTF(Requete.SUPPRIMER_PUBLICATION.getRequete());
             this.out.writeInt(idPublication);
+            this.out.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void demanderNotifications() {
+        try {
+            this.out.writeUTF(Requete.VOIR_NOTIFICATIONS.getRequete());
             this.out.flush();
         } catch (Exception e) {
             e.printStackTrace();

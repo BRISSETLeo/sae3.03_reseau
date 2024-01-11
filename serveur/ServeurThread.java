@@ -89,11 +89,15 @@ public class ServeurThread extends Thread {
 
                     } else if (message.equals(Requete.VOIR_MESSAGES.getRequete())) {
 
-                        this.voirMessages();
+                        this.voirMessages(this.in.readUTF());
 
                     } else if (message.equals(Requete.SUPPRIMER_PUBLICATION.getRequete())) {
 
                         this.supprimerPublication(this.in.readInt());
+
+                    } else if (message.equals(Requete.VOIR_NOTIFICATIONS.getRequete())) {
+
+                        this.voirNotifications();
 
                     }
 
@@ -194,10 +198,10 @@ public class ServeurThread extends Thread {
         this.out.flush();
     }
 
-    public void voirMessages() throws IOException {
+    public void voirMessages(String pseudo) throws IOException {
         this.out.writeUTF(Requete.VOIR_MESSAGES.getRequete());
         byte[] listBytes = ByteManager.convertListToBytes(
-                this.serveur.getConnexionMySQL().getMessages(this.compte.getPseudo()));
+                this.serveur.getConnexionMySQL().getMessages(this.compte.getPseudo(), pseudo));
         this.out.writeInt(listBytes.length);
         this.out.write(listBytes);
         this.out.flush();
@@ -212,6 +216,15 @@ public class ServeurThread extends Thread {
             }
         }
         this.serveur.getConnexionMySQL().supprimerPublication(idPublication);
+    }
+
+    public void voirNotifications() throws IOException {
+        this.out.writeUTF(Requete.VOIR_NOTIFICATIONS.getRequete());
+        byte[] listBytes = ByteManager.convertListToBytes(
+                this.serveur.getConnexionMySQL().getNotifications(this.compte.getPseudo()));
+        this.out.writeInt(listBytes.length);
+        this.out.write(listBytes);
+        this.out.flush();
     }
 
     public synchronized DataOutputStream getOut() {

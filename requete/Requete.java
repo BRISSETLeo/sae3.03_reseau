@@ -20,6 +20,8 @@ public enum Requete {
 
     PUBLIER_PUBLICATION("PublierPublication"),
 
+    VOIR_NOTIFICATIONS("VoirNotifications"),
+
     AVOIR_FOLLOW("AvoirFollow"),
 
     VOIR_MESSAGES("VoirMessages"),

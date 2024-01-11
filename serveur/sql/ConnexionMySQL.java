@@ -14,6 +14,7 @@ import java.util.List;
 import caches.Commentaire;
 import caches.Compte;
 import caches.MessageC;
+import caches.Notification;
 import caches.Publication;
 
 public class ConnexionMySQL {
@@ -472,25 +473,6 @@ public class ConnexionMySQL {
         return null;
     }
 
-    public synchronized void supprimerPublication(int idPublication) {
-        try {
-
-            String sqlQuery = "DELETE FROM publications WHERE id_publication = ?;";
-
-            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
-
-                statement.setInt(1, idPublication);
-                statement.executeUpdate();
-
-            }
-
-        } catch (SQLException e) {
-
-            e.printStackTrace();
-
-        }
-    }
-
     public synchronized List<Compte> getFollow(String pseudo) {
         List<Compte> comptes = new ArrayList<>();
 
@@ -500,15 +482,19 @@ public class ConnexionMySQL {
                     " c.pseudo," +
                     " c.image" +
                     " FROM" +
-                    " follows f" +
-                    " JOIN" +
-                    " comptes c ON f.pseudo_follow = c.pseudo" +
+                    " comptes c" +
                     " WHERE" +
-                    " f.pseudo = ?;";
+                    " c.pseudo IN (SELECT pseudo_follow FROM follows WHERE pseudo = ?)" +
+                    " OR c.pseudo IN (SELECT pseudo_dest FROM messages WHERE pseudo = ?)" +
+                    " OR c.pseudo IN (SELECT pseudo FROM messages WHERE pseudo_dest = ?)" +
+                    " ORDER BY" +
+                    " c.pseudo ASC;";
 
             try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
 
                 statement.setString(1, pseudo);
+                statement.setString(2, pseudo);
+                statement.setString(3, pseudo);
 
                 try (ResultSet resultSet = statement.executeQuery()) {
 
@@ -535,7 +521,26 @@ public class ConnexionMySQL {
         return comptes;
     }
 
-    public synchronized List<MessageC> getMessages(String pseudo) {
+    public synchronized void supprimerPublication(int idPublication) {
+        try {
+
+            String sqlQuery = "DELETE FROM publications WHERE id_publication = ?;";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setInt(1, idPublication);
+                statement.executeUpdate();
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+    }
+
+    public synchronized List<MessageC> getMessages(String pseudo, String pseud) {
         List<MessageC> messages = new ArrayList<>();
 
         try {
@@ -551,15 +556,17 @@ public class ConnexionMySQL {
                     " FROM" +
                     " messages m" +
                     " WHERE" +
-                    " m.pseudo = ?" +
-                    " OR m.pseudo_dest = ?" +
+                    " (m.pseudo = ? AND m.pseudo_dest = ?)" +
+                    " OR (m.pseudo_dest = ? AND m.pseudo = ?)" +
                     " ORDER BY" +
                     " m.date ASC;";
 
             try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
 
                 statement.setString(1, pseudo);
-                statement.setString(2, pseudo);
+                statement.setString(2, pseud);
+                statement.setString(3, pseudo);
+                statement.setString(4, pseud);
 
                 try (ResultSet resultSet = statement.executeQuery()) {
 
@@ -589,6 +596,55 @@ public class ConnexionMySQL {
         }
 
         return messages;
+    }
+
+    public List<Notification> getNotifications(String pseudo) {
+        List<Notification> notifications = new ArrayList<>();
+
+        try {
+
+            String sqlQuery = "SELECT" +
+                    " *" +
+                    " FROM" +
+                    " notifications" +
+                    " WHERE" +
+                    " pseudo = ?" +
+                    " ORDER BY" +
+                    " date DESC;";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setString(1, pseudo);
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+
+                    while (resultSet.next()) {
+
+                        int idNotification = resultSet.getInt("id_notification");
+                        String pseudo1 = resultSet.getString("pseudo");
+                        String pseudoDest = resultSet.getString("pseudo_notif");
+                        String type = resultSet.getString("type");
+                        int id = resultSet.getInt("id");
+                        Timestamp date = resultSet.getTimestamp("date");
+                        boolean lu = resultSet.getBoolean("lu");
+
+                        Notification notification = new Notification(idNotification, pseudo1, pseudoDest, type, id,
+                                date, lu);
+                        notifications.add(notification);
+
+                    }
+
+                }
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return notifications;
     }
 
 }

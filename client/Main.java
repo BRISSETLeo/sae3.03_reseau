@@ -11,11 +11,13 @@ import javax.sound.sampled.AudioFormat;
 
 import caches.Compte;
 import caches.MessageC;
+import caches.Notification;
 import caches.Publication;
 import client.graphisme.Accueil;
 import client.graphisme.Connexion;
 import client.graphisme.Message;
 import client.graphisme.Navigation;
+import client.graphisme.Notifications;
 import client.son.Son;
 import client.graphisme.Messagerie;
 import enums.CheminIMG;
@@ -29,7 +31,9 @@ import javafx.scene.layout.VBox;
 import client.graphisme.Barre;
 import javafx.application.Platform;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.SplitPane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -39,8 +43,10 @@ public class Main extends Application {
 
     private Client client;
     private BorderPane root;
+    private SplitPane splitPane;
     private Connexion connexion;
     private Navigation navigation;
+    private Notifications notifications;
     private Barre barre;
     private Accueil accueil;
     private client.graphisme.Publication publication;
@@ -61,7 +67,10 @@ public class Main extends Application {
         this.navigation = new Navigation(this);
         this.messagerie = new Messagerie(this);
         this.message = new Message(this);
+        this.notifications = new Notifications(this);
         this.root = new BorderPane(this.connexion);
+        this.splitPane = new SplitPane();
+        this.splitPane.setDividerPositions(1);
         this.logo = new Image(CheminIMG.LOGO.getChemin());
         this.publication = new client.graphisme.Publication(this);
         this.son = new Son(this);
@@ -115,6 +124,7 @@ public class Main extends Application {
 
     public void mettrePage() {
         Platform.runLater(() -> {
+            this.root.setCenter(this.splitPane);
             this.root.setTop(this.barre);
             this.afficherPageAccueil();
             this.root.setLeft(this.navigation);
@@ -122,7 +132,12 @@ public class Main extends Application {
     }
 
     public void afficherPageAccueil() {
-        this.root.setCenter(this.accueil);
+        if (this.splitPane.getItems().size() == 0)
+            this.splitPane.getItems().add(this.accueil);
+        else {
+            this.splitPane.getItems().set(0, this.accueil);
+            this.splitPane.setDividerPositions(0.7);
+        }
     }
 
     public void afficherPublication(Publication publication, boolean hasNewPublication) {
@@ -170,19 +185,47 @@ public class Main extends Application {
         Platform.runLater(() -> this.accueil.removeLike(id, like, isMe));
     }
 
-    public void ajouterPagePublication() {
-        this.enleverPage();
-        this.accueil.ajouterPage(this.publication);
+    public void afficherPagePublication() {
+        boolean isPageDroite = this.isPageDroite(this.publication);
+        this.enleverPageDroite();
+        if (isPageDroite)
+            return;
+        this.ajouterPageDroite(this.publication);
     }
 
-    public void ajouterPageMessage() {
-        this.enleverPage();
-        this.accueil.ajouterPage(this.message);
+    public void afficherPageNotifications() {
+        boolean isPageDroite = this.isPageDroite(this.notifications);
+        this.enleverPageDroite();
+        if (isPageDroite)
+            return;
+        this.ajouterPageDroite(this.notifications);
     }
 
-    public void enleverPage() {
-        this.afficherPageAccueil();
-        this.accueil.enleverPage();
+    public void afficherPageMessage() {
+        boolean isPageDroite = this.isPageDroite(this.message);
+        this.enleverPageDroite();
+        if (isPageDroite)
+            return;
+        this.ajouterPageDroite(this.message);
+    }
+
+    private boolean isPageDroite(Node node) {
+        return this.splitPane.getItems().size() > 1 && this.splitPane.getItems().get(1) == node;
+    }
+
+    public void afficherNotification(Notification notification) {
+        Platform.runLater(() -> this.notifications.ajouterNotification(notification));
+    }
+
+    public void enleverPageDroite() {
+        if (this.splitPane.getItems().size() > 1) {
+            this.splitPane.getItems().remove(1);
+        }
+    }
+
+    public void ajouterPageDroite(VBox page) {
+        this.splitPane.getItems().add(page);
+        this.splitPane.setDividerPositions(0.7);
     }
 
     public void startVocal() {
@@ -235,9 +278,16 @@ public class Main extends Application {
         }
     }
 
-    public void afficherMessage() {
-        this.client.getMessages();
-        this.root.setCenter(this.messagerie);
+    public void afficherMessage(String pseudo) {
+        this.messagerie.clear();
+        this.client.getMessages(pseudo);
+        if (this.splitPane.getItems().size() == 0)
+            this.splitPane.getItems().add(this.messagerie);
+        else {
+            this.splitPane.getItems().set(0, this.messagerie);
+            this.splitPane.setDividerPositions(0.7);
+        }
+        this.splitPane.setDividerPositions(0.7);
     }
 
     public void reprendreSon() {

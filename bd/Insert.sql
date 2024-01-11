@@ -26,3 +26,16 @@ INSERT INTO `commentaires`(`pseudo`,`id_publication`,`content`,`date`) VALUES ('
 
 INSERT INTO `follows` (`pseudo`,`pseudo_follow`) VALUES ('NoCros','Maxirito');
 INSERT INTO `follows` (`pseudo`,`pseudo_follow`) VALUES ('MisterP','Maxirito');
+
+INSERT INTO `messages`(`pseudo`,`pseudo_dest`,`content`,`date`) VALUES ('NoCros','Maxirito',"Salut Maxirito !","2020-04-01 12:00:00");
+
+INSERT INTO `typeNotif`(`type`) VALUES ('like');
+INSERT INTO `typeNotif`(`type`) VALUES ('commentaire');
+INSERT INTO `typeNotif`(`type`) VALUES ('follow');
+INSERT INTO `typeNotif`(`type`) VALUES ('message');
+INSERT INTO `typeNotif`(`type`) VALUES ('publication');
+
+INSERT INTO `notifications`(`pseudo`, `pseudo_notif`,`id`,`type`,`date`) 
+VALUES ('NoCros','Maxirito',1,'like',"2020-04-01 12:00:00");
+INSERT INTO `notifications`(`pseudo`, `pseudo_notif`,`id`,`type`,`date`)
+VALUES ('NoCros','MisterP',1,'commentaire',"2020-04-01 12:00:00");

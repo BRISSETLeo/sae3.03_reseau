@@ -33,3 +33,9 @@ Label {
 TextAreaPubli {
     -fx-background-color: transparent;
 }
+
+ButtonG {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+}

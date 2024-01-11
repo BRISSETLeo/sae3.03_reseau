@@ -15,7 +15,7 @@ public class Accueil implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
 
-        this.main.enleverPage();
+        this.main.afficherPageAccueil();
 
     }
 
