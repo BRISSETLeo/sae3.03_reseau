@@ -4,7 +4,6 @@ import java.sql.Blob;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,9 +121,19 @@ public class Accueil extends VBox {
         transition.setToX(-1000);
         transition.setOnFinished(e -> {
             this.contenant.getChildren().remove(container);
+            this.retirerCompteBoxDeListeAffichage(idPublication);
             this.publications.remove(idPublication);
         });
         transition.play();
+    }
+
+    public void retirerCompteBoxDeListeAffichage(int idPublication){
+        CompteBox compteBox = (CompteBox) ((HBox) this.publications.get(idPublication).getChildren().get(0)).getChildren().get(0);
+        for (String pseudo : this.comptesBoxs.keySet()) {
+            if(this.comptesBoxs.get(pseudo).contains(compteBox)){
+                this.comptesBoxs.get(pseudo).remove(compteBox);
+            }
+        }
     }
 
     private void setupVocal(Blob vocal, VBox container) {
@@ -194,7 +203,9 @@ public class Accueil extends VBox {
 
     public void modifierComptePublications(String pseudo, Image image){
         if(this.comptesBoxs.containsKey(pseudo)){
-            ((CompteBox) this.comptesBoxs.get(pseudo)).setPhotoProfil(image);
+            for (CompteBox compteBox : this.comptesBoxs.get(pseudo)) {
+                compteBox.setPhotoProfil(image);   
+            }
         }
     }
 
