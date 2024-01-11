@@ -43,7 +43,7 @@ public class ServeurThread extends Thread {
 
             while (true) {
 
-                if (this.socket.isClosed())
+                if (this.socket.isClosed() || this.socket.isInputShutdown() || this.socket.isOutputShutdown())
                     break;
 
                 if (this.in.available() > 0) {
@@ -102,30 +102,30 @@ public class ServeurThread extends Thread {
 
                         this.voirNotifications();
 
-                    } else if(message.equals(Requete.ENREGISTRER_PROFIL.getRequete())){
+                    } else if (message.equals(Requete.ENREGISTRER_PROFIL.getRequete())) {
 
                         int arraySize = this.in.readInt();
                         byte[] receivedBytes = new byte[arraySize];
                         this.in.readFully(receivedBytes);
 
-                        try{
+                        try {
                             Compte compte = ByteManager.fromBytes(receivedBytes, Compte.class);
                             this.compte.setImage(compte.getImage());
                             this.enregistrerProfil(compte.getImage());
-                        }catch(ClassNotFoundException | IOException e){
+                        } catch (ClassNotFoundException | IOException e) {
                             e.printStackTrace();
                         }
 
-                    } else if (message.equals(Requete.ENVOYER_MESSAGE.getRequete())){
+                    } else if (message.equals(Requete.ENVOYER_MESSAGE.getRequete())) {
 
                         int arraySize = this.in.readInt();
                         byte[] receivedBytes = new byte[arraySize];
                         this.in.readFully(receivedBytes);
 
-                        try{
+                        try {
                             MessageC messageC = ByteManager.fromBytes(receivedBytes, MessageC.class);
                             this.envoyerMessage(messageC);
-                        }catch(ClassNotFoundException | IOException e){
+                        } catch (ClassNotFoundException | IOException e) {
                             e.printStackTrace();
                         }
 
@@ -203,7 +203,7 @@ public class ServeurThread extends Thread {
 
     private boolean canAccessToTheBottom(Compte compte, int id) {
         return (this.serveur.getConnexionMySQL().isOwnerPublication(compte.getPseudo(), id) ||
-                    this.serveur.getConnexionMySQL().hasFollowToSenderPublication(compte.getPseudo(), id));
+                this.serveur.getConnexionMySQL().hasFollowToSenderPublication(compte.getPseudo(), id));
     }
 
     public void publierPublication(String text, byte[] vocal) throws IOException {
@@ -261,19 +261,19 @@ public class ServeurThread extends Thread {
         this.out.flush();
     }
 
-    public void enregistrerProfil(Blob image){
+    public void enregistrerProfil(Blob image) {
         this.serveur.getConnexionMySQL().enregistrerProfil(this.compte.getPseudo(), image);
         for (ServeurThread client : this.serveur.getClients()) {
-            if(this.serveur.getConnexionMySQL().hasFollowTo(client.getCompte().getPseudo(), this.compte.getPseudo()) ||
-            client.getCompte().getPseudo().equals(this.compte.getPseudo())){
-                try{
+            if (this.serveur.getConnexionMySQL().hasFollowTo(client.getCompte().getPseudo(), this.compte.getPseudo()) ||
+                    client.getCompte().getPseudo().equals(this.compte.getPseudo())) {
+                try {
                     client.getOut().writeUTF(Requete.ENREGISTRER_PROFIL.getRequete());
                     byte[] bytes = ByteManager.getBytes(this.compte);
                     client.getOut().writeInt(bytes.length);
                     client.getOut().write(bytes);
                     client.getOut().writeBoolean(this.compte.getPseudo().equals(client.getCompte().getPseudo()));
                     client.getOut().flush();
-                }catch(IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -284,11 +284,11 @@ public class ServeurThread extends Thread {
         return this.out;
     }
 
-    public void envoyerMessage(MessageC message) throws IOException{
+    public void envoyerMessage(MessageC message) throws IOException {
         message = this.serveur.getConnexionMySQL().envoyerMessage(message);
-        for(ServeurThread client : this.serveur.getClients()){
+        for (ServeurThread client : this.serveur.getClients()) {
             boolean isMe = client.getCompte().getPseudo().equals(this.compte.getPseudo());
-            if(client.getCompte().getPseudo().equals(message.getPseudoDestinataire()) || isMe){
+            if (client.getCompte().getPseudo().equals(message.getPseudoDestinataire()) || isMe) {
                 client.getOut().writeUTF(Requete.ENVOYER_MESSAGE.getRequete());
                 byte[] bytes = ByteManager.getBytes(message);
                 client.getOut().writeInt(bytes.length);
@@ -299,9 +299,9 @@ public class ServeurThread extends Thread {
 
     }
 
-    public void sendNotificationAtAllHerFollower() throws IOException{
-        for(ServeurThread client : this.serveur.getClients()){
-            if(this.serveur.getConnexionMySQL().hasFollowTo(client.getCompte().getPseudo(), this.compte.getPseudo())){
+    public void sendNotificationAtAllHerFollower() throws IOException {
+        for (ServeurThread client : this.serveur.getClients()) {
+            if (this.serveur.getConnexionMySQL().hasFollowTo(client.getCompte().getPseudo(), this.compte.getPseudo())) {
                 client.getOut().writeUTF(Requete.NOTIFICATIN_CONNEXION.getRequete());
                 client.getOut().writeUTF(this.compte.getPseudo());
                 client.getOut().flush();

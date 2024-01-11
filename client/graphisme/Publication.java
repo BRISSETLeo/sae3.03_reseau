@@ -72,9 +72,9 @@ public class Publication extends VBox {
         this.arretButton = new ButtonG(new ImageViewS(CheminIMG.STOP.getChemin()));
         this.combinaisonVocal = new VBox(2);
         this.vocalBox = new HBox(2);
-        this.jouerSon = new JouerSon(this.main);
-        this.pauseSon = new PauseSon(this.main);
-        this.unpauseSon = new Unpause(this.main);
+        this.jouerSon = new JouerSon(this.main, null);
+        this.pauseSon = new PauseSon(this.main, null);
+        this.unpauseSon = new Unpause(this.main, null);
         this.startVocal = new StartVocal(this.main);
         this.stopVocal = new StopVocal(this.main);
 
@@ -86,7 +86,7 @@ public class Publication extends VBox {
 
         this.enregistrerVocal.setOnAction(this.startVocal);
         this.playPauseButton.setOnAction(this.jouerSon);
-        this.arretButton.setOnAction(new StopperSon(this.main));
+        this.arretButton.setOnAction(new StopperSon(this.main, null));
 
         this.erreur.getStyleClass().add("erreur");
         this.erreur.setVisible(false);
@@ -163,6 +163,9 @@ public class Publication extends VBox {
     }
 
     public void jouerSon() {
+        byte[] audioJouerActuellement = this.main.getAudioJouerActuellement();
+        if (audioJouerActuellement != null)
+            this.main.arreterSon(audioJouerActuellement);
         this.reprendreSon();
         for (Node children : this.vocalBox.getChildren()) {
             children.getStyleClass().clear();
@@ -172,7 +175,7 @@ public class Publication extends VBox {
 
     public void arreterSon() {
         this.playPauseButton.setGraphic(this.playImg);
-        this.playPauseButton.setOnAction(new JouerSon(this.main));
+        this.playPauseButton.setOnAction(new JouerSon(this.main, null));
         for (Node children : this.vocalBox.getChildren()) {
             children.getStyleClass().clear();
             children.getStyleClass().add("black-rectangle");
@@ -205,6 +208,7 @@ public class Publication extends VBox {
         this.vocalBox.getChildren().clear();
         this.combinaisonVocal.setVisible(false);
         this.enleverErreur();
+        this.arreterSon();
         this.aucunSon.setVisible(false);
     }
 

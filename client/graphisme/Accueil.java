@@ -11,9 +11,13 @@ import java.util.Map;
 import caches.Commentaire;
 import caches.Publication;
 import client.Main;
+import client.controle.JouerSon;
 import client.controle.LikeButton;
+import client.controle.PauseSon;
+import client.controle.StopperSon;
 import client.controle.SupprimerPublication;
 import client.controle.UnlikeButton;
+import client.controle.Unpause;
 import client.graphisme.affichage.ButtonG;
 import client.graphisme.affichage.ImageViewS;
 import client.graphisme.affichage.LabelF;
@@ -22,6 +26,7 @@ import enums.CheminIMG;
 import enums.FontP;
 import javafx.animation.TranslateTransition;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -38,20 +43,36 @@ public class Accueil extends VBox {
     private Map<Integer, VBox> publications;
     private Map<Integer, VBox> commentaires;
     private Map<String, List<CompteBox>> comptesBoxs;
-    private List<HBox> vocalBox;
 
     private Image likePubli;
     private Image unlikePubli;
+
+    private Map<Integer, byte[]> vocaux;
+    private Map<byte[], HBox> vocalBoxs;
+    private Map<byte[], ButtonG> playPauseButtons;
+    private Map<byte[], JouerSon> jouerSons;
+    private Map<byte[], Unpause> unpauseSons;
+    private Map<byte[], PauseSon> pauseSons;
+
+    private Image playImg;
+    private Image pauseImg;
 
     public Accueil(Main main) {
         this.main = main;
         this.contenant = new VBox();
         this.publications = new HashMap<>();
         this.commentaires = new HashMap<>();
-        this.vocalBox = new ArrayList<>();
         this.likePubli = new ImageViewS(CheminIMG.LIKE.getChemin()).getImage();
         this.unlikePubli = new ImageViewS(CheminIMG.UNLIKE.getChemin()).getImage();
         this.comptesBoxs = new HashMap<>();
+        this.vocalBoxs = new HashMap<>();
+        this.playPauseButtons = new HashMap<>();
+        this.playImg = new ImageViewS(CheminIMG.PLAY.getChemin()).getImage();
+        this.pauseImg = new ImageViewS(CheminIMG.PAUSE.getChemin()).getImage();
+        this.vocaux = new HashMap<>();
+        this.jouerSons = new HashMap<>();
+        this.unpauseSons = new HashMap<>();
+        this.pauseSons = new HashMap<>();
 
         ScrollPane scrollPane = new ScrollPane(this.contenant);
         scrollPane.setFitToWidth(true);
@@ -87,7 +108,7 @@ public class Accueil extends VBox {
                 new LabelF(new SimpleDateFormat("dd-MM-YYYY HH:mm:ss").format(publication.getDate()))),
                 contentLabel);
 
-        this.setupVocal(publication.getVocal(), container);
+        this.setupVocal(publication.getVocal(), container, publication.getIdPublication());
 
         HBox likeBox = new HBox(Main.createRegion(), new LabelF(publication.getLikes() + ""), likeButton);
         likeBox.setAlignment(Pos.CENTER_LEFT);
@@ -121,6 +142,18 @@ public class Accueil extends VBox {
         transition.setOnFinished(e -> {
             this.contenant.getChildren().remove(container);
             this.retirerCompteBoxDeListeAffichage(idPublication);
+            if (this.vocaux.containsKey(idPublication)) {
+                byte[] vocal = this.vocaux.get(idPublication);
+                if (vocal != null) {
+                    this.main.arreterSon(vocal);
+                    this.vocalBoxs.remove(vocal);
+                    this.playPauseButtons.remove(vocal);
+                    this.jouerSons.remove(vocal);
+                    this.pauseSons.remove(vocal);
+                    this.unpauseSons.remove(vocal);
+                }
+            }
+            this.vocaux.remove(idPublication);
             this.publications.remove(idPublication);
         });
         transition.play();
@@ -136,23 +169,79 @@ public class Accueil extends VBox {
         }
     }
 
-    private void setupVocal(Blob vocal, VBox container) {
+    private void setupVocal(Blob vocal, VBox container, int idPublication) {
         if (vocal != null) {
             try {
                 int blobLength = (int) vocal.length();
                 if (blobLength > 1) {
                     byte[] bytes = vocal.getBytes(1, blobLength);
+                    HBox hBoxContainer = new HBox(5);
                     HBox hBox = new HBox(2);
                     hBox.setAlignment(Pos.CENTER_LEFT);
                     for (Double amplitude : this.main.playAudio(bytes)) {
                         this.drawBar(hBox, amplitude);
                     }
-                    this.vocalBox.add(hBox);
-                    container.getChildren().add(hBox);
+
+                    ButtonG playPauseButton = new ButtonG(this.playImg);
+                    ButtonG arretButton = new ButtonG(new ImageViewS(CheminIMG.STOP.getChemin()));
+                    arretButton.setOnAction(new StopperSon(this.main, bytes));
+
+                    JouerSon jouerSon = new JouerSon(this.main, bytes);
+                    PauseSon pauseSon = new PauseSon(this.main, bytes);
+                    Unpause unpause = new Unpause(this.main, bytes);
+
+                    this.vocalBoxs.put(bytes, hBox);
+                    this.playPauseButtons.put(bytes, playPauseButton);
+                    this.jouerSons.put(bytes, jouerSon);
+                    this.pauseSons.put(bytes, pauseSon);
+                    this.unpauseSons.put(bytes, unpause);
+                    this.vocaux.put(idPublication, bytes);
+
+                    playPauseButton.setOnAction(jouerSon);
+
+                    hBoxContainer.getChildren().addAll(playPauseButton, hBox, arretButton);
+                    container.getChildren().add(hBoxContainer);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void mettreEnPauseSon(byte[] bytes) {
+        ButtonG buttonG = this.playPauseButtons.get(bytes);
+        buttonG.setOnAction(this.unpauseSons.get(bytes));
+        buttonG.setGraphic(this.playImg);
+    }
+
+    public void arreterSon(byte[] bytes) {
+        ButtonG buttonG = this.playPauseButtons.get(bytes);
+        buttonG.setGraphic(this.playImg);
+        buttonG.setOnAction(this.jouerSons.get(bytes));
+        for (Node children : this.vocalBoxs.get(bytes).getChildren()) {
+            children.getStyleClass().clear();
+            children.getStyleClass().add("black-rectangle");
+        }
+    }
+
+    public void reprendreSon(byte[] bytes) {
+        ButtonG buttonG = this.playPauseButtons.get(bytes);
+        buttonG.setOnAction(this.pauseSons.get(bytes));
+        buttonG.setGraphic(this.pauseImg);
+    }
+
+    public void jouerSon(byte[] bytes) {
+        byte[] audioJouerActuellement = this.main.getAudioJouerActuellement();
+        if (audioJouerActuellement != null) {
+            if (audioJouerActuellement == this.main.getVocal())
+                this.main.arreterSon(null);
+            else
+                this.arreterSon(audioJouerActuellement);
+        }
+        this.reprendreSon(bytes);
+        for (Node children : this.vocalBoxs.get(bytes).getChildren()) {
+            children.getStyleClass().clear();
+            children.getStyleClass().add("grey-rectangle");
         }
     }
 
@@ -206,6 +295,28 @@ public class Accueil extends VBox {
             for (CompteBox compteBox : this.comptesBoxs.get(pseudo)) {
                 compteBox.setPhotoProfil(image);
             }
+        }
+    }
+
+    public void updateSon(byte[] bytes, int nbSecMax, int nbSecActuel) {
+        if (this.vocalBoxs.get(bytes) == null)
+            return;
+        int nbBarMax = this.vocalBoxs.get(bytes).getChildren().size();
+
+        int partColoration = nbBarMax / (nbSecMax + 1);
+        partColoration += (partColoration * nbSecActuel);
+
+        for (int i = 0; i < nbBarMax; ++i) {
+            if (i >= partColoration && nbSecMax != nbSecActuel)
+                break;
+
+            Rectangle rectangle = (Rectangle) this.vocalBoxs.get(bytes).getChildren().get(i);
+            rectangle.getStyleClass().clear();
+            rectangle.getStyleClass().add("black-rectangle");
+        }
+
+        if (nbSecMax == nbSecActuel) {
+            this.arreterSon(bytes);
         }
     }
 

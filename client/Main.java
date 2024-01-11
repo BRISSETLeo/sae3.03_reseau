@@ -58,6 +58,7 @@ public class Main extends Application {
     private Son son;
     private Messagerie messagerie;
     private Image logo;
+    private boolean connected;
 
     public static void main(String[] args) {
         launch(args);
@@ -65,6 +66,7 @@ public class Main extends Application {
 
     @Override
     public void init() throws Exception {
+        this.son = new Son(this);
         this.connexion = new Connexion(this);
         this.accueil = new Accueil(this);
         this.barre = new Barre();
@@ -78,7 +80,7 @@ public class Main extends Application {
         this.splitPane.setDividerPositions(1);
         this.logo = new Image(CheminIMG.LOGO.getChemin());
         this.publication = new client.graphisme.Publication(this);
-        this.son = new Son(this);
+        this.connected = true;
     }
 
     @Override
@@ -90,6 +92,8 @@ public class Main extends Application {
 
         double windowWidthFraction = 0.8;
         double windowHeightFraction = 0.8;
+
+        stage.setOnCloseRequest(event -> connected = false);
 
         stage.setWidth(bounds.getWidth() * windowWidthFraction);
         stage.setHeight(bounds.getHeight() * windowHeightFraction);
@@ -224,6 +228,9 @@ public class Main extends Application {
 
     public void enleverPageDroite() {
         if (this.splitPane.getItems().size() > 1) {
+            VBox page = (VBox) this.splitPane.getItems().get(1);
+            if (page == this.publication)
+                this.publication.reset();
             this.splitPane.getItems().remove(1);
         }
     }
@@ -284,26 +291,41 @@ public class Main extends Application {
         Platform.runLater(() -> this.publication.messageVocal(averages));
     }
 
-    public void jouerSon() {
-        if (!this.son.isEcouteSon()) {
-            this.son.jouerSon();
+    public void jouerSon(byte[] bytes) {
+        if (bytes == null)
             this.publication.jouerSon();
-        }
+        else
+            this.accueil.jouerSon(bytes);
+        this.son.jouerSon(bytes);
+    }
+
+    public byte[] getVocal() {
+        return this.son.getAudioData();
+    }
+
+    public boolean isConnected() {
+        return this.connected;
     }
 
     public void enregistrerProfil() {
         this.client.enregistrerProfil();
     }
 
-    public void arreterSon() {
-        this.son.arreterSon();
-        this.publication.arreterSon();
+    public void arreterSon(byte[] bytes) {
+        this.son.arreterSon(bytes);
+        if (bytes == null)
+            this.publication.arreterSon();
+        else
+            this.accueil.arreterSon(bytes);
     }
 
-    public void mettreEnPauseSon() {
+    public void mettreEnPauseSon(byte[] bytes) {
         if (this.son.isEcouteSon()) {
             this.son.mettreEnPauseSon();
-            this.publication.mettreEnPauseSon();
+            if (bytes == null)
+                this.publication.mettreEnPauseSon();
+            else
+                this.accueil.mettreEnPauseSon(bytes);
         }
     }
 
@@ -321,17 +343,29 @@ public class Main extends Application {
         this.splitPane.setDividerPositions(0.7);
     }
 
-    public void reprendreSon() {
+    public byte[] getAudioJouerActuellement() {
+        return Son.getAudioJouerActuellement();
+    }
+
+    public void reprendreSon(byte[] bytes) {
         this.son.reprendreSon();
-        this.publication.reprendreSon();
+        if (bytes == null)
+            this.publication.reprendreSon();
+        else
+            this.accueil.reprendreSon(bytes);
     }
 
     public AudioFormat getAudioFormat() {
         return this.son.getAudioFormat();
     }
 
-    public void updateSon(int nbSecMax, int nbSecActuel) {
-        Platform.runLater(() -> this.publication.updateSon(nbSecMax, nbSecActuel));
+    public void updateSon(byte[] bytes, int nbSecMax, int nbSecActuel) {
+        Platform.runLater(() -> {
+            if (bytes == null)
+                this.publication.updateSon(nbSecMax, nbSecActuel);
+            else
+                this.accueil.updateSon(bytes, nbSecMax, nbSecActuel);
+        });
     }
 
     public Compte getCompte() {

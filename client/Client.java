@@ -54,8 +54,11 @@ public class Client extends Thread {
 
             while (true) {
 
-                if (this.socket.isClosed())
+                if (this.socket.isClosed() || this.socket.isInputShutdown() || this.socket.isOutputShutdown() ||
+                        !this.main.isConnected()) {
+                    this.fermer();
                     break;
+                }
 
                 if (in.available() > 0) {
 
@@ -156,7 +159,7 @@ public class Client extends Thread {
                         for (Notification notification : retrievedNotificationList)
                             this.main.afficherNotification(notification);
 
-                    } else if(demande.equals(Requete.ENREGISTRER_PROFIL.getRequete())){
+                    } else if (demande.equals(Requete.ENREGISTRER_PROFIL.getRequete())) {
 
                         int arraySize = this.in.readInt();
                         byte[] receivedBytes = new byte[arraySize];
@@ -167,7 +170,7 @@ public class Client extends Thread {
                         Compte compte = ByteManager.fromBytes(receivedBytes, Compte.class);
                         Image image = Main.blobToImage(compte.getImage());
 
-                        if(isMe){
+                        if (isMe) {
                             this.main.modifierCompteBarre(image);
                         }
 
@@ -179,11 +182,11 @@ public class Client extends Thread {
                         byte[] receivedBytes = new byte[arraySize];
                         this.in.readFully(receivedBytes);
 
-                        MessageC message = ByteManager.fromBytes(receivedBytes, MessageC.class);                     
+                        MessageC message = ByteManager.fromBytes(receivedBytes, MessageC.class);
 
                         this.main.afficherMessage(message);
 
-                    } else if(demande.equals(Requete.NOTIFICATIN_CONNEXION.getRequete())){
+                    } else if (demande.equals(Requete.NOTIFICATIN_CONNEXION.getRequete())) {
 
                         this.main.afficherNotificationConnexion(this.in.readUTF());
 
@@ -198,6 +201,7 @@ public class Client extends Thread {
             e.printStackTrace();
 
         }
+
     }
 
     public void creerCompte() {
@@ -303,7 +307,7 @@ public class Client extends Thread {
         }
     }
 
-    public void enregistrerProfil(){
+    public void enregistrerProfil() {
         try {
             this.out.writeUTF(Requete.ENREGISTRER_PROFIL.getRequete());
             byte[] bytes = ByteManager.getBytes(this.compte);
@@ -315,7 +319,7 @@ public class Client extends Thread {
         }
     }
 
-    public void envoyerMessage(MessageC messageC){
+    public void envoyerMessage(MessageC messageC) {
         try {
             this.out.writeUTF(Requete.ENVOYER_MESSAGE.getRequete());
             byte[] bytes = ByteManager.getBytes(messageC);

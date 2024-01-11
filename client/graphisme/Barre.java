@@ -2,6 +2,7 @@ package client.graphisme;
 
 import client.Main;
 import client.controle.ProfilC;
+import client.graphisme.affichage.ImageViewS;
 import enums.CheminCSS;
 import enums.FontP;
 import enums.CheminIMG;
@@ -24,7 +25,7 @@ public class Barre extends StackPane {
     private CompteBox compteBox;
 
     public Barre() {
-        this.barre = new HBox(100);
+        this.barre = new HBox();
         this.personneConnecte = new Label();
 
         ImageView logo = new ImageView(CheminIMG.LOGO.getChemin());
@@ -37,13 +38,13 @@ public class Barre extends StackPane {
         this.rechercheField.setFont(FontP.FONT_20.getFont());
 
         this.barre.getStyleClass().add("positionnement");
-        this.barre.getStylesheets().add(CheminCSS.BARRE.getChemin());
-        this.barre.getChildren().addAll(logo, this.rechercheField);
+        this.barre.getChildren().addAll(logo, Main.createRegion(), this.rechercheField, Main.createRegion());
 
         this.personneConnecte.getStylesheets().add(CheminCSS.POPUP.getChemin());
 
         super.setAlignment(Pos.TOP_LEFT);
-        super.getChildren().addAll(this.personneConnecte, this.barre);
+        super.getStylesheets().add(CheminCSS.BARRE.getChemin());
+        super.getChildren().addAll(this.barre, this.personneConnecte);
     }
 
     public void ajouterCompte(Main main) {
@@ -59,7 +60,7 @@ public class Barre extends StackPane {
             }
         });
 
-        this.barre.getChildren().add(compteBox);
+        this.barre.getChildren().addAll(compteBox, new ImageViewS(CheminIMG.LEFT_ARROW.getChemin()));
     }
 
     public void modifierCompteBarre(Image image) {

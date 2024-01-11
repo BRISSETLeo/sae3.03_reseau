@@ -7,15 +7,17 @@ import javafx.event.EventHandler;
 public class StopperSon implements EventHandler<ActionEvent> {
 
     private Main main;
+    private byte[] bytes;
 
-    public StopperSon(Main main) {
+    public StopperSon(Main main, byte[] bytes) {
         this.main = main;
+        this.bytes = bytes;
     }
 
     @Override
     public void handle(ActionEvent event) {
 
-        this.main.arreterSon();
+        this.main.arreterSon(this.bytes);
 
     }
 

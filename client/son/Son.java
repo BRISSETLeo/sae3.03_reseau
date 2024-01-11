@@ -15,17 +15,24 @@ public class Son extends Thread {
 
     private Main main;
     private boolean recording;
-    private static ByteArrayOutputStream byteArrayOutputStream;
+    private static byte[] byteArrayOutputStream;
     private Clip clip;
     private List<Double> intensities;
+    private static byte[] audioJouerActuellement;
 
     public Son(Main main) {
         this.main = main;
+        try {
+            this.clip = AudioSystem.getClip();
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void run() {
         this.recording = true;
+        Son.audioJouerActuellement = null;
         if (this.clip != null)
             this.clip.stop();
         try {
@@ -41,7 +48,7 @@ public class Son extends Thread {
             line.open(format);
             line.start();
 
-            Son.byteArrayOutputStream = new ByteArrayOutputStream();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
             byte[] buffer = new byte[1024];
             long time = System.currentTimeMillis();
@@ -51,7 +58,7 @@ public class Son extends Thread {
                 if (bytesRead == -1) {
                     break;
                 }
-                Son.byteArrayOutputStream.write(buffer, 0, bytesRead);
+                byteArrayOutputStream.write(buffer, 0, bytesRead);
             }
 
             this.main.vocalFini();
@@ -59,7 +66,9 @@ public class Son extends Thread {
             line.stop();
             line.close();
 
-            Son.byteArrayOutputStream.close();
+            byteArrayOutputStream.close();
+
+            Son.byteArrayOutputStream = byteArrayOutputStream.toByteArray();
 
             byte[] audioData = this.getAudioData();
             if (audioData == null)
@@ -96,37 +105,51 @@ public class Son extends Thread {
 
     public void stopVocal() {
         this.recording = false;
+        Son.audioJouerActuellement = null;
     }
 
     public byte[] getAudioData() {
         if (Son.byteArrayOutputStream != null) {
-            return byteArrayOutputStream.toByteArray();
+            return Son.byteArrayOutputStream;
         }
         return null;
     }
 
-    public void jouerSon() {
+    public void jouerSon(byte[] bytes) {
         if (this.recording)
             return;
-        if (byteArrayOutputStream == null || this.clip != null && this.clip.isRunning())
+        byte[] data = bytes;
+        if (data == null)
+            data = this.getAudioData();
+        if (data == null)
+            return;
+        if (this.clip.isRunning() && Son.audioJouerActuellement == data)
             return;
         try {
-            byte[] data = this.getAudioData();
             AudioInputStream audioInputStream = new AudioInputStream(
                     new ByteArrayInputStream(data), getAudioFormat(), data.length);
-            this.clip = AudioSystem.getClip();
+            if (this.clip.isOpen())
+                this.clip.close();
             this.clip.open(audioInputStream);
-            this.updateSon();
+            this.updateSon(bytes);
+            Son.audioJouerActuellement = data;
             this.clip.start();
         } catch (LineUnavailableException | IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void arreterSon() {
-        if (this.clip != null && this.clip.isRunning()) {
+    public void arreterSon(byte[] data) {
+        if (data == null)
+            data = this.getAudioData();
+        if (this.clip != null && this.clip.isRunning()
+                && (Son.audioJouerActuellement == null || Son.audioJouerActuellement == data)) {
             this.clip.stop();
         }
+    }
+
+    public static byte[] getAudioJouerActuellement() {
+        return Son.audioJouerActuellement;
     }
 
     public void mettreEnPauseSon() {
@@ -145,7 +168,7 @@ public class Son extends Thread {
         }
     }
 
-    public void updateSon() {
+    public void updateSon(byte[] bytes) {
         if (this.clip != null) {
             LineListener listener = new LineListener() {
                 @Override
@@ -158,7 +181,7 @@ public class Son extends Thread {
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
-                                Son.this.main.updateSon((int) (clip.getMicrosecondLength() / 1_000_000),
+                                Son.this.main.updateSon(bytes, (int) (clip.getMicrosecondLength() / 1_000_000),
                                         (int) (clip.getMicrosecondPosition() / 1_000_000));
                             }
                         }).start();
@@ -215,9 +238,10 @@ public class Son extends Thread {
         }
     }
 
-    public void supprimerVocal(){
+    public void supprimerVocal() {
         this.stopVocal();
         Son.byteArrayOutputStream = null;
+        this.clip.stop();
     }
 
     private List<Double> drawBars() {
