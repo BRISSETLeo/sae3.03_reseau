@@ -24,21 +24,30 @@ import client.graphisme.Profil;
 import client.son.Son;
 import client.graphisme.Messagerie;
 import enums.CheminIMG;
+import javafx.animation.Transition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import client.graphisme.Barre;
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
+import javafx.stage.Popup;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.Window;
+import javafx.util.Duration;
 
 public class Main extends Application {
 
@@ -99,6 +108,7 @@ public class Main extends Application {
         stage.setTitle("SysX");
         stage.getIcons().add(this.logo);
         stage.show();
+        showNotification(stage,"test");
     }
 
     public void connecterLeClient(String adresse, String pseudo) {
@@ -402,6 +412,30 @@ public class Main extends Application {
         this.messagerie.getNewMessage(), null, null, null);
 
         this.client.envoyerMessage(messageC);
+    }
+
+    public void afficherNotificationConnexion(String pseudo){
+        //Platform.runLater(() -> this.showNotification(this.root, pseudo));
+    }
+
+    public void showNotification(Stage primaryStage, String pseudo) {
+        
+        Popup popup = new Popup();
+        popup.setAutoFix(true);
+
+        VBox popupContent = new VBox(10);
+        popupContent.setAlignment(Pos.CENTER);
+        Label label = new Label("Nouvelle connexion de " + pseudo + ".");
+        label.setStyle("-fx-padding: 1em; -fx-background-color: red; -fx-text-fill: #0056b3;");
+        popupContent.getChildren().add(label);
+        popupContent.setStyle("-fx-padding: 1em;");
+
+        popup.getContent().add(popupContent);
+
+        Window window = Stage.getWindows().get(0);
+
+        popup.show(window, 0, 0);
+
     }
 
 }

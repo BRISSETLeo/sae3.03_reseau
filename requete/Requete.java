@@ -26,6 +26,8 @@ public enum Requete {
 
     ENREGISTRER_PROFIL("EnregistrerProfil"),
 
+    NOTIFICATIN_CONNEXION("NotificationConnexion"),
+
     VOIR_MESSAGES("VoirMessages"),
     ENVOYER_MESSAGE("EnvoyerMessage"),
 

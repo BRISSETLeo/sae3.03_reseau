@@ -57,6 +57,7 @@ public class ServeurThread extends Thread {
                     } else if (message.equals(Requete.CREER_COMPTE.getRequete())) {
 
                         this.creerCompte();
+                        this.sendNotificationAtAllHerFollower();
 
                     } else if (message.equals(Requete.FERMER.getRequete())) {
 
@@ -299,6 +300,16 @@ public class ServeurThread extends Thread {
             }
         }
 
+    }
+
+    public void sendNotificationAtAllHerFollower() throws IOException{
+        for(ServeurThread client : this.serveur.getClients()){
+            if(this.serveur.getConnexionMySQL().hasFollowTo(client.getCompte().getPseudo(), this.compte.getPseudo())){
+                client.getOut().writeUTF(Requete.NOTIFICATIN_CONNEXION.getRequete());
+                client.getOut().writeUTF(this.compte.getPseudo());
+                client.getOut().flush();
+            }
+        }
     }
 
 }

@@ -188,6 +188,10 @@ public class Client extends Thread {
 
                         this.main.afficherMessage(message);
 
+                    } else if(demande.equals(Requete.NOTIFICATIN_CONNEXION.getRequete())){
+
+                        this.main.afficherNotificationConnexion(this.in.readUTF());
+
                     }
 
                 }
