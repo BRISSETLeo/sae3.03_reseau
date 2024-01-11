@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.sql.Blob;
 
 import caches.ByteManager;
 import caches.Compte;
@@ -98,6 +99,20 @@ public class ServeurThread extends Thread {
                     } else if (message.equals(Requete.VOIR_NOTIFICATIONS.getRequete())) {
 
                         this.voirNotifications();
+
+                    } else if(message.equals(Requete.ENREGISTRER_PROFIL.getRequete())){
+
+                        int arraySize = this.in.readInt();
+                        byte[] receivedBytes = new byte[arraySize];
+                        this.in.readFully(receivedBytes);
+
+                        try{
+                            Compte compte = ByteManager.fromBytes(receivedBytes, Compte.class);
+                            this.compte.setImage(compte.getImage());
+                            this.enregistrerProfil(compte.getImage());
+                        }catch(ClassNotFoundException | IOException e){
+                            e.printStackTrace();
+                        }
 
                     }
 
@@ -229,6 +244,25 @@ public class ServeurThread extends Thread {
         this.out.writeInt(listBytes.length);
         this.out.write(listBytes);
         this.out.flush();
+    }
+
+    public void enregistrerProfil(Blob image){
+        this.serveur.getConnexionMySQL().enregistrerProfil(this.compte.getPseudo(), image);
+        for (ServeurThread client : this.serveur.getClients()) {
+            if(this.serveur.getConnexionMySQL().hasFollowTo(client.getCompte().getPseudo(), this.compte.getPseudo()) ||
+            client.getCompte().getPseudo().equals(this.compte.getPseudo())){
+                try{
+                    client.getOut().writeUTF(Requete.ENREGISTRER_PROFIL.getRequete());
+                    byte[] bytes = ByteManager.getBytes(this.compte);
+                    client.getOut().writeInt(bytes.length);
+                    client.getOut().write(bytes);
+                    client.getOut().writeBoolean(this.compte.getPseudo().equals(client.getCompte().getPseudo()));
+                    client.getOut().flush();
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public synchronized DataOutputStream getOut() {

@@ -40,11 +40,11 @@ public class ConnexionMySQL {
         }
     }
 
-    public synchronized boolean isConnected() {
+    public boolean isConnected() {
         return this.connection != null;
     }
 
-    public synchronized List<Publication> getPublicationsForUserAndFollowers(String pseudoToCheck, int limite) {
+    public List<Publication> getPublicationsForUserAndFollowers(String pseudoToCheck, int limite) {
         List<Publication> publications = new ArrayList<>();
 
         try {
@@ -159,7 +159,7 @@ public class ConnexionMySQL {
         return commentaires;
     }
 
-    public synchronized boolean hasLikePublication(String pseudoToCheck, int idPublicationToCheck) {
+    public boolean hasLikePublication(String pseudoToCheck, int idPublicationToCheck) {
         try {
 
             String sqlQuery = "SELECT * FROM likes WHERE pseudo = ? and id_publication = ?;";
@@ -186,7 +186,7 @@ public class ConnexionMySQL {
         return false;
     }
 
-    public synchronized boolean isPseudoAlreadyExists(String pseudoToCheck) {
+    public boolean isPseudoAlreadyExists(String pseudoToCheck) {
         try {
 
             String sqlQuery = "SELECT COUNT(*) AS count FROM comptes WHERE pseudo = ?;";
@@ -217,7 +217,7 @@ public class ConnexionMySQL {
         return false;
     }
 
-    public synchronized void saveNewCompte(String pseudo) {
+    public void saveNewCompte(String pseudo) {
         try {
 
             if (isPseudoAlreadyExists(pseudo))
@@ -239,7 +239,7 @@ public class ConnexionMySQL {
         }
     }
 
-    public synchronized Compte getCompteByPseudo(String pseudo) {
+    public Compte getCompteByPseudo(String pseudo) {
         try {
 
             String sqlQuery = "SELECT * FROM comptes WHERE pseudo = ?;";
@@ -271,7 +271,7 @@ public class ConnexionMySQL {
         return null;
     }
 
-    public synchronized void likePublication(String pseudo, int idPublication) {
+    public void likePublication(String pseudo, int idPublication) {
 
         if (this.hasLikePublication(pseudo, idPublication))
             return;
@@ -295,7 +295,7 @@ public class ConnexionMySQL {
         }
     }
 
-    public synchronized void unlikePublication(String pseudo, int idPublication) {
+    public void unlikePublication(String pseudo, int idPublication) {
         try {
 
             String sqlQuery = "DELETE FROM likes WHERE pseudo = ? AND id_publication = ?;";
@@ -315,7 +315,7 @@ public class ConnexionMySQL {
         }
     }
 
-    public synchronized boolean hasFollowToSenderPublication(String pseudo, int idPublication) {
+    public boolean hasFollowToSenderPublication(String pseudo, int idPublication) {
         try {
 
             String sqlQuery = "select f.pseudo, p.pseudo as pseudo_follow from follows f join publications p on p.pseudo = f.pseudo_follow where f.pseudo = ? and id_publication = ?;";
@@ -342,7 +342,7 @@ public class ConnexionMySQL {
         return false;
     }
 
-    public synchronized boolean isOwnerPublication(String pseudo, int idPublication) {
+    public boolean isOwnerPublication(String pseudo, int idPublication) {
         try {
 
             String sqlQuery = "SELECT * FROM publications WHERE pseudo = ? AND id_publication = ?;";
@@ -369,7 +369,7 @@ public class ConnexionMySQL {
         return false;
     }
 
-    public synchronized int nbLikePublications(int idPublication) {
+    public int nbLikePublications(int idPublication) {
 
         try {
 
@@ -399,6 +399,28 @@ public class ConnexionMySQL {
         }
 
         return 0;
+    }
+
+    public void enregistrerProfil(String pseudo, Blob image){
+
+        try {
+
+            String sqlQuery = "UPDATE comptes SET image = ? WHERE pseudo = ?;";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setBlob(1, image);
+                statement.setString(2, pseudo);
+                statement.executeUpdate();
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+
     }
 
     public Publication publierPublication(String pseudo, String text, byte[] vocal) {
@@ -473,7 +495,34 @@ public class ConnexionMySQL {
         return null;
     }
 
-    public synchronized List<Compte> getFollow(String pseudo) {
+    public boolean hasFollowTo(String pseudo, String pseudoToCheck) {
+        try {
+
+            String sqlQuery = "SELECT * FROM follows WHERE pseudo = ? AND pseudo_follow = ?;";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setString(1, pseudo);
+                statement.setString(2, pseudoToCheck);
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+
+                    return resultSet.next();
+
+                }
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return false;
+    }
+
+    public List<Compte> getFollow(String pseudo) {
         List<Compte> comptes = new ArrayList<>();
 
         try {
@@ -521,7 +570,7 @@ public class ConnexionMySQL {
         return comptes;
     }
 
-    public synchronized void supprimerPublication(int idPublication) {
+    public void supprimerPublication(int idPublication) {
         try {
 
             String sqlQuery = "DELETE FROM publications WHERE id_publication = ?;";
@@ -540,7 +589,7 @@ public class ConnexionMySQL {
         }
     }
 
-    public synchronized List<MessageC> getMessages(String pseudo, String pseud) {
+    public List<MessageC> getMessages(String pseudo, String pseud) {
         List<MessageC> messages = new ArrayList<>();
 
         try {

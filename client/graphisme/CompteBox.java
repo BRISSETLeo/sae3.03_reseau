@@ -1,39 +1,39 @@
 package client.graphisme;
 
-import java.io.ByteArrayInputStream;
-import java.sql.Blob;
-
 import caches.Compte;
-import client.graphisme.affichage.ImageViewS;
+import client.Main;
 import client.graphisme.affichage.LabelF;
-import enums.CheminIMG;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.shape.Circle;
 
 public class CompteBox extends HBox {
 
-    public CompteBox(Compte compte) {
+    private Circle circle;
+
+    public CompteBox(Main main, Compte compte) {
         super(10);
 
-        ImageView photoProfil = new ImageViewS(CheminIMG.NO_PP.getChemin());
+        this.circle = new Circle();
+        this.circle.setRadius(20);
 
-        Blob image = compte.getImage();
+        this.circle.setFill(new ImagePattern(Main.blobToImage(compte.getImage())));
 
-        if (image != null) {
-            try {
-                int blobLength = (int) image.length();
-                byte[] bytes = image.getBytes(1, blobLength);
-                photoProfil.setImage(new Image(new ByteArrayInputStream(bytes)));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
+        super.setCursor(Cursor.HAND);
         super.setAlignment(Pos.CENTER_LEFT);
-        super.getChildren().addAll(photoProfil, new LabelF(compte.getPseudo()));
+        super.getChildren().addAll(this.circle, new LabelF(compte.getPseudo()));
 
+    }
+
+    public Image getPhotoProfil() {
+        return ((ImagePattern) this.circle.getFill()).getImage();
+    }
+
+    public void setPhotoProfil(Image image) {
+        this.circle.setFill(new ImagePattern(image));
     }
 
 }

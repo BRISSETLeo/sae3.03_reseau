@@ -2,9 +2,11 @@ package client;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Blob;
 import java.util.List;
 
 import javax.sound.sampled.AudioFormat;
@@ -18,6 +20,7 @@ import client.graphisme.Connexion;
 import client.graphisme.Message;
 import client.graphisme.Navigation;
 import client.graphisme.Notifications;
+import client.graphisme.Profil;
 import client.son.Son;
 import client.graphisme.Messagerie;
 import enums.CheminIMG;
@@ -47,6 +50,7 @@ public class Main extends Application {
     private Connexion connexion;
     private Navigation navigation;
     private Notifications notifications;
+    private Profil profil;
     private Barre barre;
     private Accueil accueil;
     private client.graphisme.Publication publication;
@@ -67,6 +71,7 @@ public class Main extends Application {
         this.navigation = new Navigation(this);
         this.messagerie = new Messagerie(this);
         this.message = new Message(this);
+        this.profil = new Profil(this);
         this.notifications = new Notifications(this);
         this.root = new BorderPane(this.connexion);
         this.splitPane = new SplitPane();
@@ -224,7 +229,10 @@ public class Main extends Application {
     }
 
     public void ajouterMonCompte(){
-        Platform.runLater(() -> this.barre.ajouterCompte(this));
+        Platform.runLater(() -> {
+            this.barre.ajouterCompte(this);
+            this.profil.ajouterCompte();
+        });
     }
 
     public void ajouterPageDroite(VBox page) {
@@ -236,6 +244,14 @@ public class Main extends Application {
         this.publication.resetSon();
         this.son.start();
         this.publication.mettreEnregistrementButtonAOn();
+    }
+
+    public void afficherPageProfil(){
+        boolean isPageDroite = this.isPageDroite(this.profil);
+        this.enleverPageDroite();
+        if (isPageDroite)
+            return;
+        this.ajouterPageDroite(this.profil);
     }
 
     public void aucunSon() {
@@ -268,6 +284,10 @@ public class Main extends Application {
             this.son.jouerSon();
             this.publication.jouerSon();
         }
+    }
+
+    public void enregistrerProfil(){
+        this.client.enregistrerProfil();
     }
 
     public void arreterSon() {
@@ -325,8 +345,16 @@ public class Main extends Application {
         return this.son.playAudio(audio);
     }
 
+    public void modifierCompteBarre(Image image) {
+        Platform.runLater(() -> this.barre.modifierCompteBarre(image));
+    }
+
     public void afficherCompte(Compte compte) {
         Platform.runLater(() -> this.message.ajouterCompte(compte));
+    }
+
+    public void modifierComptePublications(String pseudo, Image image){
+        Platform.runLater(() -> this.accueil.modifierComptePublications(pseudo, image));
     }
 
     public void afficherMessage(MessageC message) {
@@ -352,6 +380,19 @@ public class Main extends Application {
 
     public void removePublication(int idPublication) {
         Platform.runLater(() -> this.accueil.removePublication(idPublication));
+    }
+
+    public static Image blobToImage(Blob image){
+        if (image != null) {
+            try {
+                int blobLength = (int) image.length();
+                byte[] bytes = image.getBytes(1, blobLength);
+                return new Image(new ByteArrayInputStream(bytes));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return new Image(CheminIMG.NO_PP.getChemin());
     }
 
 }

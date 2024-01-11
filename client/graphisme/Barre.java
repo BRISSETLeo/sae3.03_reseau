@@ -1,16 +1,19 @@
 package client.graphisme;
 
 import client.Main;
+import client.controle.ProfilC;
 import enums.CheminCSS;
 import enums.FontP;
 import enums.CheminIMG;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 
 public class Barre extends HBox {
 
     private TextField rechercheField;
+    private CompteBox compteBox;
 
     public Barre() {
         super(100);
@@ -31,7 +34,9 @@ public class Barre extends HBox {
     }
 
     public void ajouterCompte(Main main){
-        CompteBox compteBox = new CompteBox(main.getCompte());
+        this.compteBox = new CompteBox(main,main.getCompte());
+
+        compteBox.setOnMouseClicked(new ProfilC(main));
 
         this.rechercheField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.length() > 0) {
@@ -42,6 +47,10 @@ public class Barre extends HBox {
         });
 
         super.getChildren().add(compteBox);
+    }
+
+    public void modifierCompteBarre(Image image){
+        this.compteBox.setPhotoProfil(image);
     }
 
 }

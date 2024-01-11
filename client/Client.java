@@ -12,6 +12,7 @@ import caches.MessageC;
 import caches.Notification;
 import caches.Publication;
 import enums.ErreurSocket;
+import javafx.scene.image.Image;
 import requete.*;
 
 public class Client extends Thread {
@@ -155,6 +156,23 @@ public class Client extends Thread {
                         for (Notification notification : retrievedNotificationList)
                             this.main.afficherNotification(notification);
 
+                    } else if(demande.equals(Requete.ENREGISTRER_PROFIL.getRequete())){
+
+                        int arraySize = this.in.readInt();
+                        byte[] receivedBytes = new byte[arraySize];
+                        this.in.readFully(receivedBytes);
+
+                        boolean isMe = this.in.readBoolean();
+
+                        Compte compte = ByteManager.fromBytes(receivedBytes, Compte.class);
+                        Image image = Main.blobToImage(compte.getImage());
+
+                        if(isMe){
+                            this.main.modifierCompteBarre(image);
+                        }
+
+                        this.main.modifierComptePublications(compte.getPseudo(), image);
+
                     }
 
                 }
@@ -265,6 +283,18 @@ public class Client extends Thread {
     public void demanderNotifications() {
         try {
             this.out.writeUTF(Requete.VOIR_NOTIFICATIONS.getRequete());
+            this.out.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void enregistrerProfil(){
+        try {
+            this.out.writeUTF(Requete.ENREGISTRER_PROFIL.getRequete());
+            byte[] bytes = ByteManager.getBytes(this.compte);
+            this.out.writeInt(bytes.length);
+            this.out.write(bytes);
             this.out.flush();
         } catch (Exception e) {
             e.printStackTrace();

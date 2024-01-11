@@ -4,6 +4,7 @@ import java.sql.Blob;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import client.graphisme.affichage.ImageViewS;
 import client.graphisme.affichage.LabelF;
 import enums.CheminCSS;
 import enums.CheminIMG;
+import enums.FontP;
 import javafx.animation.TranslateTransition;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
@@ -37,6 +39,7 @@ public class Accueil extends VBox {
     private VBox contenant;
     private Map<Integer, VBox> publications;
     private Map<Integer, VBox> commentaires;
+    private Map<String, List<CompteBox>> comptesBoxs;
     private List<HBox> vocalBox;
 
     private Image likePubli;
@@ -50,10 +53,11 @@ public class Accueil extends VBox {
         this.vocalBox = new ArrayList<>();
         this.likePubli = new ImageViewS(CheminIMG.LIKE.getChemin()).getImage();
         this.unlikePubli = new ImageViewS(CheminIMG.UNLIKE.getChemin()).getImage();
+        this.comptesBoxs = new HashMap<>();
 
         ScrollPane scrollPane = new ScrollPane(this.contenant);
         scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 
         super.getStylesheets().add(CheminCSS.ACCUEIL.getChemin());
         super.getChildren().add(scrollPane);
@@ -63,14 +67,27 @@ public class Accueil extends VBox {
         VBox container = new VBox();
         container.getStyleClass().add("container");
 
-        Label contentLabel = new LabelF(publication.getContent()).setWrapText();
-
         ButtonG likeButton = new ButtonG();
 
         this.mettreAJourLikeButton(likeButton, publication);
 
-        container.getChildren().addAll(new HBox(new CompteBox(publication.getCompte()), Main.createRegion(),
-                new LabelF(new SimpleDateFormat("dd-MM-YYYY HH:mm:ss").format(publication.getDate()))), contentLabel);
+        Label contentLabel = new Label(publication.getContent());
+        contentLabel.setFont(FontP.FONT_15.getFont());
+        contentLabel.setWrapText(true);
+
+        CompteBox compteBox = new CompteBox(this.main,publication.getCompte());
+
+        if(!this.comptesBoxs.containsKey(publication.getCompte().getPseudo())){
+            this.comptesBoxs.put(publication.getCompte().getPseudo(), new ArrayList<>());
+        }
+
+        List<CompteBox> compteBoxs = this.comptesBoxs.get(publication.getCompte().getPseudo());
+        compteBoxs.add(compteBox);
+        this.comptesBoxs.put(publication.getCompte().getPseudo(), compteBoxs);
+
+        container.getChildren().addAll(new HBox(compteBox, Main.createRegion(),
+                new LabelF(new SimpleDateFormat("dd-MM-YYYY HH:mm:ss").format(publication.getDate()))), 
+                contentLabel);
 
         this.setupVocal(publication.getVocal(), container);
 
@@ -173,6 +190,12 @@ public class Accueil extends VBox {
         ButtonG likeButton = this.mettreAJourLike(this.recupererLikeBox(idPublication), like, idPublication, isMe);
         if(isMe)
             this.mettreLikeButtonAUnlike(likeButton, idPublication);
+    }
+
+    public void modifierComptePublications(String pseudo, Image image){
+        if(this.comptesBoxs.containsKey(pseudo)){
+            ((CompteBox) this.comptesBoxs.get(pseudo)).setPhotoProfil(image);
+        }
     }
 
     private HBox recupererLikeBox(int idPublication) {

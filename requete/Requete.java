@@ -24,6 +24,8 @@ public enum Requete {
 
     AVOIR_FOLLOW("AvoirFollow"),
 
+    ENREGISTRER_PROFIL("EnregistrerProfil"),
+
     VOIR_MESSAGES("VoirMessages"),
 
     FERMER("Fermer");
