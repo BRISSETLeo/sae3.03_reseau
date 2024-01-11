@@ -9,6 +9,7 @@ import client.controle.PublierPublication;
 import client.controle.StartVocal;
 import client.controle.StopVocal;
 import client.controle.StopperSon;
+import client.controle.SupprimerVocal;
 import client.controle.Unpause;
 import client.graphisme.affichage.ButtonF;
 import client.graphisme.affichage.ButtonG;
@@ -91,8 +92,11 @@ public class Publication extends VBox {
         this.erreur.setVisible(false);
         this.erreur.setWrapText(true);
 
+        ButtonG supprimerVocal = new ButtonG(new ImageViewS(CheminIMG.CORBEILLE.getChemin()));
+        supprimerVocal.setOnAction(new SupprimerVocal(this.main));
+
         this.combinaisonVocal.getChildren().addAll(this.vocalBox, new HBox(2, this.playPauseButton,
-                this.arretButton));
+                this.arretButton, supprimerVocal));
         this.combinaisonVocal.setVisible(false);
 
         ButtonF publier = new ButtonF("Publier");
@@ -104,8 +108,7 @@ public class Publication extends VBox {
         super.getStylesheets().add(CheminCSS.PUBLICATION.getChemin());
         super.getChildren().addAll(new LabelF("Publication"), this.publication,
                 new HBox(this.enregistrerVocal, this.aucunSon, Main.createRegion(), label),
-                this.combinaisonVocal, Main.createRegion(),
-                this.erreur, publier);
+                this.combinaisonVocal,this.erreur, publier);
     }
 
     public void mettreEnregistrementButtonAOff() {

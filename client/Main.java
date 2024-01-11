@@ -116,8 +116,18 @@ public class Main extends Application {
         stage.setTitle("SysX");
         stage.getIcons().add(this.logo);
         stage.show();
-        this.root.prefWidthProperty().bind(stage.widthProperty());
-        this.root.prefHeightProperty().bind(stage.heightProperty());
+        overlayPane.minHeightProperty().bind(stage.heightProperty());
+        overlayPane.maxHeightProperty().bind(stage.heightProperty());
+
+        overlayPane.minWidthProperty().bind(stage.widthProperty());
+        overlayPane.maxWidthProperty().bind(stage.widthProperty());
+
+        this.root.minHeightProperty().bind(stage.heightProperty());
+        this.root.maxHeightProperty().bind(stage.heightProperty());
+
+        this.root.minWidthProperty().bind(stage.widthProperty());
+        this.root.maxWidthProperty().bind(stage.widthProperty());
+
     }
 
     public void connecterLeClient(String adresse, String pseudo) {
@@ -283,6 +293,11 @@ public class Main extends Application {
 
     public void resetPublication() {
         Platform.runLater(() -> this.publication.reset());
+    }
+
+    public void supprimerVocal(){
+        this.son.supprimerVocal();
+        this.publication.resetSon();
     }
 
     public void stopVocal() {

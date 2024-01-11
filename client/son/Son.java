@@ -215,6 +215,11 @@ public class Son extends Thread {
         }
     }
 
+    public void supprimerVocal(){
+        this.stopVocal();
+        Son.byteArrayOutputStream = null;
+    }
+
     private List<Double> drawBars() {
         int groupSize = intensities.size() / 30;
         List<Double> averages = new ArrayList<>();

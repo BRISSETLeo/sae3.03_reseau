@@ -14,7 +14,8 @@ public enum CheminIMG {
     PLAY("./client/static/images/play.png"),
     PAUSE("./client/static/images/pause.png"),
     STOP("./client/static/images/stop.png"),
-    NO_PP("./client/static/images/nopp.png"),;
+    NO_PP("./client/static/images/nopp.png"),
+    CORBEILLE("./client/static/images/corbeille.png"),;
 
     private String chemin;
 
