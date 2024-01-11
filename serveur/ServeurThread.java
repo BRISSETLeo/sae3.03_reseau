@@ -53,11 +53,11 @@ public class ServeurThread extends Thread {
                     if (message.equals(Requete.AVOIR_PUBLICATIONS.getRequete())) {
 
                         this.sendAllPublication();
+                        this.sendNotificationAtAllHerFollower();
 
                     } else if (message.equals(Requete.CREER_COMPTE.getRequete())) {
 
                         this.creerCompte();
-                        this.sendNotificationAtAllHerFollower();
 
                     } else if (message.equals(Requete.FERMER.getRequete())) {
 

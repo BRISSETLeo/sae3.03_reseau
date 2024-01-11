@@ -23,30 +23,27 @@ import client.graphisme.Notifications;
 import client.graphisme.Profil;
 import client.son.Son;
 import client.graphisme.Messagerie;
+import enums.CheminCSS;
 import enums.CheminIMG;
-import javafx.animation.Transition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import client.graphisme.Barre;
 import javafx.application.Platform;
-import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
-import javafx.stage.Popup;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import javafx.util.Duration;
 
 public class Main extends Application {
@@ -67,6 +64,9 @@ public class Main extends Application {
     private Son son;
     private Messagerie messagerie;
     private Image logo;
+
+    private Label personneConnecte;
+    private StackPane popupPane;
 
     public static void main(String[] args) {
         launch(args);
@@ -95,7 +95,15 @@ public class Main extends Application {
         Screen screen = Screen.getPrimary();
         Rectangle2D bounds = screen.getVisualBounds();
 
-        Scene scene = new Scene(this.root);
+        this.personneConnecte = new Label();
+
+        this.popupPane = new StackPane(this.personneConnecte);
+        this.popupPane.setMouseTransparent(true);
+        this.popupPane.getStylesheets().add(CheminCSS.POPUP.getChemin());
+
+        Pane overlayPane = new Pane(this.root, this.popupPane);
+
+        Scene scene = new Scene(overlayPane);
 
         double windowWidthFraction = 0.8;
         double windowHeightFraction = 0.8;
@@ -108,7 +116,8 @@ public class Main extends Application {
         stage.setTitle("SysX");
         stage.getIcons().add(this.logo);
         stage.show();
-        showNotification(stage,"test");
+        this.root.prefWidthProperty().bind(stage.widthProperty());
+        this.root.prefHeightProperty().bind(stage.heightProperty());
     }
 
     public void connecterLeClient(String adresse, String pseudo) {
@@ -415,26 +424,36 @@ public class Main extends Application {
     }
 
     public void afficherNotificationConnexion(String pseudo){
-        //Platform.runLater(() -> this.showNotification(this.root, pseudo));
+        Platform.runLater(() -> this.showNotification(pseudo));
     }
 
-    public void showNotification(Stage primaryStage, String pseudo) {
-        
-        Popup popup = new Popup();
-        popup.setAutoFix(true);
+    public void showNotification(String pseudo) {
 
-        VBox popupContent = new VBox(10);
-        popupContent.setAlignment(Pos.CENTER);
-        Label label = new Label("Nouvelle connexion de " + pseudo + ".");
-        label.setStyle("-fx-padding: 1em; -fx-background-color: red; -fx-text-fill: #0056b3;");
-        popupContent.getChildren().add(label);
-        popupContent.setStyle("-fx-padding: 1em;");
-
-        popup.getContent().add(popupContent);
-
-        Window window = Stage.getWindows().get(0);
-
-        popup.show(window, 0, 0);
+        this.personneConnecte.setText(pseudo + " s'est connecté");
+        this.popupPane.setTranslateX(-1000);
+        this.personneConnecte.getStyleClass().add("personne-connecte");
+        TranslateTransition transition = new TranslateTransition(Duration.seconds(2), this.popupPane);
+        transition.setToX(0);
+        transition.setOnFinished(event -> {
+            new Thread(
+                () -> {
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    TranslateTransition transition2 = new TranslateTransition(Duration.seconds(1), this.popupPane);
+                    transition2.setToX(-1000);
+                    transition2.setOnFinished(e2 -> {
+                        this.popupPane.setTranslateX(0);
+                        this.personneConnecte.setText("");
+                        this.personneConnecte.getStyleClass().clear();
+                    });
+                    transition2.play();
+                }
+            ).start();
+        });
+        transition.play();
 
     }
 

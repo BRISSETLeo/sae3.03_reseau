@@ -1,0 +1,5 @@
+.personne-connecte{
+    -fx-padding: 1em;
+    -fx-background-color: rgb(172, 170, 170);
+    -fx-font-weight: bold;
+}
