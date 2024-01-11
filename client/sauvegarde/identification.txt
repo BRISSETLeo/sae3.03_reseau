@@ -1,2 +1,2 @@
-ip: localhost
+ip: info22-17
 pseudo: Maxirito

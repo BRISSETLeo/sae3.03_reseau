@@ -696,7 +696,7 @@ public class ConnexionMySQL {
         return notifications;
     }
 
-    public synchronized void envoyerMessage(MessageC message) {
+    public synchronized MessageC envoyerMessage(MessageC message) {
 
         try {
 
@@ -712,6 +712,8 @@ public class ConnexionMySQL {
                 statement.setBlob(6, message.getPhoto());
                 statement.executeUpdate();
 
+                return this.getMessage();
+
             }
 
         } catch (SQLException e) {
@@ -720,6 +722,46 @@ public class ConnexionMySQL {
 
         }
 
+        return null;
+
+    }
+
+    public MessageC getMessage() {
+
+        try {
+
+            String sqlQuery = "SELECT * FROM messages WHERE id_message = (SELECT MAX(id_message) FROM messages);";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+
+                    if (resultSet.next()) {
+
+                        int idMessage = resultSet.getInt("id_message");
+                        String pseudo1 = resultSet.getString("pseudo");
+                        String pseudo2 = resultSet.getString("pseudo_dest");
+                        String content = resultSet.getString("content");
+                        Blob vocal = resultSet.getBlob("vocal");
+                        Timestamp date = resultSet.getTimestamp("date");
+                        Blob photo = resultSet.getBlob("photo");
+
+                        MessageC message = new MessageC(idMessage, pseudo1, pseudo2, content, vocal, date, photo);
+                        return message;
+
+                    }
+
+                }
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return null;
     }
 
 }

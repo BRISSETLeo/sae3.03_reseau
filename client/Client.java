@@ -179,12 +179,7 @@ public class Client extends Thread {
                         byte[] receivedBytes = new byte[arraySize];
                         this.in.readFully(receivedBytes);
 
-                        MessageC message = ByteManager.fromBytes(receivedBytes, MessageC.class);
-
-                        System.out.println(message.getIdMessage());
-                        System.out.println(message.getPseudoExpediteur());
-                        System.out.println(message.getPseudoDestinataire());
-                        System.out.println(message.getContent());                        
+                        MessageC message = ByteManager.fromBytes(receivedBytes, MessageC.class);                     
 
                         this.main.afficherMessage(message);
 

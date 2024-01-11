@@ -285,14 +285,11 @@ public class ServeurThread extends Thread {
     }
 
     public void envoyerMessage(MessageC message) throws IOException{
-
-        this.serveur.getConnexionMySQL().envoyerMessage(message);
-
+        message = this.serveur.getConnexionMySQL().envoyerMessage(message);
         for(ServeurThread client : this.serveur.getClients()){
             boolean isMe = client.getCompte().getPseudo().equals(this.compte.getPseudo());
             if(client.getCompte().getPseudo().equals(message.getPseudoDestinataire()) || isMe){
                 client.getOut().writeUTF(Requete.ENVOYER_MESSAGE.getRequete());
-                client.getOut().writeUTF( (isMe ? this.compte.getPseudo() : client.getCompte().getPseudo()) );
                 byte[] bytes = ByteManager.getBytes(message);
                 client.getOut().writeInt(bytes.length);
                 client.getOut().write(bytes);
