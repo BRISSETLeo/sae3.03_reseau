@@ -23,28 +23,22 @@ import client.graphisme.Notifications;
 import client.graphisme.Profil;
 import client.son.Son;
 import client.graphisme.Messagerie;
-import enums.CheminCSS;
 import enums.CheminIMG;
-import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import client.graphisme.Barre;
 import javafx.application.Platform;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 public class Main extends Application {
 
@@ -64,9 +58,6 @@ public class Main extends Application {
     private Son son;
     private Messagerie messagerie;
     private Image logo;
-
-    private Label personneConnecte;
-    private StackPane popupPane;
 
     public static void main(String[] args) {
         launch(args);
@@ -95,15 +86,7 @@ public class Main extends Application {
         Screen screen = Screen.getPrimary();
         Rectangle2D bounds = screen.getVisualBounds();
 
-        this.personneConnecte = new Label();
-
-        this.popupPane = new StackPane(this.personneConnecte);
-        this.popupPane.setMouseTransparent(true);
-        this.popupPane.getStylesheets().add(CheminCSS.POPUP.getChemin());
-
-        Pane overlayPane = new Pane(this.root, this.popupPane);
-
-        Scene scene = new Scene(overlayPane);
+        Scene scene = new Scene(this.root);
 
         double windowWidthFraction = 0.8;
         double windowHeightFraction = 0.8;
@@ -116,18 +99,6 @@ public class Main extends Application {
         stage.setTitle("SysX");
         stage.getIcons().add(this.logo);
         stage.show();
-        overlayPane.minHeightProperty().bind(stage.heightProperty());
-        overlayPane.maxHeightProperty().bind(stage.heightProperty());
-
-        overlayPane.minWidthProperty().bind(stage.widthProperty());
-        overlayPane.maxWidthProperty().bind(stage.widthProperty());
-
-        this.root.minHeightProperty().bind(stage.heightProperty());
-        this.root.maxHeightProperty().bind(stage.heightProperty());
-
-        this.root.minWidthProperty().bind(stage.widthProperty());
-        this.root.maxWidthProperty().bind(stage.widthProperty());
-
     }
 
     public void connecterLeClient(String adresse, String pseudo) {
@@ -257,7 +228,7 @@ public class Main extends Application {
         }
     }
 
-    public void ajouterMonCompte(){
+    public void ajouterMonCompte() {
         Platform.runLater(() -> {
             this.barre.ajouterCompte(this);
             this.profil.ajouterCompte();
@@ -275,7 +246,7 @@ public class Main extends Application {
         this.publication.mettreEnregistrementButtonAOn();
     }
 
-    public void afficherPageProfil(){
+    public void afficherPageProfil() {
         boolean isPageDroite = this.isPageDroite(this.profil);
         this.enleverPageDroite();
         if (isPageDroite)
@@ -295,7 +266,7 @@ public class Main extends Application {
         Platform.runLater(() -> this.publication.reset());
     }
 
-    public void supprimerVocal(){
+    public void supprimerVocal() {
         this.son.supprimerVocal();
         this.publication.resetSon();
     }
@@ -320,7 +291,7 @@ public class Main extends Application {
         }
     }
 
-    public void enregistrerProfil(){
+    public void enregistrerProfil() {
         this.client.enregistrerProfil();
     }
 
@@ -339,7 +310,7 @@ public class Main extends Application {
     public void afficherMessage(Compte compte) {
         this.messagerie.clear();
         this.client.getMessages(compte.getPseudo());
-        if (this.splitPane.getItems().size() == 0){
+        if (this.splitPane.getItems().size() == 0) {
             this.messagerie.setCompteFollow(compte);
             this.splitPane.getItems().add(this.messagerie);
         } else {
@@ -363,7 +334,7 @@ public class Main extends Application {
         Platform.runLater(() -> this.publication.updateSon(nbSecMax, nbSecActuel));
     }
 
-    public Compte getCompte(){
+    public Compte getCompte() {
         return this.client.getCompte();
     }
 
@@ -389,7 +360,7 @@ public class Main extends Application {
         Platform.runLater(() -> this.message.ajouterCompte(compte));
     }
 
-    public void modifierComptePublications(String pseudo, Image image){
+    public void modifierComptePublications(String pseudo, Image image) {
         Platform.runLater(() -> this.accueil.modifierComptePublications(pseudo, image));
     }
 
@@ -418,7 +389,7 @@ public class Main extends Application {
         Platform.runLater(() -> this.accueil.removePublication(idPublication));
     }
 
-    public static Image blobToImage(Blob image){
+    public static Image blobToImage(Blob image) {
         if (image != null) {
             try {
                 int blobLength = (int) image.length();
@@ -432,44 +403,14 @@ public class Main extends Application {
     }
 
     public void envoyerMessage() {
-        MessageC messageC = new MessageC(-1, this.client.getPseudo(), this.messagerie.getPseudoDest(), 
-        this.messagerie.getNewMessage(), null, null, null);
+        MessageC messageC = new MessageC(-1, this.client.getPseudo(), this.messagerie.getPseudoDest(),
+                this.messagerie.getNewMessage(), null, null, null);
 
         this.client.envoyerMessage(messageC);
     }
 
-    public void afficherNotificationConnexion(String pseudo){
-        Platform.runLater(() -> this.showNotification(pseudo));
-    }
-
-    public void showNotification(String pseudo) {
-
-        this.personneConnecte.setText(pseudo + " s'est connecté");
-        this.popupPane.setTranslateX(-1000);
-        this.personneConnecte.getStyleClass().add("personne-connecte");
-        TranslateTransition transition = new TranslateTransition(Duration.seconds(2), this.popupPane);
-        transition.setToX(0);
-        transition.setOnFinished(event -> {
-            new Thread(
-                () -> {
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    TranslateTransition transition2 = new TranslateTransition(Duration.seconds(1), this.popupPane);
-                    transition2.setToX(-1000);
-                    transition2.setOnFinished(e2 -> {
-                        this.popupPane.setTranslateX(0);
-                        this.personneConnecte.setText("");
-                        this.personneConnecte.getStyleClass().clear();
-                    });
-                    transition2.play();
-                }
-            ).start();
-        });
-        transition.play();
-
+    public void afficherNotificationConnexion(String pseudo) {
+        Platform.runLater(() -> this.barre.showNotification(pseudo));
     }
 
 }

@@ -23,7 +23,6 @@ import enums.FontP;
 import javafx.animation.TranslateTransition;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
@@ -74,9 +73,9 @@ public class Accueil extends VBox {
         contentLabel.setFont(FontP.FONT_15.getFont());
         contentLabel.setWrapText(true);
 
-        CompteBox compteBox = new CompteBox(this.main,publication.getCompte());
+        CompteBox compteBox = new CompteBox(this.main, publication.getCompte());
 
-        if(!this.comptesBoxs.containsKey(publication.getCompte().getPseudo())){
+        if (!this.comptesBoxs.containsKey(publication.getCompte().getPseudo())) {
             this.comptesBoxs.put(publication.getCompte().getPseudo(), new ArrayList<>());
         }
 
@@ -85,7 +84,7 @@ public class Accueil extends VBox {
         this.comptesBoxs.put(publication.getCompte().getPseudo(), compteBoxs);
 
         container.getChildren().addAll(new HBox(compteBox, Main.createRegion(),
-                new LabelF(new SimpleDateFormat("dd-MM-YYYY HH:mm:ss").format(publication.getDate()))), 
+                new LabelF(new SimpleDateFormat("dd-MM-YYYY HH:mm:ss").format(publication.getDate()))),
                 contentLabel);
 
         this.setupVocal(publication.getVocal(), container);
@@ -94,7 +93,7 @@ public class Accueil extends VBox {
         likeBox.setAlignment(Pos.CENTER_LEFT);
 
         if (publication.getCompte().getPseudo().equals(this.main.getPseudo())) {
-            Button supprimerPublication = new Button("Supprimer la publication");
+            ButtonG supprimerPublication = new ButtonG(new ImageViewS(CheminIMG.CORBEILLE.getChemin()));
             supprimerPublication.setOnAction(new SupprimerPublication(this.main, publication.getIdPublication()));
             likeBox.getChildren().add(0, supprimerPublication);
         }
@@ -127,10 +126,11 @@ public class Accueil extends VBox {
         transition.play();
     }
 
-    public void retirerCompteBoxDeListeAffichage(int idPublication){
-        CompteBox compteBox = (CompteBox) ((HBox) this.publications.get(idPublication).getChildren().get(0)).getChildren().get(0);
+    public void retirerCompteBoxDeListeAffichage(int idPublication) {
+        CompteBox compteBox = (CompteBox) ((HBox) this.publications.get(idPublication).getChildren().get(0))
+                .getChildren().get(0);
         for (String pseudo : this.comptesBoxs.keySet()) {
-            if(this.comptesBoxs.get(pseudo).contains(compteBox)){
+            if (this.comptesBoxs.get(pseudo).contains(compteBox)) {
                 this.comptesBoxs.get(pseudo).remove(compteBox);
             }
         }
@@ -191,20 +191,20 @@ public class Accueil extends VBox {
 
     public void ajouterLike(int idPublication, int like, boolean isMe) {
         ButtonG likeButton = this.mettreAJourLike(this.recupererLikeBox(idPublication), like, idPublication, isMe);
-        if(isMe)
+        if (isMe)
             this.mettreLikeButtonALike(likeButton, idPublication);
     }
 
     public void removeLike(int idPublication, int like, boolean isMe) {
         ButtonG likeButton = this.mettreAJourLike(this.recupererLikeBox(idPublication), like, idPublication, isMe);
-        if(isMe)
+        if (isMe)
             this.mettreLikeButtonAUnlike(likeButton, idPublication);
     }
 
-    public void modifierComptePublications(String pseudo, Image image){
-        if(this.comptesBoxs.containsKey(pseudo)){
+    public void modifierComptePublications(String pseudo, Image image) {
+        if (this.comptesBoxs.containsKey(pseudo)) {
             for (CompteBox compteBox : this.comptesBoxs.get(pseudo)) {
-                compteBox.setPhotoProfil(image);   
+                compteBox.setPhotoProfil(image);
             }
         }
     }

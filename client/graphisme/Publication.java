@@ -108,7 +108,7 @@ public class Publication extends VBox {
         super.getStylesheets().add(CheminCSS.PUBLICATION.getChemin());
         super.getChildren().addAll(new LabelF("Publication"), this.publication,
                 new HBox(this.enregistrerVocal, this.aucunSon, Main.createRegion(), label),
-                this.combinaisonVocal,this.erreur, publier);
+                this.combinaisonVocal, Main.createRegion(), this.erreur, publier);
     }
 
     public void mettreEnregistrementButtonAOff() {
