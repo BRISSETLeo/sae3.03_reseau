@@ -213,7 +213,7 @@ public class ServeurThread extends Thread {
 
     public void supprimerPublication(int idPublication) throws IOException {
         for (ServeurThread client : this.serveur.getClients()) {
-            if (this.serveur.getConnexionMySQL().isOwnerPublication(client.getCompte().getPseudo(), idPublication)) {
+            if (this.canAccessToTheBottom(client.getCompte(), idPublication)) {
                 client.getOut().writeUTF(Requete.SUPPRIMER_PUBLICATION.getRequete());
                 client.getOut().writeInt(idPublication);
                 client.getOut().flush();

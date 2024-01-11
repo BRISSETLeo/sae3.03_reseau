@@ -145,13 +145,6 @@ public class Accueil extends VBox {
         this.commentaires.put(commentaire.getIdCommentaire(), container);
     }
 
-    private void mettreAJourLikeButton(ButtonG likeButton, int idPublication) {
-        if (((ImageViewS) likeButton.getGraphic()).getImage().equals(this.likePubli))
-            this.mettreLikeButtonAUnlike(likeButton, idPublication);
-        else
-            this.mettreLikeButtonALike(likeButton, idPublication);
-    }
-
     private void mettreAJourLikeButton(ButtonG likeButton, Publication publication) {
         int idPublication = publication.getIdPublication();
         if (publication.isCallerIsLiker())
@@ -172,12 +165,14 @@ public class Accueil extends VBox {
 
     public void ajouterLike(int idPublication, int like, boolean isMe) {
         ButtonG likeButton = this.mettreAJourLike(this.recupererLikeBox(idPublication), like, idPublication, isMe);
-        this.mettreLikeButtonALike(likeButton, idPublication);
+        if(isMe)
+            this.mettreLikeButtonALike(likeButton, idPublication);
     }
 
     public void removeLike(int idPublication, int like, boolean isMe) {
         ButtonG likeButton = this.mettreAJourLike(this.recupererLikeBox(idPublication), like, idPublication, isMe);
-        this.mettreLikeButtonAUnlike(likeButton, idPublication);
+        if(isMe)
+            this.mettreLikeButtonAUnlike(likeButton, idPublication);
     }
 
     private HBox recupererLikeBox(int idPublication) {
