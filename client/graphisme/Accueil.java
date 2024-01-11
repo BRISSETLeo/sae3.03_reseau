@@ -53,6 +53,7 @@ public class Accueil extends VBox {
 
         ScrollPane scrollPane = new ScrollPane(this.contenant);
         scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
 
         super.getStylesheets().add(CheminCSS.ACCUEIL.getChemin());
         super.getChildren().add(scrollPane);
@@ -85,10 +86,10 @@ public class Accueil extends VBox {
         container.getChildren().add(likeBox);
 
         if (hasNewPublication) {
-            container.setTranslateY(-100);
+            container.setTranslateX(-1000);
             this.contenant.getChildren().add(0, container);
             TranslateTransition transition = new TranslateTransition(Duration.seconds(1), container);
-            transition.setToY(0);
+            transition.setToX(0);
             transition.play();
         } else
             this.contenant.getChildren().add(container);
@@ -101,7 +102,7 @@ public class Accueil extends VBox {
     public void removePublication(int idPublication) {
         VBox container = this.publications.get(idPublication);
         TranslateTransition transition = new TranslateTransition(Duration.seconds(1), container);
-        transition.setToY(-100);
+        transition.setToX(-1000);
         transition.setOnFinished(e -> {
             this.contenant.getChildren().remove(container);
             this.publications.remove(idPublication);
@@ -170,11 +171,13 @@ public class Accueil extends VBox {
     }
 
     public void ajouterLike(int idPublication, int like, boolean isMe) {
-        this.mettreAJourLike(this.recupererLikeBox(idPublication), like, idPublication, isMe);
+        ButtonG likeButton = this.mettreAJourLike(this.recupererLikeBox(idPublication), like, idPublication, isMe);
+        this.mettreLikeButtonALike(likeButton, idPublication);
     }
 
     public void removeLike(int idPublication, int like, boolean isMe) {
-        this.mettreAJourLike(this.recupererLikeBox(idPublication), like, idPublication, isMe);
+        ButtonG likeButton = this.mettreAJourLike(this.recupererLikeBox(idPublication), like, idPublication, isMe);
+        this.mettreLikeButtonAUnlike(likeButton, idPublication);
     }
 
     private HBox recupererLikeBox(int idPublication) {
@@ -182,15 +185,13 @@ public class Accueil extends VBox {
         return (HBox) container.getChildren().get(container.getChildren().size() - 1);
     }
 
-    private void mettreAJourLike(HBox likeBox, int like, int idPublication, boolean isMe) {
+    private ButtonG mettreAJourLike(HBox likeBox, int like, int idPublication, boolean isMe) {
         int deb = 1;
         if (likeBox.getChildren().size() == 4)
             deb = 2;
         LabelF likeLabel = (LabelF) likeBox.getChildren().get(deb);
-        ButtonG likeButton = (ButtonG) likeBox.getChildren().get(deb + 1);
         likeLabel.setText(like + "");
-        if (isMe)
-            this.mettreAJourLikeButton(likeButton, idPublication);
+        return (ButtonG) likeBox.getChildren().get(deb + 1);
     }
 
     public boolean demanderSupprimerPublication(int idPublication) {

@@ -147,8 +147,7 @@ public class ServeurThread extends Thread {
         this.serveur.getConnexionMySQL().likePublication(this.compte.getPseudo(), id);
         int nbLike = this.serveur.getConnexionMySQL().nbLikePublications(id);
         for (ServeurThread client : this.serveur.getClients()) {
-            if (this.serveur.getConnexionMySQL().isOwnerPublication(client.getCompte().getPseudo(), id) ||
-                    this.serveur.getConnexionMySQL().hasFollowToSenderPublication(client.getCompte().getPseudo(), id)) {
+            if (this.canAccessToTheBottom(client.getCompte(), id)) {
                 client.getOut().writeUTF(Requete.LIKER_PUBLICATION.getRequete());
                 client.getOut().writeInt(id);
                 client.getOut().writeInt(nbLike);
@@ -162,8 +161,7 @@ public class ServeurThread extends Thread {
         this.serveur.getConnexionMySQL().unlikePublication(this.compte.getPseudo(), id);
         int nbLike = this.serveur.getConnexionMySQL().nbLikePublications(id);
         for (ServeurThread client : this.serveur.getClients()) {
-            if (this.serveur.getConnexionMySQL().isOwnerPublication(client.getCompte().getPseudo(), id) ||
-                    this.serveur.getConnexionMySQL().hasFollowToSenderPublication(client.getCompte().getPseudo(), id)) {
+            if (this.canAccessToTheBottom(client.getCompte(), id)) {
                 client.getOut().writeUTF(Requete.DISLIKER_PUBLICATION.getRequete());
                 client.getOut().writeInt(id);
                 client.getOut().writeInt(nbLike);
@@ -173,14 +171,17 @@ public class ServeurThread extends Thread {
         }
     }
 
+    private boolean canAccessToTheBottom(Compte compte, int id) {
+        return (this.serveur.getConnexionMySQL().isOwnerPublication(compte.getPseudo(), id) ||
+                    this.serveur.getConnexionMySQL().hasFollowToSenderPublication(compte.getPseudo(), id));
+    }
+
     public void publierPublication(String text, byte[] vocal) throws IOException {
         Publication publication = this.serveur.getConnexionMySQL().publierPublication(this.compte.getPseudo(), text,
                 vocal);
         byte[] bytes = ByteManager.getBytes(publication);
         for (ServeurThread client : this.serveur.getClients()) {
-            if (client.getCompte().getPseudo().equals(this.compte.getPseudo()) ||
-                    this.serveur.getConnexionMySQL().hasFollowToSenderPublication(client.getCompte().getPseudo(),
-                            publication.getIdPublication())) {
+            if (this.canAccessToTheBottom(client.getCompte(), publication.getIdPublication())) {
                 client.getOut().writeUTF(Requete.PUBLIER_PUBLICATION.getRequete());
                 client.getOut().writeInt(bytes.length);
                 client.getOut().write(bytes);
