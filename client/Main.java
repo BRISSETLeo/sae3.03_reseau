@@ -302,12 +302,14 @@ public class Main extends Application {
         }
     }
 
-    public void afficherMessage(String pseudo) {
+    public void afficherMessage(Compte compte) {
         this.messagerie.clear();
-        this.client.getMessages(pseudo);
-        if (this.splitPane.getItems().size() == 0)
+        this.client.getMessages(compte.getPseudo());
+        if (this.splitPane.getItems().size() == 0){
+            this.messagerie.setCompteFollow(compte);
             this.splitPane.getItems().add(this.messagerie);
-        else {
+        } else {
+            this.messagerie.setCompteFollow(compte);
             this.splitPane.getItems().set(0, this.messagerie);
             this.splitPane.setDividerPositions(0.7);
         }
@@ -393,6 +395,13 @@ public class Main extends Application {
             }
         }
         return new Image(CheminIMG.NO_PP.getChemin());
+    }
+
+    public void envoyerMessage() {
+        MessageC messageC = new MessageC(-1, this.client.getPseudo(), this.messagerie.getPseudoDest(), 
+        this.messagerie.getNewMessage(), null, null, null);
+
+        this.client.envoyerMessage(messageC);
     }
 
 }

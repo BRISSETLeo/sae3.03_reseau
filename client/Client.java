@@ -173,6 +173,21 @@ public class Client extends Thread {
 
                         this.main.modifierComptePublications(compte.getPseudo(), image);
 
+                    } else if (demande.equals(Requete.ENVOYER_MESSAGE.getRequete())) {
+
+                        int arraySize = this.in.readInt();
+                        byte[] receivedBytes = new byte[arraySize];
+                        this.in.readFully(receivedBytes);
+
+                        MessageC message = ByteManager.fromBytes(receivedBytes, MessageC.class);
+
+                        System.out.println(message.getIdMessage());
+                        System.out.println(message.getPseudoExpediteur());
+                        System.out.println(message.getPseudoDestinataire());
+                        System.out.println(message.getContent());                        
+
+                        this.main.afficherMessage(message);
+
                     }
 
                 }
@@ -293,6 +308,18 @@ public class Client extends Thread {
         try {
             this.out.writeUTF(Requete.ENREGISTRER_PROFIL.getRequete());
             byte[] bytes = ByteManager.getBytes(this.compte);
+            this.out.writeInt(bytes.length);
+            this.out.write(bytes);
+            this.out.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void envoyerMessage(MessageC messageC){
+        try {
+            this.out.writeUTF(Requete.ENVOYER_MESSAGE.getRequete());
+            byte[] bytes = ByteManager.getBytes(messageC);
             this.out.writeInt(bytes.length);
             this.out.write(bytes);
             this.out.flush();

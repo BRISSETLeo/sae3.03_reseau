@@ -27,6 +27,7 @@ public enum Requete {
     ENREGISTRER_PROFIL("EnregistrerProfil"),
 
     VOIR_MESSAGES("VoirMessages"),
+    ENVOYER_MESSAGE("EnvoyerMessage"),
 
     FERMER("Fermer");
 

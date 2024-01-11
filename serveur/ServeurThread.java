@@ -8,6 +8,7 @@ import java.sql.Blob;
 
 import caches.ByteManager;
 import caches.Compte;
+import caches.MessageC;
 import caches.Publication;
 import enums.Color;
 import requete.Requete;
@@ -110,6 +111,19 @@ public class ServeurThread extends Thread {
                             Compte compte = ByteManager.fromBytes(receivedBytes, Compte.class);
                             this.compte.setImage(compte.getImage());
                             this.enregistrerProfil(compte.getImage());
+                        }catch(ClassNotFoundException | IOException e){
+                            e.printStackTrace();
+                        }
+
+                    } else if (message.equals(Requete.ENVOYER_MESSAGE.getRequete())){
+
+                        int arraySize = this.in.readInt();
+                        byte[] receivedBytes = new byte[arraySize];
+                        this.in.readFully(receivedBytes);
+
+                        try{
+                            MessageC messageC = ByteManager.fromBytes(receivedBytes, MessageC.class);
+                            this.envoyerMessage(messageC);
                         }catch(ClassNotFoundException | IOException e){
                             e.printStackTrace();
                         }
@@ -267,6 +281,24 @@ public class ServeurThread extends Thread {
 
     public synchronized DataOutputStream getOut() {
         return this.out;
+    }
+
+    public void envoyerMessage(MessageC message) throws IOException{
+
+        this.serveur.getConnexionMySQL().envoyerMessage(message);
+
+        for(ServeurThread client : this.serveur.getClients()){
+            boolean isMe = client.getCompte().getPseudo().equals(this.compte.getPseudo());
+            if(client.getCompte().getPseudo().equals(message.getPseudoDestinataire()) || isMe){
+                client.getOut().writeUTF(Requete.ENVOYER_MESSAGE.getRequete());
+                client.getOut().writeUTF( (isMe ? this.compte.getPseudo() : client.getCompte().getPseudo()) );
+                byte[] bytes = ByteManager.getBytes(message);
+                client.getOut().writeInt(bytes.length);
+                client.getOut().write(bytes);
+                client.getOut().flush();
+            }
+        }
+
     }
 
 }

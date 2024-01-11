@@ -696,4 +696,30 @@ public class ConnexionMySQL {
         return notifications;
     }
 
+    public synchronized void envoyerMessage(MessageC message) {
+
+        try {
+
+            String sqlQuery = "INSERT INTO messages (pseudo, pseudo_dest, content, vocal, date, photo) VALUES (?, ?, ?, ?, ?, ?);";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setString(1, message.getPseudoExpediteur());
+                statement.setString(2, message.getPseudoDestinataire());
+                statement.setString(3, message.getContent());
+                statement.setBlob(4, message.getVocal());
+                statement.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+                statement.setBlob(6, message.getPhoto());
+                statement.executeUpdate();
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+
+    }
+
 }

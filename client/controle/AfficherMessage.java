@@ -1,5 +1,6 @@
 package client.controle;
 
+import caches.Compte;
 import client.Main;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
@@ -7,17 +8,17 @@ import javafx.scene.input.MouseEvent;
 public class AfficherMessage implements EventHandler<MouseEvent> {
 
     private Main main;
-    private String pseudo;
+    private Compte compte;
 
-    public AfficherMessage(Main main, String pseudo) {
+    public AfficherMessage(Main main, Compte compte) {
         this.main = main;
-        this.pseudo = pseudo;
+        this.compte = compte;
     }
 
     @Override
     public void handle(MouseEvent event) {
 
-        this.main.afficherMessage(this.pseudo);
+        this.main.afficherMessage(this.compte);
 
     }
 
