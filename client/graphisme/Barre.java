@@ -1,5 +1,6 @@
 package client.graphisme;
 
+import client.Main;
 import enums.CheminCSS;
 import enums.FontP;
 import enums.CheminIMG;
@@ -27,6 +28,20 @@ public class Barre extends HBox {
         super.getStyleClass().add("positionnement");
         super.getStylesheets().add(CheminCSS.BARRE.getChemin());
         super.getChildren().addAll(logo, this.rechercheField);
+    }
+
+    public void ajouterCompte(Main main){
+        CompteBox compteBox = new CompteBox(main.getCompte());
+
+        this.rechercheField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.length() > 0) {
+                compteBox.setVisible(false);
+            } else {
+                compteBox.setVisible(true);
+            }
+        });
+
+        super.getChildren().add(compteBox);
     }
 
 }

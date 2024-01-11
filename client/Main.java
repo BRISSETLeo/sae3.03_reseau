@@ -223,6 +223,10 @@ public class Main extends Application {
         }
     }
 
+    public void ajouterMonCompte(){
+        Platform.runLater(() -> this.barre.ajouterCompte(this));
+    }
+
     public void ajouterPageDroite(VBox page) {
         this.splitPane.getItems().add(page);
         this.splitPane.setDividerPositions(0.7);
@@ -301,6 +305,10 @@ public class Main extends Application {
 
     public void updateSon(int nbSecMax, int nbSecActuel) {
         Platform.runLater(() -> this.publication.updateSon(nbSecMax, nbSecActuel));
+    }
+
+    public Compte getCompte(){
+        return this.client.getCompte();
     }
 
     public void publierPublication() {

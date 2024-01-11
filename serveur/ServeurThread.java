@@ -191,7 +191,10 @@ public class ServeurThread extends Thread {
 
     public void avoirCompte() throws IOException {
         this.out.writeUTF(Requete.AVOIR_FOLLOW.getRequete());
-        byte[] listBytes = ByteManager.convertListToBytes(
+        byte[] listBytes = ByteManager.getBytes(this.compte);
+        this.out.writeInt(listBytes.length);
+        this.out.write(listBytes);
+        listBytes = ByteManager.convertListToBytes(
                 this.serveur.getConnexionMySQL().getFollow(this.compte.getPseudo()));
         this.out.writeInt(listBytes.length);
         this.out.write(listBytes);

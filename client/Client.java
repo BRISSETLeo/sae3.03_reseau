@@ -18,6 +18,7 @@ public class Client extends Thread {
 
     private Main main;
     private String pseudo;
+    private Compte compte;
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
@@ -100,6 +101,14 @@ public class Client extends Thread {
 
                         int arraySize = this.in.readInt();
                         byte[] receivedBytes = new byte[arraySize];
+                        this.in.readFully(receivedBytes);
+
+                        this.compte = ByteManager.fromBytes(receivedBytes, Compte.class);
+
+                        this.main.ajouterMonCompte();
+
+                        arraySize = this.in.readInt();
+                        receivedBytes = new byte[arraySize];
                         this.in.readFully(receivedBytes);
 
                         List<Compte> comptes = ByteManager.convertBytesToList(receivedBytes, Compte.class);
@@ -264,6 +273,10 @@ public class Client extends Thread {
 
     public String getPseudo() {
         return this.pseudo;
+    }
+
+    public Compte getCompte() {
+        return this.compte;
     }
 
 }
