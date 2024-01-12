@@ -4,6 +4,7 @@ import client.Main;
 import client.graphisme.Connexion;
 
 import javafx.event.EventHandler;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
 public class ConnexionEntrer implements EventHandler<KeyEvent> {
@@ -18,9 +19,9 @@ public class ConnexionEntrer implements EventHandler<KeyEvent> {
 
     @Override
     public void handle(KeyEvent event) {
-
-        this.main.connecterLeClient(this.connexion.getAdresse(), this.connexion.getPseudo());
-
+        if (event.getCode() == KeyCode.ENTER) {
+            this.main.connecterLeClient(this.connexion.getAdresse(), this.connexion.getPseudo());
+        }
     }
 
 }
