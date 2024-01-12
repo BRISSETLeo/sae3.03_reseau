@@ -103,18 +103,21 @@ public class Barre extends StackPane {
 
     }
 
-    public void insertLexicographique(Compte compte){
-        System.out.println(compte.getPseudo());
+    public void insertLexicographique(Compte compte) {
         this.trie.insert(compte.getPseudo());
-        this.comptes.put(compte.getPseudo(), compte);
+        this.comptes.put(compte.getPseudo().toLowerCase(), compte);
     }
 
-    public String getResultat(){
+    public String getResultat() {
         return this.rechercheField.getText();
     }
 
     public Trie getTrie() {
         return this.trie;
+    }
+
+    public void clearRecherche() {
+        this.rechercheField.clear();
     }
 
     public Map<String, Compte> getComptes() {

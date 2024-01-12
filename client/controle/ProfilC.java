@@ -5,7 +5,7 @@ import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 
 public class ProfilC implements EventHandler<MouseEvent> {
-    
+
     private Main main;
     private String pseudo;
 
@@ -16,8 +16,9 @@ public class ProfilC implements EventHandler<MouseEvent> {
 
     @Override
     public void handle(MouseEvent event) {
-        
+
         this.main.afficherPageProfil(this.pseudo);
+        this.main.clearRecherche();
 
     }
 

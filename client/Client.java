@@ -187,7 +187,10 @@ public class Client extends Thread {
                         MessageC message = ByteManager.fromBytes(receivedBytes, MessageC.class);
 
                         this.main.afficherMessage(message);
-                        this.main.changerDernierMessage( (message.getPseudoExpediteur().equals(this.pseudo) ? message.getPseudoDestinataire() : message.getPseudoExpediteur()) , message);
+                        this.main.changerDernierMessage(
+                                (message.getPseudoExpediteur().equals(this.pseudo) ? message.getPseudoDestinataire()
+                                        : message.getPseudoExpediteur()),
+                                message);
 
                     } else if (demande.equals(Requete.NOTIFICATIN_CONNEXION.getRequete())) {
 
@@ -199,7 +202,7 @@ public class Client extends Thread {
 
                         this.main.removeMessage(idMessage);
 
-                    } else if(demande.equals(Requete.AFFICHER_PROFIL.getRequete())){
+                    } else if (demande.equals(Requete.AFFICHER_PROFIL.getRequete())) {
 
                         int arraySize = this.in.readInt();
                         byte[] receivedBytes = new byte[arraySize];
@@ -209,12 +212,12 @@ public class Client extends Thread {
 
                         this.main.afficherProfil(compte, compte.getPseudo().equals(this.pseudo), this.in.readBoolean());
 
-                    } else if(demande.equals(Requete.UNFOLLOW.getRequete())){
+                    } else if (demande.equals(Requete.UNFOLLOW.getRequete())) {
 
                         this.main.unfollowAffichage(this.in.readUTF());
                         this.demanderPublications();
 
-                    }else if(demande.equals(Requete.FOLLOW.getRequete())){
+                    } else if (demande.equals(Requete.FOLLOW.getRequete())) {
 
                         this.main.followAffichage(this.in.readUTF());
                         this.demanderPublications();
@@ -223,7 +226,7 @@ public class Client extends Thread {
 
                         this.main.removeNotification(this.in.readInt());
 
-                    } else if(demande.equals(Requete.AVOIR_TOUT_LES_COMPTES.getRequete())){
+                    } else if (demande.equals(Requete.AVOIR_TOUT_LES_COMPTES.getRequete())) {
 
                         int arraySize = this.in.readInt();
                         byte[] receivedBytes = new byte[arraySize];
@@ -286,7 +289,7 @@ public class Client extends Thread {
         }
     }
 
-    private void demanderToutLesComptes(){
+    private void demanderToutLesComptes() {
         try {
             this.out.writeUTF(Requete.AVOIR_TOUT_LES_COMPTES.getRequete());
             this.out.flush();
@@ -383,7 +386,7 @@ public class Client extends Thread {
         }
     }
 
-    public void supprimerMessage(int idMessage){
+    public void supprimerMessage(int idMessage) {
         try {
             this.out.writeUTF(Requete.SUPPRIMER_MESSAGE.getRequete());
             this.out.writeInt(idMessage);
@@ -403,7 +406,7 @@ public class Client extends Thread {
         }
     }
 
-    public void afficherProfil(String pseudo){
+    public void afficherProfil(String pseudo) {
         try {
             this.out.writeUTF(Requete.AFFICHER_PROFIL.getRequete());
             this.out.writeUTF(pseudo);
@@ -413,7 +416,7 @@ public class Client extends Thread {
         }
     }
 
-    public void unfollow(String pseudoUnfollow){
+    public void unfollow(String pseudoUnfollow) {
         try {
             this.out.writeUTF(Requete.UNFOLLOW.getRequete());
             this.out.writeUTF(pseudoUnfollow);
@@ -423,7 +426,7 @@ public class Client extends Thread {
         }
     }
 
-    public void follow(String pseudoFollow){
+    public void follow(String pseudoFollow) {
         try {
             this.out.writeUTF(Requete.FOLLOW.getRequete());
             this.out.writeUTF(pseudoFollow);

@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Blob;
 import java.util.List;
+import java.util.Map;
 
 import javax.sound.sampled.AudioFormat;
 
@@ -21,6 +22,7 @@ import client.graphisme.Message;
 import client.graphisme.Navigation;
 import client.graphisme.Notifications;
 import client.graphisme.Profil;
+import client.graphisme.RecherchePage;
 import client.lexicographie.Trie;
 import client.son.Son;
 import client.graphisme.Messagerie;
@@ -51,6 +53,7 @@ public class Main extends Application {
     private Connexion connexion;
     private Navigation navigation;
     private Notifications notifications;
+    private RecherchePage recherchePage;
     private Profil profil;
     private Barre barre;
     private Accueil accueil;
@@ -75,6 +78,7 @@ public class Main extends Application {
         this.messagerie = new Messagerie(this);
         this.message = new Message(this);
         this.profil = new Profil(this);
+        this.recherchePage = new RecherchePage(this);
         this.notifications = new Notifications(this);
         this.root = new BorderPane(this.connexion);
         this.splitPane = new SplitPane();
@@ -275,7 +279,7 @@ public class Main extends Application {
 
     }
 
-    public void modifierCompteProfil(String pseudo, Image image){
+    public void modifierCompteProfil(String pseudo, Image image) {
         Platform.runLater(() -> this.profil.updateImage(pseudo, image));
     }
 
@@ -291,11 +295,11 @@ public class Main extends Application {
         Platform.runLater(() -> this.publication.reset());
     }
 
-    public void unfollow(String pseudoUnfollow){
+    public void unfollow(String pseudoUnfollow) {
         this.client.unfollow(pseudoUnfollow);
     }
 
-    public void unfollowAffichage(String pseudoUnfollow){
+    public void unfollowAffichage(String pseudoUnfollow) {
         Platform.runLater(() -> {
             this.profil.unfollow(pseudoUnfollow);
             this.accueil.resetPublications();
@@ -312,7 +316,7 @@ public class Main extends Application {
         this.son = new Son(this);
     }
 
-    public void follow(String pseudoFollow){
+    public void follow(String pseudoFollow) {
         this.client.follow(pseudoFollow);
     }
 
@@ -320,26 +324,45 @@ public class Main extends Application {
         Platform.runLater(() -> this.publication.mettreEnregistrementButtonAOff());
     }
 
-    public void followAffichage(String pseudoFollow){
+    public void followAffichage(String pseudoFollow) {
         Platform.runLater(() -> {
             this.profil.follow(pseudoFollow);
             this.accueil.resetPublications();
         });
     }
 
+    public void addCompteSimilar(String[] recherches) {
+        this.recherchePage.addCompteSimilar(recherches);
+        this.afficherPageRecherche();
+    }
+
+    public void afficherPageRecherche() {
+        this.enleverPageDroite();
+        this.ajouterPageDroite(this.recherchePage);
+    }
+
+    public void clearRecherche() {
+        this.barre.clearRecherche();
+    }
+
     public void insertLexicographique(Compte compte) {
         this.barre.insertLexicographique(compte);
+        this.recherchePage.insertCompte(compte);
     }
 
     public void nouveauVocal(List<Double> averages) {
         Platform.runLater(() -> this.publication.messageVocal(averages));
     }
 
-    public Trie getTrie(){
+    public Map<String, Compte> getComptes() {
+        return this.barre.getComptes();
+    }
+
+    public Trie getTrie() {
         return this.barre.getTrie();
     }
 
-    public String getResultat(){
+    public String getResultat() {
         return this.barre.getResultat();
     }
 
@@ -487,8 +510,6 @@ public class Main extends Application {
     public void supprimerNotification(int idNotification) {
         this.client.supprimerNotification(idNotification);
     }
-
-
 
     public void removeMessage(int idMessage) {
         Platform.runLater(() -> this.messagerie.removeMessage(idMessage));

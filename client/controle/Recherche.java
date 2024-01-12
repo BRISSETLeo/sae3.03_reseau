@@ -6,7 +6,7 @@ import javafx.event.EventHandler;
 import javafx.scene.input.KeyEvent;
 
 public class Recherche implements EventHandler<KeyEvent> {
-    
+
     private Main main;
 
     public Recherche(Main main) {
@@ -17,9 +17,13 @@ public class Recherche implements EventHandler<KeyEvent> {
     public void handle(KeyEvent event) {
 
         Trie trie = main.getTrie();
-        String resultat = this.main.getResultat();
-        System.out.println(trie.findAllWordsWithPrefix(resultat.toLowerCase()));
-        
+        String resultat = this.main.getResultat().toLowerCase();
+
+        if (resultat.equals(""))
+            this.main.enleverPageDroite();
+        else
+            this.main.addCompteSimilar(trie.findAllWordsWithPrefix(resultat).split(" "));
+
     }
 
 }
