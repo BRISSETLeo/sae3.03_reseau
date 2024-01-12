@@ -116,6 +116,7 @@ public class Accueil extends VBox {
 
         if (publication.getCompte().getPseudo().equals(this.main.getPseudo())) {
             ButtonG supprimerPublication = new ButtonG(new ImageViewS(CheminIMG.CORBEILLE.getChemin()));
+            supprimerPublication.getStyleClass().add("button-corbeille");
             supprimerPublication.setOnAction(new SupprimerPublication(this.main, publication.getIdPublication()));
             likeBox.getChildren().add(0, supprimerPublication);
         }

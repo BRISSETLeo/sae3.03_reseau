@@ -21,6 +21,14 @@ Button {
     -fx-cursor: hand;
 }
 
-Button:hover {
-    -fx-text-fill: red;
+
+/* Par défaut, l'opacité du bouton est à zéro */
+.container .button-corbeille {
+    -fx-opacity: 0.0;
+}
+
+/* Au survol de la publication, augmentez l'opacité du bouton à 1.0 */
+.container:hover .button-corbeille {
+    -fx-opacity: 1.0;
+    -fx-cursor: hand;
 }
