@@ -161,6 +161,8 @@ public class Accueil extends VBox {
     }
 
     public void retirerCompteBoxDeListeAffichage(int idPublication) {
+        if(this.publications.get(idPublication) == null)
+            return;
         CompteBox compteBox = (CompteBox) ((HBox) this.publications.get(idPublication).getChildren().get(0))
                 .getChildren().get(0);
         for (String pseudo : this.comptesBoxs.keySet()) {

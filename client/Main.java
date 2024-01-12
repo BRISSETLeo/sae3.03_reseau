@@ -150,9 +150,12 @@ public class Main extends Application {
     }
 
     public void afficherPublication(Publication publication, boolean hasNewPublication) {
-        Platform.runLater(() -> this.accueil.ajouterPublication(publication, hasNewPublication));
-        if (hasNewPublication && this.client.getPseudo().equals(publication.getCompte().getPseudo()))
-            Platform.runLater(() -> this.resetPublication());
+        Platform.runLater(() -> {
+            this.accueil.ajouterPublication(publication, hasNewPublication);
+            this.profil.ajouterPublication(publication.getCompte().getPseudo());
+            if (hasNewPublication && this.client.getPseudo().equals(publication.getCompte().getPseudo()))
+                this.resetPublication();
+        });
     }
 
     public void sauvegarderIdentifiant(String ip, String pseudo) {
@@ -271,8 +274,8 @@ public class Main extends Application {
 
     }
 
-    public void modifierCompteProfil(Image image){
-        Platform.runLater(() -> this.profil.changerImage(image));
+    public void modifierCompteProfil(String pseudo, Image image){
+        Platform.runLater(() -> this.profil.updateImage(pseudo, image));
     }
 
     public void aucunSon() {
@@ -446,8 +449,11 @@ public class Main extends Application {
         Platform.runLater(() -> this.messagerie.removeMessage(idMessage));
     }
 
-    public void removePublication(int idPublication) {
-        Platform.runLater(() -> this.accueil.removePublication(idPublication));
+    public void removePublication(String pseudo, int idPublication) {
+        Platform.runLater(() -> {
+            this.accueil.removePublication(idPublication);
+            this.profil.removePublication(pseudo);
+        });
     }
 
     public void changerDernierMessage(String pseudo, MessageC message) {

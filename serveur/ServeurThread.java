@@ -255,6 +255,7 @@ public class ServeurThread extends Thread {
         for (ServeurThread client : this.serveur.getClients()) {
             if (this.canAccessToTheBottom(client.getCompte(), idPublication)) {
                 client.getOut().writeUTF(Requete.SUPPRIMER_PUBLICATION.getRequete());
+                client.getOut().writeUTF(this.compte.getPseudo());
                 client.getOut().writeInt(idPublication);
                 client.getOut().flush();
             }

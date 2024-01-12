@@ -145,9 +145,7 @@ public class Client extends Thread {
 
                     } else if (demande.equals(Requete.SUPPRIMER_PUBLICATION.getRequete())) {
 
-                        int idPublication = this.in.readInt();
-
-                        this.main.removePublication(idPublication);
+                        this.main.removePublication(this.in.readUTF(), this.in.readInt());
 
                     } else if (demande.equals(Requete.VOIR_NOTIFICATIONS.getRequete())) {
 
@@ -176,7 +174,7 @@ public class Client extends Thread {
                             this.main.modifierCompteBarre(image);
                         }
 
-                        this.main.modifierCompteProfil(image);
+                        this.main.modifierCompteProfil(compte.getPseudo(), image);
                         this.main.modifierComptePublications(compte.getPseudo(), image);
 
                     } else if (demande.equals(Requete.ENVOYER_MESSAGE.getRequete())) {

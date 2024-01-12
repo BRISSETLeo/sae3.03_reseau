@@ -37,6 +37,10 @@ public class Profil extends VBox {
     private VBox content;
     private Compte compte;
 
+    private Label nbPublications;
+    private Label nbAbonnes;
+    private Label nbAbonnements;
+
     public Profil(Main main) {
         this.main = main;
         this.content = new VBox(20);
@@ -57,15 +61,19 @@ public class Profil extends VBox {
         this.content.getChildren().clear();
         this.compte = compte;
 
-        this.circle.setFill(new ImagePattern(Main.blobToImage(this.main.getCompte().getImage())));
+        this.circle.setFill(new ImagePattern(Main.blobToImage(compte.getImage())));
 
         VBox profil = new VBox(20, new LabelF(compte.getPseudo()), this.circle);
 
         HBox informations = new HBox(10);
 
-        VBox publications = new VBox(new Label(compte.getNbPublications()+""), new Label("Publication(s)"));
-        VBox abonnes = new VBox(new Label(compte.getNbAbonnes()+""), new Label("Abonné(s)"));
-        VBox abonnements = new VBox(new Label(compte.getNbAbonnements()+""), new Label("Abonnement(s)"));
+        this.nbPublications = new Label(compte.getNbPublications()+"");
+        this.nbAbonnes = new Label(compte.getNbAbonnes()+"");
+        this.nbAbonnements = new Label(compte.getNbAbonnements()+"");
+
+        VBox publications = new VBox(this.nbPublications, new Label("Publication(s)"));
+        VBox abonnes = new VBox(this.nbAbonnes, new Label("Abonné(s)"));
+        VBox abonnements = new VBox(this.nbAbonnements, new Label("Abonnement(s)"));
 
         publications.setAlignment(Pos.CENTER);
         abonnes.setAlignment(Pos.CENTER);
@@ -95,6 +103,42 @@ public class Profil extends VBox {
         this.content.getChildren().add(profil);
     }
 
+    public void ajouterPublication(String pseudo){
+        if(this.compte != null && this.compte.getPseudo().equals(pseudo)){
+            this.nbPublications.setText((Integer.parseInt(this.nbPublications.getText())+1)+"");
+        }
+    }
+
+    public void removePublication(String pseudo){
+        if(this.compte != null && this.compte.getPseudo().equals(pseudo)){
+            this.nbPublications.setText((Integer.parseInt(this.nbPublications.getText())-1)+"");
+        }
+    }
+    
+    public void ajouterAbonne(String pseudo){
+        if(this.compte != null && this.compte.getPseudo().equals(pseudo)){
+            this.nbAbonnes.setText((Integer.parseInt(this.nbAbonnes.getText())+1)+"");
+        }
+    }
+
+    public void removeAbonne(String pseudo){
+        if(this.compte != null && this.compte.getPseudo().equals(pseudo)){
+            this.nbAbonnes.setText((Integer.parseInt(this.nbAbonnes.getText())-1)+"");
+        }
+    }
+
+    public void ajouterAbonnement(String pseudo){
+        if(this.compte != null && this.compte.getPseudo().equals(pseudo)){
+            this.nbAbonnements.setText((Integer.parseInt(this.nbAbonnements.getText())+1)+"");
+        }
+    }
+
+    public void removeAbonnement(String pseudo){
+        if(this.compte != null && this.compte.getPseudo().equals(pseudo)){
+            this.nbAbonnements.setText((Integer.parseInt(this.nbAbonnements.getText())-1)+"");
+        }
+    }
+
     public void changerImage(Image image) {
         this.circle.setFill(new ImagePattern(image));
         try {
@@ -102,6 +146,11 @@ public class Profil extends VBox {
         } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public void updateImage(String pseudo, Image image) {
+        if(this.compte != null && this.compte.getPseudo().equals(pseudo))
+            this.circle.setFill(new ImagePattern(image));
     }
 
     public Blob imageToBlob(Image image) throws IOException, SQLException {
