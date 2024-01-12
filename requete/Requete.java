@@ -30,6 +30,7 @@ public enum Requete {
 
     VOIR_MESSAGES("VoirMessages"),
     ENVOYER_MESSAGE("EnvoyerMessage"),
+    SUPPRIMER_MESSAGE("SupprimerMessage"),
 
     FERMER("Fermer");
 

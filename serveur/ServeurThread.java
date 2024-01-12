@@ -129,6 +129,12 @@ public class ServeurThread extends Thread {
                             e.printStackTrace();
                         }
 
+                    } else if (message.equals(Requete.SUPPRIMER_MESSAGE.getRequete())){
+
+                        int idMessage = this.in.readInt();
+                    
+                        this.supprimerMessage(idMessage);
+                        
                     }
 
                 }
@@ -304,6 +310,17 @@ public class ServeurThread extends Thread {
             if (this.serveur.getConnexionMySQL().hasFollowTo(client.getCompte().getPseudo(), this.compte.getPseudo())) {
                 client.getOut().writeUTF(Requete.NOTIFICATIN_CONNEXION.getRequete());
                 client.getOut().writeUTF(this.compte.getPseudo());
+                client.getOut().flush();
+            }
+        }
+    }
+
+    public void supprimerMessage(int idMessage) throws IOException{
+        this.serveur.getConnexionMySQL().supprimerMessage(idMessage);
+        for(ServeurThread client : this.serveur.getClients()){
+            if(client.getCompte().getPseudo().equals(this.compte.getPseudo())){
+                client.getOut().writeUTF(Requete.SUPPRIMER_MESSAGE.getRequete());
+                client.getOut().writeInt(idMessage);
                 client.getOut().flush();
             }
         }

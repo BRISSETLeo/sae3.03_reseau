@@ -187,10 +187,17 @@ public class Client extends Thread {
                         MessageC message = ByteManager.fromBytes(receivedBytes, MessageC.class);
 
                         this.main.afficherMessage(message);
+                        this.main.changerDernierMessage( (message.getPseudoExpediteur().equals(this.pseudo) ? message.getPseudoDestinataire() : message.getPseudoExpediteur()) , message.getContent());
 
                     } else if (demande.equals(Requete.NOTIFICATIN_CONNEXION.getRequete())) {
 
                         this.main.afficherNotificationConnexion(this.in.readUTF());
+
+                    } else if (demande.equals(Requete.SUPPRIMER_MESSAGE.getRequete())) {
+
+                        int idMessage = this.in.readInt();
+
+                        this.main.removeMessage(idMessage);
 
                     }
 
@@ -327,6 +334,16 @@ public class Client extends Thread {
             byte[] bytes = ByteManager.getBytes(messageC);
             this.out.writeInt(bytes.length);
             this.out.write(bytes);
+            this.out.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void supprimerMessage(int idMessage){
+        try {
+            this.out.writeUTF(Requete.SUPPRIMER_MESSAGE.getRequete());
+            this.out.writeInt(idMessage);
             this.out.flush();
         } catch (Exception e) {
             e.printStackTrace();

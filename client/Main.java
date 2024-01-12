@@ -426,8 +426,20 @@ public class Main extends Application {
             this.client.supprimerPublication(idPublication);
     }
 
+    public void supprimerMessage(int idMessage) {
+        this.client.supprimerMessage(idMessage);
+    }
+
+    public void removeMessage(int idMessage) {
+        Platform.runLater(() -> this.messagerie.removeMessage(idMessage));
+    }
+
     public void removePublication(int idPublication) {
         Platform.runLater(() -> this.accueil.removePublication(idPublication));
+    }
+
+    public void changerDernierMessage(String pseudo, String message) {
+        Platform.runLater(() -> this.message.changerDernierMessage(pseudo, message));
     }
 
     public static Image blobToImage(Blob image) {

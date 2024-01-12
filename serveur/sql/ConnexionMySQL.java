@@ -808,4 +808,23 @@ public class ConnexionMySQL {
 
     }
 
+    public void supprimerMessage(int idMessage) {
+        try {
+
+            String sqlQuery = "DELETE FROM messages WHERE id_message = ?;";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setInt(1, idMessage);
+                statement.executeUpdate();
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+    }
+
 }

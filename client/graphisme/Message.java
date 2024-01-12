@@ -1,5 +1,8 @@
 package client.graphisme;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import caches.Compte;
 import caches.MessageC;
 import client.Main;
@@ -17,9 +20,11 @@ import javafx.scene.layout.VBox;
 public class Message extends VBox {
 
     private Main main;
+    private Map<String, Label> dernierMessages;
 
     public Message(Main main) {
         this.main = main;
+        this.dernierMessages = new HashMap<>();
 
         ButtonG close = new ButtonG(CheminIMG.CLOSE.getChemin());
         close.setOnAction(new CloseRight(this.main));
@@ -43,11 +48,18 @@ public class Message extends VBox {
             content.getStyleClass().add("non-lu");
         }
         ((VBox) compteBox.getChildren().get(1)).getChildren().add(content);
+        this.dernierMessages.put(compte.getPseudo(), content);
 
         HBox.setMargin(compteBox, new Insets(10, 10, 10, 10));
         HBox.setHgrow(compteBox, Priority.ALWAYS);
 
         super.getChildren().add(compteBox);
+    }
+
+    public void changerDernierMessage(String pseudo, String message){
+        if(this.dernierMessages.containsKey(pseudo)){
+            this.dernierMessages.get(pseudo).setText(message);
+        }
     }
 
 }
