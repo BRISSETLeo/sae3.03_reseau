@@ -1,2 +1,2 @@
-ip: info12-18
-pseudo: Maxirito
+ip: localhost
+pseudo: NoCros
