@@ -711,6 +711,47 @@ public class ConnexionMySQL {
         }
     }
 
+    public List<Compte> getToutLesComptes(){
+        List<Compte> comptes = new ArrayList<>();
+
+        try {
+
+            String sqlQuery = "SELECT" +
+                    " c.pseudo," +
+                    " c.image" +
+                    " FROM" +
+                    " comptes c" +
+                    " ORDER BY" +
+                    " c.pseudo ASC;";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+
+                    while (resultSet.next()) {
+
+                        String pseud = resultSet.getString("pseudo");
+                        Blob image = resultSet.getBlob("image");
+
+                        Compte compte = new Compte(pseud, image, this.nbPublications(pseud), this.nbAbonnes(pseud),
+                                this.nbAbonnements(pseud));
+                        comptes.add(compte);
+
+                    }
+
+                }
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return comptes;
+    }
+
     public void supprimerPublication(int idPublication) {
         try {
 

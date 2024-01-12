@@ -74,6 +74,7 @@ public class Client extends Thread {
                         this.demanderPublications();
                         this.demanderComptes();
                         this.demanderNotifications();
+                        this.demanderToutLesComptes();
                         this.main.mettrePage();
 
                     } else if (demande.equals(Requete.AVOIR_PUBLICATIONS.getRequete())) {
@@ -222,6 +223,17 @@ public class Client extends Thread {
 
                         this.main.removeNotification(this.in.readInt());
 
+                    } else if(demande.equals(Requete.AVOIR_TOUT_LES_COMPTES.getRequete())){
+
+                        int arraySize = this.in.readInt();
+                        byte[] receivedBytes = new byte[arraySize];
+                        this.in.readFully(receivedBytes);
+
+                        List<Compte> comptes = ByteManager.convertBytesToList(receivedBytes, Compte.class);
+
+                        for (Compte compte : comptes)
+                            this.main.insertLexicographique(compte);
+
                     }
 
                 }
@@ -268,6 +280,15 @@ public class Client extends Thread {
     public void demanderComptes() {
         try {
             this.out.writeUTF(Requete.AVOIR_FOLLOW.getRequete());
+            this.out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void demanderToutLesComptes(){
+        try {
+            this.out.writeUTF(Requete.AVOIR_TOUT_LES_COMPTES.getRequete());
             this.out.flush();
         } catch (IOException e) {
             e.printStackTrace();

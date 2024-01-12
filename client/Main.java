@@ -21,6 +21,7 @@ import client.graphisme.Message;
 import client.graphisme.Navigation;
 import client.graphisme.Notifications;
 import client.graphisme.Profil;
+import client.lexicographie.Trie;
 import client.son.Son;
 import client.graphisme.Messagerie;
 import enums.CheminIMG;
@@ -69,7 +70,7 @@ public class Main extends Application {
         this.son = new Son(this);
         this.connexion = new Connexion(this);
         this.accueil = new Accueil(this);
-        this.barre = new Barre();
+        this.barre = new Barre(this);
         this.navigation = new Navigation(this);
         this.messagerie = new Messagerie(this);
         this.message = new Message(this);
@@ -326,8 +327,20 @@ public class Main extends Application {
         });
     }
 
+    public void insertLexicographique(Compte compte) {
+        this.barre.insertLexicographique(compte);
+    }
+
     public void nouveauVocal(List<Double> averages) {
         Platform.runLater(() -> this.publication.messageVocal(averages));
+    }
+
+    public Trie getTrie(){
+        return this.barre.getTrie();
+    }
+
+    public String getResultat(){
+        return this.barre.getResultat();
     }
 
     public void jouerSon(byte[] bytes) {

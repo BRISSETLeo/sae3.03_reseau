@@ -151,6 +151,9 @@ public class ServeurThread extends Thread {
 
                         this.supprimerNotification(this.in.readInt());
                     
+                    } else if(message.equals(Requete.AVOIR_TOUT_LES_COMPTES.getRequete())){
+
+                        this.avoirToutLesComptes();
                     }
 
                 }
@@ -375,6 +378,14 @@ public class ServeurThread extends Thread {
         this.out.writeUTF(pseudoFollow);
         this.out.flush();
 
+    }
+
+    public void avoirToutLesComptes() throws IOException{
+        byte[] bytes = ByteManager.convertListToBytes(this.serveur.getConnexionMySQL().getToutLesComptes());
+        this.out.writeUTF(Requete.AVOIR_TOUT_LES_COMPTES.getRequete());
+        this.out.writeInt(bytes.length);
+        this.out.write(bytes);
+        this.out.flush();
     }
 
 }

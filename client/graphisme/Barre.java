@@ -1,8 +1,13 @@
 package client.graphisme;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import caches.Compte;
 import client.Main;
+import client.controle.Recherche;
+import client.lexicographie.Trie;
 import enums.CheminCSS;
-import enums.FontP;
 import enums.CheminIMG;
 import javafx.animation.TranslateTransition;
 import javafx.geometry.Pos;
@@ -22,9 +27,14 @@ public class Barre extends StackPane {
     private TextField rechercheField;
     private CompteBox compteBox;
 
-    public Barre() {
+    private Trie trie;
+    private Map<String, Compte> comptes;
+
+    public Barre(Main main) {
         this.barre = new HBox();
         this.personneConnecte = new Label();
+        this.trie = new Trie();
+        this.comptes = new HashMap<>();
 
         ImageView logo = new ImageView(CheminIMG.LOGO.getChemin());
 
@@ -33,7 +43,7 @@ public class Barre extends StackPane {
 
         this.rechercheField = new TextField();
         this.rechercheField.setPromptText("Rechercher...");
-        this.rechercheField.setFont(FontP.FONT_20.getFont());
+        this.rechercheField.setOnKeyReleased(new Recherche(main));
 
         this.barre.getStyleClass().add("positionnement");
         this.barre.getChildren().addAll(logo, Main.createRegion(), this.rechercheField, Main.createRegion());
@@ -91,6 +101,24 @@ public class Barre extends StackPane {
         });
         transition.play();
 
+    }
+
+    public void insertLexicographique(Compte compte){
+        System.out.println(compte.getPseudo());
+        this.trie.insert(compte.getPseudo());
+        this.comptes.put(compte.getPseudo(), compte);
+    }
+
+    public String getResultat(){
+        return this.rechercheField.getText();
+    }
+
+    public Trie getTrie() {
+        return this.trie;
+    }
+
+    public Map<String, Compte> getComptes() {
+        return this.comptes;
     }
 
 }

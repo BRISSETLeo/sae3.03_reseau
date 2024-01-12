@@ -21,6 +21,8 @@ public enum Requete {
     AJOUTER_FOLLOW("AjouterFollow"),
     RETIRER_FOLLOW("RetirerFollow"),
 
+    AVOIR_TOUT_LES_COMPTES("AvoirToutLesComptes"),
+
     PUBLIER_PUBLICATION("PublierPublication"),
 
     VOIR_NOTIFICATIONS("VoirNotifications"),
