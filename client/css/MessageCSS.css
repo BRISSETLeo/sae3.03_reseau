@@ -1,0 +1,7 @@
+.lu {
+    -fx-text-fill: gray;
+}
+
+.non-lu {
+    -fx-text-fill: black;
+}

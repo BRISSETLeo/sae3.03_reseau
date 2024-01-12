@@ -16,7 +16,8 @@ public enum CheminIMG {
     STOP("./client/static/images/stop.png"),
     NO_PP("./client/static/images/nopp.png"),
     CORBEILLE("./client/static/images/corbeille.png"),
-    LEFT_ARROW("./client/static/images/left-arrow.png");
+    LEFT_ARROW("./client/static/images/left-arrow.png"),
+    CLOSE("./client/static/images/close.png");
 
     private String chemin;
 

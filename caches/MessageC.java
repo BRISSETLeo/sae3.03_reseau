@@ -14,9 +14,10 @@ public class MessageC implements Serializable {
     private String content;
     private Blob vocal;
     private Blob photo;
+    private boolean lu;
 
     public MessageC(int idMessage, String pseudoExpediteur, String pseudoDestinataire, String content, Blob vocal,
-            Timestamp date, Blob photo) {
+            Timestamp date, Blob photo, boolean lu) {
         this.idMessage = idMessage;
         this.pseudoExpediteur = pseudoExpediteur;
         this.pseudoDestinataire = pseudoDestinataire;
@@ -24,6 +25,7 @@ public class MessageC implements Serializable {
         this.vocal = vocal;
         this.date = date;
         this.photo = photo;
+        this.lu = lu;
     }
 
     public String getMessage() {
@@ -56,6 +58,10 @@ public class MessageC implements Serializable {
 
     public int getIdMessage() {
         return this.idMessage;
+    }
+
+    public boolean isLu() {
+        return this.lu;
     }
 
 }

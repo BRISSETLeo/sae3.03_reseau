@@ -229,8 +229,10 @@ public class Main extends Application {
     public void enleverPageDroite() {
         if (this.splitPane.getItems().size() > 1) {
             VBox page = (VBox) this.splitPane.getItems().get(1);
-            if (page == this.publication)
-                this.publication.reset();
+            if (page == this.publication) {
+                this.publication.resetSon();
+                this.arreterSon(null);
+            }
             this.splitPane.getItems().remove(1);
         }
     }
@@ -332,13 +334,18 @@ public class Main extends Application {
     public void afficherMessage(Compte compte) {
         this.messagerie.clear();
         this.client.getMessages(compte.getPseudo());
+        byte[] audioJouerActuellement = this.getAudioJouerActuellement();
         if (this.splitPane.getItems().size() == 0) {
             this.messagerie.setCompteFollow(compte);
             this.splitPane.getItems().add(this.messagerie);
+            if (audioJouerActuellement != null)
+                this.arreterSon(audioJouerActuellement);
         } else {
             this.messagerie.setCompteFollow(compte);
             this.splitPane.getItems().set(0, this.messagerie);
             this.splitPane.setDividerPositions(0.7);
+            if (audioJouerActuellement != null)
+                this.arreterSon(audioJouerActuellement);
         }
         this.splitPane.setDividerPositions(0.7);
     }
@@ -390,8 +397,8 @@ public class Main extends Application {
         Platform.runLater(() -> this.barre.modifierCompteBarre(image));
     }
 
-    public void afficherCompte(Compte compte) {
-        Platform.runLater(() -> this.message.ajouterCompte(compte));
+    public void afficherCompte(Compte compte, MessageC message) {
+        Platform.runLater(() -> this.message.ajouterCompte(compte, message));
     }
 
     public void modifierComptePublications(String pseudo, Image image) {
@@ -438,7 +445,7 @@ public class Main extends Application {
 
     public void envoyerMessage() {
         MessageC messageC = new MessageC(-1, this.client.getPseudo(), this.messagerie.getPseudoDest(),
-                this.messagerie.getNewMessage(), null, null, null);
+                this.messagerie.getNewMessage(), null, null, null, false);
 
         this.client.envoyerMessage(messageC);
     }

@@ -10,7 +10,9 @@ public enum CheminCSS {
     PUBLICATION("./client/css/PublicationCSS.css"),
     TEXTEFIELD("./client/css/TextFieldCSS.css"),
     COMPTEBOX("./client/css/CompteBoxCSS.css"),
-    POPUP("./client/css/PopupCSS.css");
+    POPUP("./client/css/PopupCSS.css"),
+    PROFIL("./client/css/ProfilCSS.css"),
+    MESSAGE("./client/css/MessageCSS.css");
 
     private String chemin;
 

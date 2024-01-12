@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
+import java.util.Map;
 
 import caches.ByteManager;
 import caches.Compte;
@@ -115,9 +116,10 @@ public class Client extends Thread {
                         receivedBytes = new byte[arraySize];
                         this.in.readFully(receivedBytes);
 
-                        List<Compte> comptes = ByteManager.convertBytesToList(receivedBytes, Compte.class);
-                        for (Compte compte : comptes)
-                            this.main.afficherCompte(compte);
+                        Map<Compte, MessageC> comptes = ByteManager.convertBytesToMap(receivedBytes, Compte.class,
+                                MessageC.class);
+                        for (Map.Entry<Compte, MessageC> compte : comptes.entrySet())
+                            this.main.afficherCompte(compte.getKey(), compte.getValue());
 
                     } else if (demande.equals(Requete.PUBLIER_PUBLICATION.getRequete())) {
 

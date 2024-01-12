@@ -7,6 +7,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 
@@ -24,7 +25,7 @@ public class CompteBox extends HBox {
 
         super.setCursor(Cursor.HAND);
         super.setAlignment(Pos.CENTER_LEFT);
-        super.getChildren().addAll(this.circle, new LabelF(compte.getPseudo()));
+        super.getChildren().addAll(this.circle, new VBox(new LabelF(compte.getPseudo())));
 
     }
 

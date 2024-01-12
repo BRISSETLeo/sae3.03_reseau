@@ -225,7 +225,7 @@ public class ServeurThread extends Thread {
         byte[] listBytes = ByteManager.getBytes(this.compte);
         this.out.writeInt(listBytes.length);
         this.out.write(listBytes);
-        listBytes = ByteManager.convertListToBytes(
+        listBytes = ByteManager.convertMapToBytes(
                 this.serveur.getConnexionMySQL().getFollow(this.compte.getPseudo()));
         this.out.writeInt(listBytes.length);
         this.out.write(listBytes);

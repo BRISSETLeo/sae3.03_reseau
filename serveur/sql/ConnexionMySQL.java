@@ -9,7 +9,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import caches.Commentaire;
 import caches.Compte;
@@ -401,7 +403,7 @@ public class ConnexionMySQL {
         return 0;
     }
 
-    public void enregistrerProfil(String pseudo, Blob image){
+    public void enregistrerProfil(String pseudo, Blob image) {
 
         try {
 
@@ -522,8 +524,8 @@ public class ConnexionMySQL {
         return false;
     }
 
-    public List<Compte> getFollow(String pseudo) {
-        List<Compte> comptes = new ArrayList<>();
+    public Map<Compte, MessageC> getFollow(String pseudo) {
+        Map<Compte, MessageC> comptes = new HashMap<>();
 
         try {
 
@@ -553,7 +555,7 @@ public class ConnexionMySQL {
                         Blob image = resultSet.getBlob("image");
 
                         Compte compte = new Compte(pseud, image);
-                        comptes.add(compte);
+                        comptes.put(compte, this.getDernierMessageEnvoyer(pseudo, pseud));
 
                     }
 
@@ -595,13 +597,7 @@ public class ConnexionMySQL {
         try {
 
             String sqlQuery = "SELECT" +
-                    " m.id_message," +
-                    " m.pseudo," +
-                    " m.pseudo_dest," +
-                    " m.content," +
-                    " m.vocal," +
-                    " m.date," +
-                    " m.photo" +
+                    " m.*" +
                     " FROM" +
                     " messages m" +
                     " WHERE" +
@@ -628,8 +624,9 @@ public class ConnexionMySQL {
                         Blob vocal = resultSet.getBlob("vocal");
                         Timestamp date = resultSet.getTimestamp("date");
                         Blob photo = resultSet.getBlob("photo");
+                        boolean lu = resultSet.getBoolean("lu");
 
-                        MessageC message = new MessageC(idMessage, pseudo1, pseudo2, content, vocal, date, photo);
+                        MessageC message = new MessageC(idMessage, pseudo1, pseudo2, content, vocal, date, photo, lu);
                         messages.add(message);
 
                     }
@@ -745,8 +742,9 @@ public class ConnexionMySQL {
                         Blob vocal = resultSet.getBlob("vocal");
                         Timestamp date = resultSet.getTimestamp("date");
                         Blob photo = resultSet.getBlob("photo");
+                        boolean lu = resultSet.getBoolean("lu");
 
-                        MessageC message = new MessageC(idMessage, pseudo1, pseudo2, content, vocal, date, photo);
+                        MessageC message = new MessageC(idMessage, pseudo1, pseudo2, content, vocal, date, photo, lu);
                         return message;
 
                     }
@@ -762,6 +760,52 @@ public class ConnexionMySQL {
         }
 
         return null;
+    }
+
+    public MessageC getDernierMessageEnvoyer(String pseudo, String pseudDest) {
+
+        try {
+
+            String sqlQuery = "SELECT * FROM messages WHERE (pseudo = ? AND pseudo_dest = ? OR pseudo = ? AND pseudo_dest = ?) ORDER BY id_message DESC LIMIT 1;";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setString(1, pseudo);
+                statement.setString(2, pseudDest);
+
+                statement.setString(3, pseudDest);
+                statement.setString(4, pseudo);
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+
+                    if (resultSet.next()) {
+
+                        int idMessage = resultSet.getInt("id_message");
+                        String pseudo1 = resultSet.getString("pseudo");
+                        String pseudo2 = resultSet.getString("pseudo_dest");
+                        String content = resultSet.getString("content");
+                        Blob vocal = resultSet.getBlob("vocal");
+                        Timestamp date = resultSet.getTimestamp("date");
+                        Blob photo = resultSet.getBlob("photo");
+                        boolean lu = resultSet.getBoolean("lu");
+
+                        MessageC message = new MessageC(idMessage, pseudo1, pseudo2, content, vocal, date, photo, lu);
+                        return message;
+
+                    }
+
+                }
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return null;
+
     }
 
 }

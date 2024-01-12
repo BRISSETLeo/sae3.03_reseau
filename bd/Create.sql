@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS `messages`(
     `vocal` LONGBLOB DEFAULT NULL,
     `date` TIMESTAMP NOT NULL,
     `photo` LONGBLOB DEFAULT NULL,
+    `lu` BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (`id_message`),
     FOREIGN KEY (`pseudo`) REFERENCES `comptes`(`pseudo`),
     FOREIGN KEY (`pseudo_dest`) REFERENCES `comptes`(`pseudo`)

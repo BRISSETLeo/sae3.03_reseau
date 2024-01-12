@@ -13,11 +13,17 @@ import javax.sql.rowset.serial.SerialBlob;
 import caches.Compte;
 import client.Main;
 import client.controle.ChoosePP;
+import client.controle.CloseRight;
 import client.controle.EnregistrerProfil;
+import client.graphisme.affichage.ButtonG;
 import client.graphisme.affichage.LabelF;
+import enums.CheminCSS;
+import enums.CheminIMG;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
@@ -27,13 +33,19 @@ public class Profil extends VBox {
     private Main main;
     private Circle circle;
 
-    public Profil(Main main){
+    public Profil(Main main) {
+        super(20);
         this.main = main;
         this.circle = new Circle();
         this.circle.setRadius(100);
+        ButtonG close = new ButtonG(CheminIMG.CLOSE.getChemin());
+        close.setOnAction(new CloseRight(this.main));
+        HBox hBox = new HBox(close);
+        hBox.getStylesheets().add(CheminCSS.PROFIL.getChemin());
+        super.getChildren().add(hBox);
     }
-    
-    public void ajouterCompte(){
+
+    public void ajouterCompte() {
         Compte compte = this.main.getCompte();
 
         Button selectImageButton = new Button("Sélectionner une image");
@@ -44,14 +56,15 @@ public class Profil extends VBox {
 
         this.circle.setFill(new ImagePattern(Main.blobToImage(this.main.getCompte().getImage())));
 
+        super.setAlignment(Pos.TOP_CENTER);
         super.getChildren().addAll(new LabelF(compte.getPseudo()), this.circle, selectImageButton, enregistrer);
     }
 
-    public void changerImage(Image image){
+    public void changerImage(Image image) {
         this.circle.setFill(new ImagePattern(image));
-        try{
+        try {
             this.main.getCompte().setImage(this.imageToBlob(image));
-        }catch(IOException | SQLException e){
+        } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
     }

@@ -3,6 +3,7 @@ package client.graphisme;
 import java.util.List;
 
 import client.Main;
+import client.controle.CloseRight;
 import client.controle.JouerSon;
 import client.controle.PauseSon;
 import client.controle.PublierPublication;
@@ -106,6 +107,13 @@ public class Publication extends VBox {
         this.aucunSon.setVisible(false);
 
         super.getStylesheets().add(CheminCSS.PUBLICATION.getChemin());
+
+        ButtonG close = new ButtonG(CheminIMG.CLOSE.getChemin());
+        close.setOnAction(new CloseRight(this.main));
+        HBox hBox = new HBox(close);
+        hBox.getStylesheets().add(CheminCSS.PROFIL.getChemin());
+        super.getChildren().add(hBox);
+
         super.getChildren().addAll(new LabelF("Publication"), this.publication,
                 new HBox(this.enregistrerVocal, this.aucunSon, Main.createRegion(), label),
                 this.combinaisonVocal, Main.createRegion(), this.erreur, publier);

@@ -2,8 +2,13 @@ package client.graphisme;
 
 import caches.Notification;
 import client.Main;
+import client.controle.CloseRight;
+import client.graphisme.affichage.ButtonG;
+import enums.CheminCSS;
+import enums.CheminIMG;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class Notifications extends VBox {
@@ -18,7 +23,12 @@ public class Notifications extends VBox {
         scrollPane.setFitToWidth(true);
         scrollPane.setContent(this.content);
 
-        super.getChildren().add(scrollPane);
+        ButtonG close = new ButtonG(CheminIMG.CLOSE.getChemin());
+        close.setOnAction(new CloseRight(main));
+        HBox hBox = new HBox(close);
+        hBox.getStylesheets().add(CheminCSS.PROFIL.getChemin());
+
+        super.getChildren().addAll(hBox, scrollPane);
     }
 
     public void ajouterNotification(Notification notification) {

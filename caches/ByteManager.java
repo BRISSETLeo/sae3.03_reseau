@@ -9,7 +9,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ByteManager {
 
@@ -67,6 +69,59 @@ public class ByteManager {
 
         dataInputStream.close();
         return objectList;
+    }
+
+    public static <K extends Serializable, V extends Serializable> byte[] convertMapToBytes(Map<K, V> map)
+            throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            K key = entry.getKey();
+            V value = entry.getValue();
+
+            byte[] keyBytes = ByteManager.getBytes(key);
+            dataOutputStream.writeInt(keyBytes.length);
+            dataOutputStream.write(keyBytes);
+
+            byte[] valueBytes = ByteManager.getBytes(value);
+            dataOutputStream.writeInt(valueBytes.length);
+            dataOutputStream.write(valueBytes);
+
+        }
+
+        dataOutputStream.close();
+
+        return byteArrayOutputStream.toByteArray();
+    }
+
+    public static <K extends Serializable, V extends Serializable> Map<K, V> convertBytesToMap(byte[] bytes,
+            Class<K> keyClass, Class<V> valueClass)
+            throws IOException, ClassNotFoundException {
+        Map<K, V> resultMap = new HashMap<>();
+
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+        DataInputStream dataInputStream = new DataInputStream(byteArrayInputStream);
+
+        while (dataInputStream.available() > 0) {
+
+            int keyLength = dataInputStream.readInt();
+            byte[] keyBytes = new byte[keyLength];
+            dataInputStream.readFully(keyBytes);
+
+            int valueLength = dataInputStream.readInt();
+            byte[] valueBytes = new byte[valueLength];
+            dataInputStream.readFully(valueBytes);
+
+            K key = ByteManager.fromBytes(keyBytes, keyClass);
+            V value = ByteManager.fromBytes(valueBytes, valueClass);
+
+            resultMap.put(key, value);
+        }
+
+        dataInputStream.close();
+
+        return resultMap;
     }
 
 }
