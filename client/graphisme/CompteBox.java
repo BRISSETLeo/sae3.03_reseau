@@ -25,8 +25,9 @@ public class CompteBox extends HBox {
 
         super.setCursor(Cursor.HAND);
         super.setAlignment(Pos.CENTER_LEFT);
-        super.getChildren().addAll(this.circle, new VBox(new LabelF(compte.getPseudo())));
-
+        VBox vBox = new VBox(new LabelF(compte.getPseudo()));
+        vBox.setAlignment(Pos.CENTER_LEFT);
+        super.getChildren().addAll(this.circle, vBox);
     }
 
     public Image getPhotoProfil() {

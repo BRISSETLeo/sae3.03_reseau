@@ -2,7 +2,6 @@ package client.graphisme;
 
 import client.Main;
 import client.controle.ProfilC;
-import client.graphisme.affichage.ImageViewS;
 import enums.CheminCSS;
 import enums.FontP;
 import enums.CheminIMG;
@@ -60,7 +59,7 @@ public class Barre extends StackPane {
             }
         });
 
-        this.barre.getChildren().addAll(compteBox, new ImageViewS(CheminIMG.LEFT_ARROW.getChemin()));
+        this.barre.getChildren().add(compteBox);
     }
 
     public void modifierCompteBarre(Image image) {
