@@ -139,6 +139,14 @@ public class ServeurThread extends Thread {
 
                         this.afficherProfil(this.in.readUTF());
 
+                    } else if(message.equals(Requete.UNFOLLOW.getRequete())){
+
+                        this.unfollow(this.in.readUTF());
+
+                    }else if(message.equals(Requete.FOLLOW.getRequete())){
+
+                        this.follow(this.in.readUTF());
+
                     }
 
                 }
@@ -337,7 +345,25 @@ public class ServeurThread extends Thread {
         byte[] bytes = ByteManager.getBytes(compte);
         this.out.writeInt(bytes.length);
         this.out.write(bytes);
+        this.out.writeBoolean(this.serveur.getConnexionMySQL().hasFollowTo(this.compte.getPseudo(), pseudo));
         this.out.flush();
+    }
+
+    public void unfollow(String pseudoUnfollow) throws IOException{
+        this.serveur.getConnexionMySQL().unfollow(this.compte.getPseudo(), pseudoUnfollow);
+        
+        this.out.writeUTF(Requete.UNFOLLOW.getRequete());
+        this.out.writeUTF(pseudoUnfollow);
+        this.out.flush();
+    }
+
+    public void follow(String pseudoFollow) throws IOException{
+        this.serveur.getConnexionMySQL().follow(this.compte.getPseudo(), pseudoFollow);
+        
+        this.out.writeUTF(Requete.FOLLOW.getRequete());
+        this.out.writeUTF(pseudoFollow);
+        this.out.flush();
+
     }
 
 }

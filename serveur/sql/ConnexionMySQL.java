@@ -667,6 +667,50 @@ public class ConnexionMySQL {
         return comptes;
     }
 
+    public void follow(String pseudo, String pseudoToFollow) {
+
+        if (this.hasFollowTo(pseudo, pseudoToFollow))
+            return;
+
+        try {
+
+            String sqlQuery = "INSERT INTO follows (pseudo, pseudo_follow) VALUES (?, ?);";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setString(1, pseudo);
+                statement.setString(2, pseudoToFollow);
+                statement.executeUpdate();
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+    }
+
+    public void unfollow(String pseudo, String pseudoToUnfollow) {
+        try {
+
+            String sqlQuery = "DELETE FROM follows WHERE pseudo = ? AND pseudo_follow = ?;";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setString(1, pseudo);
+                statement.setString(2, pseudoToUnfollow);
+                statement.executeUpdate();
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+    }
+
     public void supprimerPublication(int idPublication) {
         try {
 

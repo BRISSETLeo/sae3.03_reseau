@@ -206,12 +206,21 @@ public class Client extends Thread {
 
                         Compte compte = ByteManager.fromBytes(receivedBytes, Compte.class);
 
-                        this.main.afficherProfil(compte, compte.getPseudo().equals(this.pseudo));
+                        this.main.afficherProfil(compte, compte.getPseudo().equals(this.pseudo), this.in.readBoolean());
+
+                    } else if(demande.equals(Requete.UNFOLLOW.getRequete())){
+
+                        this.main.unfollowAffichage(this.in.readUTF());
+                        this.demanderPublications();
+
+                    }else if(demande.equals(Requete.FOLLOW.getRequete())){
+
+                        this.main.followAffichage(this.in.readUTF());
+                        this.demanderPublications();
 
                     }
 
                 }
-
             }
 
         } catch (Exception e) {
@@ -363,6 +372,26 @@ public class Client extends Thread {
         try {
             this.out.writeUTF(Requete.AFFICHER_PROFIL.getRequete());
             this.out.writeUTF(pseudo);
+            this.out.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void unfollow(String pseudoUnfollow){
+        try {
+            this.out.writeUTF(Requete.UNFOLLOW.getRequete());
+            this.out.writeUTF(pseudoUnfollow);
+            this.out.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void follow(String pseudoFollow){
+        try {
+            this.out.writeUTF(Requete.FOLLOW.getRequete());
+            this.out.writeUTF(pseudoFollow);
             this.out.flush();
         } catch (Exception e) {
             e.printStackTrace();

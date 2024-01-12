@@ -261,14 +261,14 @@ public class Main extends Application {
         this.client.afficherProfil(pseudo);
     }
 
-    public void afficherProfil(Compte compte, boolean isMe) {
+    public void afficherProfil(Compte compte, boolean isMe, boolean isFollow) {
         Platform.runLater(() -> {
             boolean isPageDroite = this.isPageDroite(this.profil);
             this.enleverPageDroite();
             Compte compteDisplay = this.profil.getPseudo();
             if (isPageDroite && (compteDisplay != null && compteDisplay.getPseudo().equals(compte.getPseudo())))
                 return;
-            this.profil.afficherProfil(compte, isMe);
+            this.profil.afficherProfil(compte, isMe, isFollow);
             this.ajouterPageDroite(this.profil);
         });
 
@@ -290,6 +290,17 @@ public class Main extends Application {
         Platform.runLater(() -> this.publication.reset());
     }
 
+    public void unfollow(String pseudoUnfollow){
+        this.client.unfollow(pseudoUnfollow);
+    }
+
+    public void unfollowAffichage(String pseudoUnfollow){
+        Platform.runLater(() -> {
+            this.profil.unfollow(pseudoUnfollow);
+            this.accueil.resetPublications();
+        });
+    }
+
     public void supprimerVocal() {
         this.son.supprimerVocal();
         this.publication.resetSon();
@@ -300,8 +311,19 @@ public class Main extends Application {
         this.son = new Son(this);
     }
 
+    public void follow(String pseudoFollow){
+        this.client.follow(pseudoFollow);
+    }
+
     public void vocalFini() {
         Platform.runLater(() -> this.publication.mettreEnregistrementButtonAOff());
+    }
+
+    public void followAffichage(String pseudoFollow){
+        Platform.runLater(() -> {
+            this.profil.follow(pseudoFollow);
+            this.accueil.resetPublications();
+        });
     }
 
     public void nouveauVocal(List<Double> averages) {

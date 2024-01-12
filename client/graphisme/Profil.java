@@ -15,6 +15,8 @@ import client.Main;
 import client.controle.ChoosePP;
 import client.controle.CloseRight;
 import client.controle.EnregistrerProfil;
+import client.controle.Follow;
+import client.controle.UnFollow;
 import client.graphisme.affichage.ButtonG;
 import client.graphisme.affichage.LabelF;
 import enums.CheminCSS;
@@ -41,10 +43,13 @@ public class Profil extends VBox {
     private Label nbAbonnes;
     private Label nbAbonnements;
 
+    private Button follow;
+
     public Profil(Main main) {
         this.main = main;
         this.content = new VBox(20);
         this.circle = new Circle();
+        this.follow = new Button();
         this.circle.setRadius(100);
         ButtonG close = new ButtonG(CheminIMG.CLOSE.getChemin());
         close.setOnAction(new CloseRight(this.main));
@@ -57,7 +62,7 @@ public class Profil extends VBox {
         super.getChildren().addAll(hBox, scrollPane);
     }
 
-    public void afficherProfil(Compte compte, boolean isMe) {
+    public void afficherProfil(Compte compte, boolean isMe, boolean isFollow) {
         this.content.getChildren().clear();
         this.compte = compte;
 
@@ -96,11 +101,22 @@ public class Profil extends VBox {
             Button enregistrer = new Button("Enregistrer les modifications");
             enregistrer.setOnAction(new EnregistrerProfil(this.main));
             profil.getChildren().addAll(selectImageButton, enregistrer);
+        }else{
+            this.changeButton(isFollow);
+            profil.getChildren().add(this.follow);
         }
 
         profil.setAlignment(Pos.CENTER);
 
         this.content.getChildren().add(profil);
+    }
+
+    private void changeButton(boolean isFollow){
+        this.follow.setText(isFollow ? "Ne plus suivre" : "Suivre");
+        if(this.follow.getText().equals("Suivre"))
+            this.follow.setOnAction(new Follow(this.main, compte.getPseudo()));
+        else
+            this.follow.setOnAction(new UnFollow(this.main, compte.getPseudo()));
     }
 
     public void ajouterPublication(String pseudo){
@@ -136,6 +152,18 @@ public class Profil extends VBox {
     public void removeAbonnement(String pseudo){
         if(this.compte != null && this.compte.getPseudo().equals(pseudo)){
             this.nbAbonnements.setText((Integer.parseInt(this.nbAbonnements.getText())-1)+"");
+        }
+    }
+
+    public void unfollow(String pseudo){
+        if(this.compte != null && this.compte.getPseudo().equals(pseudo)){
+            this.changeButton(false);
+        }
+    }
+
+    public void follow(String pseudo){
+        if(this.compte != null && this.compte.getPseudo().equals(pseudo)){
+            this.changeButton(true);
         }
     }
 

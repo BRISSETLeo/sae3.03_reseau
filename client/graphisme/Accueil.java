@@ -160,6 +160,19 @@ public class Accueil extends VBox {
         transition.play();
     }
 
+    public void resetPublications() {
+        this.contenant.getChildren().clear();
+        this.publications.clear();
+        this.commentaires.clear();
+        this.comptesBoxs.clear();
+        this.vocaux.clear();
+        this.vocalBoxs.clear();
+        this.playPauseButtons.clear();
+        this.jouerSons.clear();
+        this.unpauseSons.clear();
+        this.pauseSons.clear();
+    }
+
     public void retirerCompteBoxDeListeAffichage(int idPublication) {
         if(this.publications.get(idPublication) == null)
             return;

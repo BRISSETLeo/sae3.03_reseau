@@ -11,6 +11,9 @@ public enum Requete {
     SUPPRIMER_PUBLICATION("SupprimerPublication"),
     COMMENTER_PUBLICATION("CommenterPublication"),
 
+    UNFOLLOW("UnFollow"),
+    FOLLOW("Follow"),
+
     AVOIR_COMPTES("AvoirComptes"),
     AVOIR_FOLLOWERS("AvoirFollowers"),
     AVOIR_FOLLOWINGS("AvoirFollowings"),
