@@ -11,6 +11,7 @@ import caches.Compte;
 import caches.MessageC;
 import client.Main;
 import client.controle.EnvoyerMessage;
+import client.controle.EnvoyerMessageEntrer;
 import client.controle.SupprimerMessage;
 import client.graphisme.affichage.ButtonG;
 import client.graphisme.affichage.ImageViewS;
@@ -55,6 +56,7 @@ public class Messagerie extends VBox {
 
         Button envoyer = new Button("Envoyer");
         envoyer.setOnAction(new EnvoyerMessage(this.main));
+        super.setOnKeyPressed(new EnvoyerMessageEntrer(this.main));
 
         HBox inputBox = new HBox();
         inputBox.getChildren().addAll(this.newMessage, envoyer);
@@ -105,12 +107,34 @@ public class Messagerie extends VBox {
         this.pseudoDest = (message.getPseudoExpediteur().equals(this.main.getCompte().getPseudo())) ? 
         message.getPseudoDestinataire() : message.getPseudoExpediteur();
         Label content = new Label(message.getContent());
+        LabelF date = new LabelF(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(message.getDate()));
+        Button supprimerMessage = new Button("Supprimer");
+
         HBox compteDateBox = new HBox();
+        HBox deleteBox = new HBox(Main.createRegion(),  supprimerMessage);
+        CompteBox compteBox = new CompteBox(this.main, ((message.getPseudoExpediteur().equals(this.main.getCompte().getPseudo())) ? compteUser : compteFollow));
+        
+        supprimerMessage.setOnAction(new SupprimerMessage(this.main, message.getIdMessage()));
+        compteDateBox.getChildren().addAll(compteBox, Main.createRegion(), date);
 
         VBox contentBoxSender = new VBox();
+        contentBoxSender.getChildren().addAll(compteDateBox, content);
         VBox contentBoxReceiver = new VBox();
+        contentBoxSender.getChildren().addAll(compteDateBox, content, deleteBox);
 
-        CompteBox compteBox = new CompteBox(this.main, ((message.getPseudoExpediteur().equals(this.main.getCompte().getPseudo())) ? compteUser : compteFollow));
+
+
+        if (message.getPseudoExpediteur().equals(this.main.getCompte().getPseudo())) {
+            messagesContainer.getChildren().add(contentBoxReceiver);
+            newMessage.clear();
+            listMessages.put(message.getIdMessage(), contentBoxReceiver);
+        }
+        else {
+            messagesContainer.getChildren().add(contentBoxSender);
+            newMessage.clear();
+            listMessages.put(message.getIdMessage(), contentBoxSender);
+        }
+        
     }
 
     public void clear() {

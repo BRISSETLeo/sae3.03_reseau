@@ -40,6 +40,7 @@ public class Connexion extends HBox {
         Button connexionButton = new Button("Se connecter");
         connexionButton.setOnAction(new ConnexionC(this.main, this));
         connexionButton.setFont(FontP.FONT_50.getFont());
+        super.setOnKeyPressed(new ConnexionEntrer(this.main, this));
 
         super.getStylesheets().add(CheminCSS.PAGE_CONNEXION.getChemin());
         super.getChildren().addAll(logo, new VBox(50, this.pseudoField, this.adresseField, connexionButton));
