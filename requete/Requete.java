@@ -24,6 +24,7 @@ public enum Requete {
     PUBLIER_PUBLICATION("PublierPublication"),
 
     VOIR_NOTIFICATIONS("VoirNotifications"),
+    SUPPRIMER_NOTIFICATION("SupprimerNotification"),
 
     AVOIR_FOLLOW("AvoirFollow"),
 

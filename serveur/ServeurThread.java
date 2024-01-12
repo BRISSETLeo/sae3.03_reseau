@@ -147,6 +147,10 @@ public class ServeurThread extends Thread {
 
                         this.follow(this.in.readUTF());
 
+                    } else if(message.equals(Requete.SUPPRIMER_NOTIFICATION.getRequete())){
+
+                        this.supprimerNotification(this.in.readInt());
+                    
                     }
 
                 }
@@ -277,6 +281,13 @@ public class ServeurThread extends Thread {
                 this.serveur.getConnexionMySQL().getNotifications(this.compte.getPseudo()));
         this.out.writeInt(listBytes.length);
         this.out.write(listBytes);
+        this.out.flush();
+    }
+
+    public void supprimerNotification(int idNotification) throws IOException{
+        this.serveur.getConnexionMySQL().supprimerNotification(idNotification);
+        this.out.writeUTF(Requete.SUPPRIMER_NOTIFICATION.getRequete());
+        this.out.writeInt(idNotification);
         this.out.flush();
     }
 

@@ -467,6 +467,16 @@ public class Main extends Application {
         this.client.supprimerMessage(idMessage);
     }
 
+    public void removeNotification(int idNotification) {
+        Platform.runLater(() -> this.notifications.removeNotification(idNotification));
+    }
+
+    public void supprimerNotification(int idNotification) {
+        this.client.supprimerNotification(idNotification);
+    }
+
+
+
     public void removeMessage(int idMessage) {
         Platform.runLater(() -> this.messagerie.removeMessage(idMessage));
     }

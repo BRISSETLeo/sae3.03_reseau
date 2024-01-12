@@ -966,4 +966,23 @@ public class ConnexionMySQL {
         }
     }
 
+    public void supprimerNotification(int idNotification) {
+        try {
+    
+            String sqlQuery = "DELETE FROM notifications WHERE id_notification = ?;";
+    
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+    
+                statement.setInt(1, idNotification);
+                statement.executeUpdate();
+    
+            }
+    
+        } catch (SQLException e) {
+    
+            e.printStackTrace();
+    
+        }
+    }
+
 }

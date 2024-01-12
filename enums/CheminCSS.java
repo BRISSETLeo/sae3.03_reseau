@@ -12,7 +12,8 @@ public enum CheminCSS {
     COMPTEBOX("./client/css/CompteBoxCSS.css"),
     POPUP("./client/css/PopupCSS.css"),
     PROFIL("./client/css/ProfilCSS.css"),
-    MESSAGE("./client/css/MessageCSS.css");
+    MESSAGE("./client/css/MessageCSS.css"),
+    NOTIFICATION("./client/css/NotificiationCSS.css");
 
     private String chemin;
 

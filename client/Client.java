@@ -218,6 +218,10 @@ public class Client extends Thread {
                         this.main.followAffichage(this.in.readUTF());
                         this.demanderPublications();
 
+                    } else if (demande.equals(Requete.SUPPRIMER_NOTIFICATION.getRequete())) {
+
+                        this.main.removeNotification(this.in.readInt());
+
                     }
 
                 }
@@ -362,6 +366,16 @@ public class Client extends Thread {
         try {
             this.out.writeUTF(Requete.SUPPRIMER_MESSAGE.getRequete());
             this.out.writeInt(idMessage);
+            this.out.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void supprimerNotification(int idNotification) {
+        try {
+            this.out.writeUTF(Requete.SUPPRIMER_NOTIFICATION.getRequete());
+            this.out.writeInt(idNotification);
             this.out.flush();
         } catch (Exception e) {
             e.printStackTrace();
