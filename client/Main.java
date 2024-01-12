@@ -240,7 +240,6 @@ public class Main extends Application {
     public void ajouterMonCompte() {
         Platform.runLater(() -> {
             this.barre.ajouterCompte(this);
-            this.profil.ajouterCompte();
         });
     }
 
@@ -255,12 +254,25 @@ public class Main extends Application {
         this.publication.mettreEnregistrementButtonAOn();
     }
 
-    public void afficherPageProfil() {
-        boolean isPageDroite = this.isPageDroite(this.profil);
-        this.enleverPageDroite();
-        if (isPageDroite)
-            return;
-        this.ajouterPageDroite(this.profil);
+    public void afficherPageProfil(String pseudo) {
+        this.client.afficherProfil(pseudo);
+    }
+
+    public void afficherProfil(Compte compte, boolean isMe) {
+        Platform.runLater(() -> {
+            boolean isPageDroite = this.isPageDroite(this.profil);
+            this.enleverPageDroite();
+            Compte compteDisplay = this.profil.getPseudo();
+            if (isPageDroite && (compteDisplay != null && compteDisplay.getPseudo().equals(compte.getPseudo())))
+                return;
+            this.profil.afficherProfil(compte, isMe);
+            this.ajouterPageDroite(this.profil);
+        });
+
+    }
+
+    public void modifierCompteProfil(Image image){
+        Platform.runLater(() -> this.profil.changerImage(image));
     }
 
     public void aucunSon() {
@@ -438,7 +450,7 @@ public class Main extends Application {
         Platform.runLater(() -> this.accueil.removePublication(idPublication));
     }
 
-    public void changerDernierMessage(String pseudo, String message) {
+    public void changerDernierMessage(String pseudo, MessageC message) {
         Platform.runLater(() -> this.message.changerDernierMessage(pseudo, message));
     }
 

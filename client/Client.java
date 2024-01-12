@@ -176,6 +176,7 @@ public class Client extends Thread {
                             this.main.modifierCompteBarre(image);
                         }
 
+                        this.main.modifierCompteProfil(image);
                         this.main.modifierComptePublications(compte.getPseudo(), image);
 
                     } else if (demande.equals(Requete.ENVOYER_MESSAGE.getRequete())) {
@@ -187,7 +188,7 @@ public class Client extends Thread {
                         MessageC message = ByteManager.fromBytes(receivedBytes, MessageC.class);
 
                         this.main.afficherMessage(message);
-                        this.main.changerDernierMessage( (message.getPseudoExpediteur().equals(this.pseudo) ? message.getPseudoDestinataire() : message.getPseudoExpediteur()) , message.getContent());
+                        this.main.changerDernierMessage( (message.getPseudoExpediteur().equals(this.pseudo) ? message.getPseudoDestinataire() : message.getPseudoExpediteur()) , message);
 
                     } else if (demande.equals(Requete.NOTIFICATIN_CONNEXION.getRequete())) {
 
@@ -198,6 +199,16 @@ public class Client extends Thread {
                         int idMessage = this.in.readInt();
 
                         this.main.removeMessage(idMessage);
+
+                    } else if(demande.equals(Requete.AFFICHER_PROFIL.getRequete())){
+
+                        int arraySize = this.in.readInt();
+                        byte[] receivedBytes = new byte[arraySize];
+                        this.in.readFully(receivedBytes);
+
+                        Compte compte = ByteManager.fromBytes(receivedBytes, Compte.class);
+
+                        this.main.afficherProfil(compte, compte.getPseudo().equals(this.pseudo));
 
                     }
 
@@ -344,6 +355,16 @@ public class Client extends Thread {
         try {
             this.out.writeUTF(Requete.SUPPRIMER_MESSAGE.getRequete());
             this.out.writeInt(idMessage);
+            this.out.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void afficherProfil(String pseudo){
+        try {
+            this.out.writeUTF(Requete.AFFICHER_PROFIL.getRequete());
+            this.out.writeUTF(pseudo);
             this.out.flush();
         } catch (Exception e) {
             e.printStackTrace();

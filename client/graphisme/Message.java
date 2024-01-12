@@ -42,11 +42,6 @@ public class Message extends VBox {
         compteBox.setOnMouseClicked(new AfficherMessage(this.main, compte));
 
         Label content = new Label(message.getContent());
-        if (message.isLu() || message.getPseudoExpediteur().equals(this.main.getCompte().getPseudo())) {
-            content.getStyleClass().add("lu");
-        } else {
-            content.getStyleClass().add("non-lu");
-        }
         ((VBox) compteBox.getChildren().get(1)).getChildren().add(content);
         this.dernierMessages.put(compte.getPseudo(), content);
 
@@ -56,9 +51,15 @@ public class Message extends VBox {
         super.getChildren().add(compteBox);
     }
 
-    public void changerDernierMessage(String pseudo, String message){
+    public void changerDernierMessage(String pseudo, MessageC message){
         if(this.dernierMessages.containsKey(pseudo)){
-            this.dernierMessages.get(pseudo).setText(message);
+            Label content = this.dernierMessages.get(pseudo);
+            content.setText(message.getContent());
+            if (message.isLu() || message.getPseudoExpediteur().equals(this.main.getCompte().getPseudo())) {
+                content.getStyleClass().add("lu");
+            } else {
+                content.getStyleClass().add("non-lu");
+            }
         }
     }
 

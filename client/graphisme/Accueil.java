@@ -75,6 +75,7 @@ public class Accueil extends VBox {
         this.pauseSons = new HashMap<>();
 
         ScrollPane scrollPane = new ScrollPane(this.contenant);
+        scrollPane.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
         scrollPane.setFitToWidth(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 
@@ -105,7 +106,7 @@ public class Accueil extends VBox {
         this.comptesBoxs.put(publication.getCompte().getPseudo(), compteBoxs);
 
         container.getChildren().addAll(new HBox(compteBox, Main.createRegion(),
-                new LabelF(new SimpleDateFormat("dd-MM-YYYY HH:mm:ss").format(publication.getDate()))),
+                new Label(new SimpleDateFormat("dd/MM/YYYY HH:mm:ss").format(publication.getDate()))),
                 contentLabel);
 
         this.setupVocal(publication.getVocal(), container, publication.getIdPublication());

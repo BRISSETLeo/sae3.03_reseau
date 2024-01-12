@@ -256,7 +256,8 @@ public class ConnexionMySQL {
 
                         Blob image = resultSet.getBlob("image");
 
-                        return new Compte(pseudo, image);
+                        return new Compte(pseudo, image, this.nbPublications(pseudo), this.nbAbonnes(pseudo),
+                                this.nbAbonnements(pseudo));
 
                     }
 
@@ -271,6 +272,99 @@ public class ConnexionMySQL {
         }
 
         return null;
+    }
+
+    public int nbAbonnes(String pseudo){
+        try {
+
+            String sqlQuery = "SELECT COUNT(*) AS count FROM follows WHERE pseudo_follow = ?;";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setString(1, pseudo);
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+
+                    if (resultSet.next()) {
+
+                        int count = resultSet.getInt("count");
+                        return count;
+
+                    }
+
+                }
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return 0;
+    }
+
+    public int nbAbonnements(String pseudo){
+        try {
+
+            String sqlQuery = "SELECT COUNT(*) AS count FROM follows WHERE pseudo = ?;";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setString(1, pseudo);
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+
+                    if (resultSet.next()) {
+
+                        int count = resultSet.getInt("count");
+                        return count;
+
+                    }
+
+                }
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return 0;
+    }
+
+    public int nbPublications(String pseudo){
+        try {
+
+            String sqlQuery = "SELECT COUNT(*) AS count FROM publications WHERE pseudo = ?;";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+                statement.setString(1, pseudo);
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+
+                    if (resultSet.next()) {
+
+                        int count = resultSet.getInt("count");
+                        return count;
+
+                    }
+
+                }
+
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return 0;
     }
 
     public void likePublication(String pseudo, int idPublication) {
@@ -554,7 +648,8 @@ public class ConnexionMySQL {
                         String pseud = resultSet.getString("pseudo");
                         Blob image = resultSet.getBlob("image");
 
-                        Compte compte = new Compte(pseud, image);
+                        Compte compte = new Compte(pseud, image, this.nbPublications(pseud), this.nbAbonnes(pseud),
+                                this.nbAbonnements(pseud));
                         comptes.put(compte, this.getDernierMessageEnvoyer(pseudo, pseud));
 
                     }

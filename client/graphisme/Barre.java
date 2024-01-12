@@ -1,7 +1,6 @@
 package client.graphisme;
 
 import client.Main;
-import client.controle.ProfilC;
 import enums.CheminCSS;
 import enums.FontP;
 import enums.CheminIMG;
@@ -48,8 +47,6 @@ public class Barre extends StackPane {
 
     public void ajouterCompte(Main main) {
         this.compteBox = new CompteBox(main, main.getCompte());
-
-        compteBox.setOnMouseClicked(new ProfilC(main));
 
         this.rechercheField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.length() > 0) {

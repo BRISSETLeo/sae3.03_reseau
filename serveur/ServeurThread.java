@@ -135,6 +135,10 @@ public class ServeurThread extends Thread {
                     
                         this.supprimerMessage(idMessage);
                         
+                    } else if(message.equals(Requete.AFFICHER_PROFIL.getRequete())){
+
+                        this.afficherProfil(this.in.readUTF());
+
                     }
 
                 }
@@ -324,6 +328,15 @@ public class ServeurThread extends Thread {
                 client.getOut().flush();
             }
         }
+    }
+
+    public void afficherProfil(String pseudo) throws IOException{
+        Compte compte = this.serveur.getConnexionMySQL().getCompteByPseudo(pseudo);
+        this.out.writeUTF(Requete.AFFICHER_PROFIL.getRequete());
+        byte[] bytes = ByteManager.getBytes(compte);
+        this.out.writeInt(bytes.length);
+        this.out.write(bytes);
+        this.out.flush();
     }
 
 }

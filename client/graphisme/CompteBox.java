@@ -2,7 +2,9 @@ package client.graphisme;
 
 import caches.Compte;
 import client.Main;
+import client.controle.ProfilC;
 import client.graphisme.affichage.LabelF;
+import enums.CheminCSS;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.image.Image;
@@ -28,6 +30,8 @@ public class CompteBox extends HBox {
         VBox vBox = new VBox(new LabelF(compte.getPseudo()));
         vBox.setAlignment(Pos.CENTER_LEFT);
         super.getChildren().addAll(this.circle, vBox);
+        super.getStylesheets().add(CheminCSS.COMPTEBOX.getChemin());
+        super.setOnMouseClicked(new ProfilC(main,compte.getPseudo()));
     }
 
     public Image getPhotoProfil() {

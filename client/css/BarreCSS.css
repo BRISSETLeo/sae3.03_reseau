@@ -2,14 +2,6 @@
     -fx-alignment: center;
 }
 
-CompteBox VBox LabelF {
-    -fx-padding: 0 5em 0 0;
-}
-
-CompteBox:hover VBox LabelF {
-    -fx-underline: true;
-}
-
 .text-field {
     -fx-background-color: rgb(44, 44, 44);
     -fx-background-radius: 0 1em 1em 0;

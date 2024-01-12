@@ -1,7 +1,7 @@
-CompteBox{
-    -fx-background-color: transparent;
-    -fx-cursor: hand;
-    -fx-border-width: 0 0.3em 0 0;
-    -fx-border-color: black;
-    -fx-alignment: top-left;
+CompteBox VBox LabelF {
+    -fx-padding: 0 5em 0 0;
+}
+
+CompteBox:hover VBox LabelF {
+    -fx-underline: true;
 }

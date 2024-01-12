@@ -28,6 +28,8 @@ public enum Requete {
 
     NOTIFICATIN_CONNEXION("NotificationConnexion"),
 
+    AFFICHER_PROFIL("AfficherProfil"),
+
     VOIR_MESSAGES("VoirMessages"),
     ENVOYER_MESSAGE("EnvoyerMessage"),
     SUPPRIMER_MESSAGE("SupprimerMessage"),
