@@ -56,16 +56,7 @@ public class Barre extends StackPane {
     }
 
     public void ajouterCompte(Main main) {
-        this.compteBox = new CompteBox(main, main.getCompte());
-
-        this.rechercheField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.length() > 0) {
-                compteBox.setVisible(false);
-            } else {
-                compteBox.setVisible(true);
-            }
-        });
-
+        this.compteBox = new CompteBox(main, main.getCompte(), true);
         this.barre.getChildren().add(compteBox);
     }
 

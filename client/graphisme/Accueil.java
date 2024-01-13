@@ -95,7 +95,7 @@ public class Accueil extends VBox {
         contentLabel.setFont(FontP.FONT_15.getFont());
         contentLabel.setWrapText(true);
 
-        CompteBox compteBox = new CompteBox(this.main, publication.getCompte());
+        CompteBox compteBox = new CompteBox(this.main, publication.getCompte(), false);
 
         if (!this.comptesBoxs.containsKey(publication.getCompte().getPseudo())) {
             this.comptesBoxs.put(publication.getCompte().getPseudo(), new ArrayList<>());
@@ -175,7 +175,7 @@ public class Accueil extends VBox {
     }
 
     public void retirerCompteBoxDeListeAffichage(int idPublication) {
-        if(this.publications.get(idPublication) == null)
+        if (this.publications.get(idPublication) == null)
             return;
         CompteBox compteBox = (CompteBox) ((HBox) this.publications.get(idPublication).getChildren().get(0))
                 .getChildren().get(0);
@@ -351,7 +351,7 @@ public class Accueil extends VBox {
         return (ButtonG) likeBox.getChildren().get(deb + 1);
     }
 
-    public boolean demanderSupprimerPublication(int idPublication) {
+    public boolean demanderSupprimerPublication() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.getDialogPane().getStylesheets().add(CheminCSS.ALERT.getChemin());
         alert.setTitle("Supprimer la publication");

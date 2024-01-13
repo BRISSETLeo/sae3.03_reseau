@@ -1,7 +1,3 @@
-CompteBox VBox LabelF {
-    -fx-padding: 0 5em 0 0;
-}
-
-CompteBox:hover VBox LabelF {
+.compte-box:hover LabelF {
     -fx-underline: true;
 }

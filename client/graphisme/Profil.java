@@ -12,6 +12,7 @@ import javax.sql.rowset.serial.SerialBlob;
 
 import caches.Compte;
 import client.Main;
+import client.controle.AfficherMessage;
 import client.controle.ChoosePP;
 import client.controle.CloseRight;
 import client.controle.EnregistrerProfil;
@@ -72,9 +73,9 @@ public class Profil extends VBox {
 
         HBox informations = new HBox(10);
 
-        this.nbPublications = new Label(compte.getNbPublications()+"");
-        this.nbAbonnes = new Label(compte.getNbAbonnes()+"");
-        this.nbAbonnements = new Label(compte.getNbAbonnements()+"");
+        this.nbPublications = new Label(compte.getNbPublications() + "");
+        this.nbAbonnes = new Label(compte.getNbAbonnes() + "");
+        this.nbAbonnements = new Label(compte.getNbAbonnements() + "");
 
         VBox publications = new VBox(this.nbPublications, new Label("Publication(s)"));
         VBox abonnes = new VBox(this.nbAbonnes, new Label("Abonné(s)"));
@@ -85,25 +86,26 @@ public class Profil extends VBox {
         abonnements.setAlignment(Pos.CENTER);
 
         informations.getChildren().addAll(
-            publications,
-            abonnes,
-            abonnements
-        );
+                publications,
+                abonnes,
+                abonnements);
 
         informations.setAlignment(Pos.CENTER);
 
         profil.getChildren().add(informations);
 
-        if(isMe){
+        if (isMe) {
             Button selectImageButton = new Button("Sélectionner une image");
             selectImageButton.setOnAction(new ChoosePP(this));
 
             Button enregistrer = new Button("Enregistrer les modifications");
             enregistrer.setOnAction(new EnregistrerProfil(this.main));
             profil.getChildren().addAll(selectImageButton, enregistrer);
-        }else{
+        } else {
             this.changeButton(isFollow);
-            profil.getChildren().add(this.follow);
+            Button envoyerMessage = new Button("Envoyer un message");
+            envoyerMessage.setOnMouseClicked(new AfficherMessage(this.main, compte));
+            profil.getChildren().addAll(this.follow, envoyerMessage);
         }
 
         profil.setAlignment(Pos.CENTER);
@@ -111,58 +113,58 @@ public class Profil extends VBox {
         this.content.getChildren().add(profil);
     }
 
-    private void changeButton(boolean isFollow){
+    private void changeButton(boolean isFollow) {
         this.follow.setText(isFollow ? "Ne plus suivre" : "Suivre");
-        if(this.follow.getText().equals("Suivre"))
+        if (this.follow.getText().equals("Suivre"))
             this.follow.setOnAction(new Follow(this.main, compte.getPseudo()));
         else
             this.follow.setOnAction(new UnFollow(this.main, compte.getPseudo()));
     }
 
-    public void ajouterPublication(String pseudo){
-        if(this.compte != null && this.compte.getPseudo().equals(pseudo)){
-            this.nbPublications.setText((Integer.parseInt(this.nbPublications.getText())+1)+"");
+    public void ajouterPublication(String pseudo) {
+        if (this.compte != null && this.compte.getPseudo().equals(pseudo)) {
+            this.nbPublications.setText((Integer.parseInt(this.nbPublications.getText()) + 1) + "");
         }
     }
 
-    public void removePublication(String pseudo){
-        if(this.compte != null && this.compte.getPseudo().equals(pseudo)){
-            this.nbPublications.setText((Integer.parseInt(this.nbPublications.getText())-1)+"");
-        }
-    }
-    
-    public void ajouterAbonne(String pseudo){
-        if(this.compte != null && this.compte.getPseudo().equals(pseudo)){
-            this.nbAbonnes.setText((Integer.parseInt(this.nbAbonnes.getText())+1)+"");
+    public void removePublication(String pseudo) {
+        if (this.compte != null && this.compte.getPseudo().equals(pseudo)) {
+            this.nbPublications.setText((Integer.parseInt(this.nbPublications.getText()) - 1) + "");
         }
     }
 
-    public void removeAbonne(String pseudo){
-        if(this.compte != null && this.compte.getPseudo().equals(pseudo)){
-            this.nbAbonnes.setText((Integer.parseInt(this.nbAbonnes.getText())-1)+"");
+    public void ajouterAbonne(String pseudo) {
+        if (this.compte != null && this.compte.getPseudo().equals(pseudo)) {
+            this.nbAbonnes.setText((Integer.parseInt(this.nbAbonnes.getText()) + 1) + "");
         }
     }
 
-    public void ajouterAbonnement(String pseudo){
-        if(this.compte != null && this.compte.getPseudo().equals(pseudo)){
-            this.nbAbonnements.setText((Integer.parseInt(this.nbAbonnements.getText())+1)+"");
+    public void removeAbonne(String pseudo) {
+        if (this.compte != null && this.compte.getPseudo().equals(pseudo)) {
+            this.nbAbonnes.setText((Integer.parseInt(this.nbAbonnes.getText()) - 1) + "");
         }
     }
 
-    public void removeAbonnement(String pseudo){
-        if(this.compte != null && this.compte.getPseudo().equals(pseudo)){
-            this.nbAbonnements.setText((Integer.parseInt(this.nbAbonnements.getText())-1)+"");
+    public void ajouterAbonnement(String pseudo) {
+        if (this.compte != null && this.compte.getPseudo().equals(pseudo)) {
+            this.nbAbonnements.setText((Integer.parseInt(this.nbAbonnements.getText()) + 1) + "");
         }
     }
 
-    public void unfollow(String pseudo){
-        if(this.compte != null && this.compte.getPseudo().equals(pseudo)){
+    public void removeAbonnement(String pseudo) {
+        if (this.compte != null && this.compte.getPseudo().equals(pseudo)) {
+            this.nbAbonnements.setText((Integer.parseInt(this.nbAbonnements.getText()) - 1) + "");
+        }
+    }
+
+    public void unfollow(String pseudo) {
+        if (this.compte != null && this.compte.getPseudo().equals(pseudo)) {
             this.changeButton(false);
         }
     }
 
-    public void follow(String pseudo){
-        if(this.compte != null && this.compte.getPseudo().equals(pseudo)){
+    public void follow(String pseudo) {
+        if (this.compte != null && this.compte.getPseudo().equals(pseudo)) {
             this.changeButton(true);
         }
     }
@@ -177,7 +179,7 @@ public class Profil extends VBox {
     }
 
     public void updateImage(String pseudo, Image image) {
-        if(this.compte != null && this.compte.getPseudo().equals(pseudo))
+        if (this.compte != null && this.compte.getPseudo().equals(pseudo))
             this.circle.setFill(new ImagePattern(image));
     }
 

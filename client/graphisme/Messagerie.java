@@ -11,6 +11,7 @@ import client.Main;
 import client.controle.EnvoyerMessage;
 import client.controle.EnvoyerMessageEntrer;
 import client.controle.SupprimerMessage;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -22,7 +23,7 @@ import enums.FontP;
 
 public class Messagerie extends VBox {
 
-    private Map<Integer,VBox> listMessages;
+    private Map<Integer, VBox> listMessages;
 
     private Main main;
     private Compte compteFollow;
@@ -30,15 +31,16 @@ public class Messagerie extends VBox {
 
     private String pseudoDest;
     private TextField newMessage;
-	private Compte compteUser;
+    private Compte compteUser;
     private ScrollPane scrollPane;
 
     public Messagerie(Main main) {
         this.main = main;
         this.listMessages = new HashMap<>();
-        this.messagesContainer = new VBox(); 
+        this.messagesContainer = new VBox(20);
         this.scrollPane = new ScrollPane(messagesContainer);
         this.scrollPane.setFitToWidth(true);
+        this.scrollPane.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
         this.newMessage = new TextField();
         this.newMessage.setPromptText("Votre message...");
 
@@ -51,45 +53,51 @@ public class Messagerie extends VBox {
         HBox.setHgrow(this.newMessage, Priority.ALWAYS);
 
         super.getStylesheets().add(CheminCSS.TEXTEFIELD.getChemin());
-        super.getChildren().addAll(scrollPane,inputBox);
+        super.getChildren().addAll(scrollPane, inputBox);
+        VBox.setVgrow(this.scrollPane, Priority.ALWAYS);
 
         this.scrollPane.setVvalue(1.0);
     }
 
     public void ajouterMessage(MessageC message) {
+
         this.compteUser = this.main.getCompte();
-        if(this.compteUser == null || this.compteFollow == null)
-            return;
+        this.pseudoDest = (message.getPseudoExpediteur().equals(this.main.getCompte().getPseudo()))
+                ? message.getPseudoDestinataire()
+                : message.getPseudoExpediteur();
+        boolean ouPlacerLeMessage = message.getPseudoExpediteur().equals(this.main.getCompte().getPseudo())
+                || message.getPseudoDestinataire().equals(this.compteFollow.getPseudo());
+        CompteBox compteBox = new CompteBox(this.main,
+                (message.getPseudoExpediteur().equals(this.main.getCompte().getPseudo())) ? this.compteUser
+                        : this.compteFollow,
+                !ouPlacerLeMessage);
+        compteBox.changerFont();
 
-        boolean isSentMessage = message.getPseudoExpediteur().equals(this.main.getCompte().getPseudo());
-    
-        VBox contentBox = new VBox();
-        CompteBox compteBox = new CompteBox(this.main, (isSentMessage ? this.compteUser : this.compteFollow));
-
-        Label content = new Label(message.getContent());
-        content.setWrapText(true);
-        content.setFont(FontP.FONT_15.getFont());
+        Label msg = new Label(message.getContent());
+        msg.setWrapText(true);
+        msg.setFont(FontP.FONT_15.getFont());
 
         Label date = new Label(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(message.getDate()));
-        HBox compteDateBox = new HBox(Main.createRegion(), date);
-    
-        this.pseudoDest = (message.getPseudoExpediteur().equals(this.main.getCompte().getPseudo())) ? 
-            message.getPseudoDestinataire() : message.getPseudoExpediteur();
-    
-        Button supprimerMessage = new Button("Supprimer");
-        supprimerMessage.setOnAction(new SupprimerMessage(this.main, message.getIdMessage()));
-    
-        contentBox.getChildren().addAll(compteBox, content, compteDateBox,new HBox(Main.createRegion(), supprimerMessage));
+        HBox compteDateBox = new HBox();
 
-        this.messagesContainer.getChildren().add(contentBox);
+        VBox content = new VBox(compteDateBox, msg);
 
-        this.newMessage.clear();
+        if (ouPlacerLeMessage) {
+            compteDateBox.getChildren().addAll(compteBox, Main.createRegion(), date);
+            compteDateBox.setAlignment(Pos.CENTER_LEFT);
+            compteBox.setAlignment(Pos.CENTER_LEFT);
+            content.setAlignment(Pos.CENTER_LEFT);
+        } else {
+            compteDateBox.getChildren().addAll(date, Main.createRegion(), compteBox);
+            compteDateBox.setAlignment(Pos.CENTER_RIGHT);
+            compteBox.setAlignment(Pos.CENTER_RIGHT);
+            content.setAlignment(Pos.CENTER_RIGHT);
+        }
 
-        this.listMessages.put(message.getIdMessage(), contentBox);
-        
-        this.mettreToutEnBas();
+        this.messagesContainer.getChildren().add(content);
+
     }
-    
+
     public void clear() {
         this.messagesContainer.getChildren().clear();
     }
@@ -112,11 +120,54 @@ public class Messagerie extends VBox {
         this.mettreToutEnBas();
     }
 
-    private void mettreToutEnBas(){
+    private void mettreToutEnBas() {
         this.scrollPane.applyCss();
         this.scrollPane.layout();
 
         double scrollValue = this.scrollPane.getVmax();
         this.scrollPane.setVvalue(scrollValue);
     }
-}  
+
+    /*
+     * this.compteUser = this.main.getCompte();
+     * if (this.compteUser == null || this.compteFollow == null)
+     * return;
+     * 
+     * boolean isSentMessage =
+     * message.getPseudoExpediteur().equals(this.main.getCompte().getPseudo());
+     * 
+     * VBox contentBox = new VBox();
+     * CompteBox compteBox = new CompteBox(this.main, (isSentMessage ?
+     * this.compteUser : this.compteFollow));
+     * 
+     * Label content = new Label(message.getContent());
+     * content.setWrapText(true);
+     * content.setFont(FontP.FONT_15.getFont());
+     * 
+     * Label date = new Label(new
+     * SimpleDateFormat("dd/MM/yyyy HH:mm").format(message.getDate()));
+     * HBox compteDateBox = new HBox(Main.createRegion(), date);
+     * 
+     * this.pseudoDest =
+     * (message.getPseudoExpediteur().equals(this.main.getCompte().getPseudo()))
+     * ? message.getPseudoDestinataire()
+     * : message.getPseudoExpediteur();
+     * 
+     * Button supprimerMessage = new Button("Supprimer");
+     * supprimerMessage.setOnAction(new SupprimerMessage(this.main,
+     * message.getIdMessage()));
+     * 
+     * contentBox.getChildren().addAll(compteBox, content, compteDateBox,
+     * new HBox(Main.createRegion(), supprimerMessage));
+     * 
+     * this.messagesContainer.getChildren().add(contentBox);
+     * 
+     * this.newMessage.clear();
+     * 
+     * this.listMessages.put(message.getIdMessage(), contentBox);
+     * 
+     * contentBox.setAlignment(Pos.CENTER);
+     * 
+     * this.mettreToutEnBas();
+     */
+}

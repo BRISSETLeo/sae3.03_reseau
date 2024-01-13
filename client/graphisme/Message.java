@@ -37,7 +37,7 @@ public class Message extends VBox {
     }
 
     public void ajouterCompte(Compte compte, MessageC message) {
-        HBox compteBox = new CompteBox(this.main, compte);
+        HBox compteBox = new CompteBox(this.main, compte, false);
         super.getStylesheets().add(CheminCSS.COMPTEBOX.getChemin());
         compteBox.setOnMouseClicked(new AfficherMessage(this.main, compte));
 
@@ -51,8 +51,8 @@ public class Message extends VBox {
         super.getChildren().add(compteBox);
     }
 
-    public void changerDernierMessage(String pseudo, MessageC message){
-        if(this.dernierMessages.containsKey(pseudo)){
+    public void changerDernierMessage(String pseudo, MessageC message) {
+        if (this.dernierMessages.containsKey(pseudo)) {
             Label content = this.dernierMessages.get(pseudo);
             content.setText(message.getContent());
             if (message.isLu() || message.getPseudoExpediteur().equals(this.main.getCompte().getPseudo())) {

@@ -494,7 +494,7 @@ public class Main extends Application {
     }
 
     public void supprimerPublication(int idPublication) {
-        boolean isAccepted = this.accueil.demanderSupprimerPublication(idPublication);
+        boolean isAccepted = this.accueil.demanderSupprimerPublication();
         if (isAccepted)
             this.client.supprimerPublication(idPublication);
     }
@@ -508,7 +508,9 @@ public class Main extends Application {
     }
 
     public void supprimerNotification(int idNotification) {
-        this.client.supprimerNotification(idNotification);
+        boolean isAccepted = this.notifications.demanderSupprimerPublication();
+        if (isAccepted)
+            this.client.supprimerNotification(idNotification);
     }
 
     public void removeMessage(int idMessage) {

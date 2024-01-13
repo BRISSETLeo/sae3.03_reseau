@@ -5,6 +5,7 @@ import client.Main;
 import client.controle.ProfilC;
 import client.graphisme.affichage.LabelF;
 import enums.CheminCSS;
+import enums.FontP;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.image.Image;
@@ -16,8 +17,9 @@ import javafx.scene.shape.Circle;
 public class CompteBox extends HBox {
 
     private Circle circle;
+    private LabelF pseudo;
 
-    public CompteBox(Main main, Compte compte) {
+    public CompteBox(Main main, Compte compte, boolean rightMessage) {
         super(10);
 
         this.circle = new Circle();
@@ -27,11 +29,17 @@ public class CompteBox extends HBox {
 
         super.setCursor(Cursor.HAND);
         super.setAlignment(Pos.CENTER_LEFT);
-        VBox vBox = new VBox(new LabelF(compte.getPseudo()));
+        this.pseudo = new LabelF(compte.getPseudo());
+        VBox vBox = new VBox(this.pseudo);
         vBox.setAlignment(Pos.CENTER_LEFT);
-        super.getChildren().addAll(this.circle, vBox);
+        if (rightMessage) {
+            super.getChildren().addAll(vBox, this.circle);
+        } else {
+            super.getChildren().addAll(this.circle, vBox);
+        }
         super.getStylesheets().add(CheminCSS.COMPTEBOX.getChemin());
-        super.setOnMouseClicked(new ProfilC(main,compte.getPseudo()));
+        super.setOnMouseClicked(new ProfilC(main, compte.getPseudo()));
+        super.getStyleClass().add("compte-box");
     }
 
     public Image getPhotoProfil() {
@@ -40,6 +48,11 @@ public class CompteBox extends HBox {
 
     public void setPhotoProfil(Image image) {
         this.circle.setFill(new ImagePattern(image));
+    }
+
+    public void changerFont() {
+        this.pseudo.setFont(FontP.FONT_15.getFont());
+        this.circle.setRadius(15);
     }
 
 }

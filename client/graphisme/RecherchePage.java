@@ -19,7 +19,7 @@ public class RecherchePage extends VBox {
     }
 
     public void insertCompte(Compte compte) {
-        this.comptes.put(compte.getPseudo().toLowerCase(), new CompteBox(this.main, compte));
+        this.comptes.put(compte.getPseudo().toLowerCase(), new CompteBox(this.main, compte, false));
     }
 
     public void addCompteSimilar(String[] pseudos) {
