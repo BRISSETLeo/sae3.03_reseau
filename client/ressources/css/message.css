@@ -1,0 +1,49 @@
+.container {
+    -fx-padding: 2em 10em;
+}
+
+.mon-message,
+.son-message {
+    -fx-max-width: 30em;
+    -fx-min-width: 20em;
+}
+
+.ecrire-message {
+    -fx-font-size: 1.3em;
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
+}
+
+Button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.mon-message {
+    -fx-alignment: center-right;
+    -fx-background-color: #6fccfa;
+    -fx-background-radius: 1em 1em 0 1em;
+    -fx-border-radius: 1em 1em 0 1em;
+    -fx-padding: 1em;
+}
+
+.son-message {
+    -fx-alignment: center-left;
+    -fx-background-color: #c6c6c6;
+    -fx-background-radius: 0 1em 1em 1em;
+    -fx-border-radius: 0 1em 1em 1em;
+    -fx-padding: 1em;
+}
+
+Label {
+    -fx-text-fill: black;
+}
+
+Button {
+    -fx-cursor: hand;
+}
+
+.duree {
+    -fx-font-size: 0.8em;
+    -fx-text-fill: #c6c6c6;
+}

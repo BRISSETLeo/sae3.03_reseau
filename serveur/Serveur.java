@@ -1,74 +1,62 @@
 package serveur;
 
-import java.io.DataInputStream;
 import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-import enums.Color;
 import serveur.sql.ConnexionMySQL;
 
 public class Serveur {
 
-    private List<ServeurThread> clients;
-    private ConnexionMySQL connexionMySQL;
+    private Set<ServeurThread> clients;
+    private ConnexionMySQL mysql;
 
     public Serveur() {
-        this.clients = new ArrayList<>();
-        this.connexionMySQL = new ConnexionMySQL();
 
-        try (ServerSocket serverSocket = new ServerSocket(8080)) {
+        this.clients = new HashSet<>();
+        this.mysql = new ConnexionMySQL();
 
-            Socket socket;
-            DataInputStream in;
+        try (ServerSocket server = new ServerSocket(25565)) {
 
-            String pseudo;
-            ServeurThread serveurThread;
+            System.out.println("Le serveur est lancé.");
+
+            new WriteThread(this).start();
 
             while (true) {
 
-                socket = serverSocket.accept();
-                in = new DataInputStream(socket.getInputStream());
-                pseudo = in.readUTF();
-                System.out.println(
-                        Color.BLUE.getCode() + pseudo + Color.PURPLE.getCode() + " s'est connecté au serveur"
-                                + Color.RED.getCode() + "." + Color.RESET.getCode());
-                serveurThread = new ServeurThread(this, pseudo, socket);
-                this.addClient(serveurThread);
-                serveurThread.start();
+                ServeurThread client = new ServeurThread(this, server.accept());
+
+                if (client.isConnected()) {
+                    this.addClient(client);
+                    client.start();
+                }
 
             }
 
-        } catch (
-
-        Exception e) {
-
+        } catch (Exception e) {
             e.printStackTrace();
-
         }
+
     }
 
-    public List<ServeurThread> getClients() {
+    public synchronized void addClient(ServeurThread client) {
+        this.clients.add(client);
+    }
+
+    public synchronized void removeClient(ServeurThread client) {
+        this.clients.remove(client);
+    }
+
+    public synchronized Set<ServeurThread> getClients() {
         return this.clients;
     }
 
-    public synchronized boolean removeClient(ServeurThread serveurThread) {
-        return this.clients.remove(serveurThread);
-    }
-
-    public synchronized boolean addClient(ServeurThread serveurThread) {
-        return this.clients.add(serveurThread);
-    }
-
-    public synchronized ConnexionMySQL getConnexionMySQL() {
-        return this.connexionMySQL;
+    public synchronized ConnexionMySQL getSQL() {
+        return this.mysql;
     }
 
     public static void main(String[] args) {
-
         new Serveur();
-
     }
 
 }

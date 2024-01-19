@@ -1,34 +1,30 @@
 package caches;
 
+import java.io.ByteArrayInputStream;
 import java.io.Serializable;
-import java.sql.Blob;
 import java.sql.Timestamp;
-import java.util.List;
+
+import javafx.scene.image.Image;
 
 public class Publication implements Serializable {
 
     private final int idPublication;
     private final Compte compte;
-    private final String content;
-    private final Blob vocal;
-    private final Timestamp date;
-    private final Blob photo;
-    private final int likes;
-    private final boolean callerIsLiker;
-    private final List<Commentaire> commentaires;
+    private final String contenu;
+    private final Timestamp datePublication;
+    private final byte[] image;
+    private final boolean estCeQueJaiLike;
+    private final int nbLike;
 
-    public Publication(int idPublication, Compte compte, String content, Blob vocal, Timestamp date, Blob photo,
-            int likes,
-            boolean callerIsLiker, List<Commentaire> commentaires) {
-        this.commentaires = commentaires;
+    public Publication(int idPublication, Compte compte, String contenu, Timestamp datePublication, byte[] image,
+            boolean estCeQueJaiLike, int nbLike) {
         this.idPublication = idPublication;
         this.compte = compte;
-        this.content = content;
-        this.vocal = vocal;
-        this.date = date;
-        this.photo = photo;
-        this.likes = likes;
-        this.callerIsLiker = callerIsLiker;
+        this.contenu = contenu;
+        this.datePublication = datePublication;
+        this.image = image;
+        this.estCeQueJaiLike = estCeQueJaiLike;
+        this.nbLike = nbLike;
     }
 
     public int getIdPublication() {
@@ -39,32 +35,29 @@ public class Publication implements Serializable {
         return this.compte;
     }
 
-    public String getContent() {
-        return this.content;
+    public String getContenu() {
+        return this.contenu;
     }
 
-    public Timestamp getDate() {
-        return this.date;
+    public Timestamp getDatePublication() {
+        return this.datePublication;
     }
 
-    public Blob getPhoto() {
-        return this.photo;
+    public byte[] getImageBytes() {
+        return this.image;
     }
 
-    public int getLikes() {
-        return this.likes;
+    public Image getImage() {
+        return this.image == null ? null
+                : new Image(new ByteArrayInputStream(this.image));
     }
 
-    public boolean isCallerIsLiker() {
-        return this.callerIsLiker;
+    public boolean estCeQueJaiLike() {
+        return this.estCeQueJaiLike;
     }
 
-    public Blob getVocal() {
-        return this.vocal;
-    }
-
-    public List<Commentaire> getCommentaires() {
-        return this.commentaires;
+    public int getNbLike() {
+        return this.nbLike;
     }
 
 }

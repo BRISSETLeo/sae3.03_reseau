@@ -1,0 +1,26 @@
+VBox {
+    -fx-padding: 1em;
+}
+
+HBox {
+    -fx-alignment: center-left;
+}
+
+TextField {
+    -fx-background-color: transparent;
+    -fx-bordure-color: transparent;
+    -fx-font-size: 1.3em;
+}
+
+Label {
+    -fx-font-size: 1.5em;
+}
+
+HBox:hover {
+    -fx-cursor: hand;
+}
+
+HBox:hover Label {
+    -fx-border-color: black;
+    -fx-border-width: 0 0 0.1em 0;
+}

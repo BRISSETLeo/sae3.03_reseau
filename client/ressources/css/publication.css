@@ -1,0 +1,21 @@
+VBox {
+    -fx-alignment: top-center;
+    -fx-padding: 1.5em 10em 1.5em 10em;
+}
+
+Button {
+    -fx-background-color: white;
+    -fx-border-color: black;
+    -fx-border-width: 0.1em;
+    -fx-font-size: 1em;
+    -fx-font-weight: bold;
+    -fx-border-radius: 0.5em;
+    -fx-background-radius: 0.5em;
+    -fx-padding: 0.5em 1em;
+}
+
+Button:hover {
+    -fx-cursor: hand;
+    -fx-background-color: black;
+    -fx-text-fill: white;
+}

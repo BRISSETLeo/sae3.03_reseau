@@ -1,104 +1,102 @@
 package client;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.sql.Blob;
+import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
-import javax.sound.sampled.AudioFormat;
+import javax.imageio.ImageIO;
 
 import caches.Compte;
-import caches.MessageC;
-import caches.Notification;
 import caches.Publication;
-import client.graphisme.Accueil;
-import client.graphisme.Connexion;
-import client.graphisme.Message;
-import client.graphisme.Navigation;
-import client.graphisme.Notifications;
-import client.graphisme.Profil;
-import client.graphisme.RecherchePage;
-import client.lexicographie.Trie;
-import client.son.Son;
-import client.graphisme.Messagerie;
-import enums.CheminIMG;
+import client.utilitaire.IMAGE;
+import client.vues.Accueil;
+import client.vues.Connexion;
+import client.vues.Message;
+import client.vues.Navigation;
+import client.vues.Profil;
+import client.vues.MonProfil;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import client.graphisme.Barre;
-import javafx.application.Platform;
-import javafx.geometry.Rectangle2D;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.control.SplitPane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class Main extends Application {
 
-    public static String fontPath = "file:./client/css/police/Poppins-Regular.ttf";
+    private BorderPane root;
+    private Connexion pageDeConnexion;
+    private Navigation pageDeNavigation;
+    private MonProfil pageDeMonProfil;
+    private Accueil pageDAccueil;
+    private Profil pageDeProfil;
+    private client.vues.Publication pageDeNewPublication;
+    private Message pageDeMessage;
+
+    private boolean clientEstSurLaPageDesMessages;
 
     private Client client;
-    private BorderPane root;
-    private SplitPane splitPane;
-    private Connexion connexion;
-    private Navigation navigation;
-    private Notifications notifications;
-    private RecherchePage recherchePage;
-    private Profil profil;
-    private Barre barre;
-    private Accueil accueil;
-    private client.graphisme.Publication publication;
-    private Message message;
-    private Son son;
-    private Messagerie messagerie;
-    private Image logo;
-    private boolean connected;
-
-    public static void main(String[] args) {
-        launch(args);
-    }
+    private Compte monCompte;
 
     @Override
     public void init() throws Exception {
-        this.son = new Son(this);
-        this.connexion = new Connexion(this);
-        this.accueil = new Accueil(this);
-        this.barre = new Barre(this);
-        this.navigation = new Navigation(this);
-        this.messagerie = new Messagerie(this);
-        this.message = new Message(this);
-        this.profil = new Profil(this);
-        this.recherchePage = new RecherchePage(this);
-        this.notifications = new Notifications(this);
-        this.root = new BorderPane(this.connexion);
-        this.splitPane = new SplitPane();
-        this.splitPane.setDividerPositions(1);
-        this.logo = new Image(CheminIMG.LOGO.getChemin());
-        this.publication = new client.graphisme.Publication(this);
-        this.connected = true;
+
+        this.root = new BorderPane();
+        this.pageDeConnexion = new Connexion(this);
+        this.pageDeNavigation = new Navigation(this);
+        this.pageDeMonProfil = new MonProfil(this);
+        this.pageDeProfil = new Profil(this);
+        this.pageDAccueil = new Accueil(this);
+        this.pageDeNewPublication = new client.vues.Publication(this);
+        this.pageDeMessage = new Message(this);
+        this.clientEstSurLaPageDesMessages = false;
+
+        this.root.centerProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                this.clientEstSurLaPageDesMessages = false;
+                if (newValue instanceof Accueil)
+                    this.pageDAccueil.redimenssionerScroll();
+                else if (newValue instanceof client.vues.Publication)
+                    this.pageDeNewPublication.clearAll();
+                else if (newValue instanceof Message) {
+                    this.pageDeMessage.redimenssionerScroll();
+                    this.clientEstSurLaPageDesMessages = true;
+                }
+            }
+        });
+
     }
 
     @Override
     public void start(Stage stage) throws Exception {
+
+        this.root.setCenter(this.pageDeConnexion);
+
         Screen screen = Screen.getPrimary();
         Rectangle2D bounds = screen.getVisualBounds();
 
         Scene scene = new Scene(this.root);
 
+        stage.setOnCloseRequest(event -> {
+            if (this.client != null && this.client.isConnected()) {
+                this.client.closeSocket();
+            }
+        });
+
         double windowWidthFraction = 0.8;
         double windowHeightFraction = 0.8;
-
-        stage.setOnCloseRequest(event -> connected = false);
 
         stage.setWidth(bounds.getWidth() * windowWidthFraction);
         stage.setHeight(bounds.getHeight() * windowHeightFraction);
@@ -106,450 +104,274 @@ public class Main extends Application {
         stage.setY((bounds.getHeight() - stage.getHeight()) / 2);
         stage.setScene(scene);
         stage.setTitle("SysX");
-        stage.getIcons().add(this.logo);
+        stage.getIcons().add(new Image(IMAGE.LOGO.getChemin()));
         stage.show();
+
     }
 
-    public void connecterLeClient(String adresse, String pseudo) {
-        this.client = new Client(this, pseudo, adresse);
+    public boolean seConnecter(String pseudo, String ip) {
+        this.client = new Client(this, pseudo, ip, false);
+        boolean isConnected = this.client.isConnected();
+        if (isConnected) {
+            this.client.start();
+        }
+        return isConnected;
     }
 
-    public void erreurDansAdresse() {
-        this.connexion.erreurDansAdresse();
-    }
-
-    public void erreurDansPseudo() {
-        this.connexion.erreurDansPseudo();
-    }
-
-    public void demanderCreationDeCompte() {
+    public void afficherLaPageCreerCompte() {
         Platform.runLater(() -> {
-            this.connexion.demanderCreationDeCompte();
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Information");
+            alert.setHeaderText("Vous n'avez pas de compte");
+            alert.setContentText("Voulez-vous vous inscrire ?");
+            alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.YES) {
+                this.client.accepterDeCreerCompte();
+            } else {
+                this.client.closeSocket();
+            }
         });
     }
 
-    public void creerCompte() {
-        this.client.creerCompte();
-    }
-
-    public void fermer() {
-        this.client.fermer();
-    }
-
-    public void mettrePage() {
+    public void seDeconnecter() {
         Platform.runLater(() -> {
-            this.root.setCenter(this.splitPane);
-            this.root.setTop(this.barre);
-            this.afficherPageAccueil();
-            this.root.setLeft(this.navigation);
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Information");
+            alert.setHeaderText("Vous allez être déconnecté");
+            alert.setContentText("Voulez-vous vous déconnecter ?");
+            alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.YES) {
+                System.exit(0);
+            }
         });
     }
 
-    public void afficherPageAccueil() {
-        if (this.splitPane.getItems().size() == 0)
-            this.splitPane.getItems().add(this.accueil);
-        else {
-            this.splitPane.getItems().set(0, this.accueil);
-            this.splitPane.setDividerPositions(0.7);
+    public void supprimerMessage(int idMessage) {
+        Platform.runLater(() -> this.pageDeMessage.supprimerMessage(idMessage));
+    }
+
+    public void deconnexion() {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Information");
+            alert.setHeaderText("Votre compte a été supprimé de la base de donnée");
+            alert.setContentText("Vous allez être déconnecté");
+            alert.showAndWait();
+            System.exit(0);
+        });
+    }
+
+    public void afficherPageMessage() {
+        this.root.setCenter(this.pageDeMessage);
+    }
+
+    public void initialiser() {
+        Platform.runLater(() -> {
+            this.pageDeNavigation.init();
+            this.pageDeMonProfil.init();
+            this.root.setLeft(this.pageDeNavigation);
+            this.root.setCenter(this.pageDAccueil);
+        });
+    }
+
+    public void afficherPageDAccueil() {
+        this.root.setCenter(this.pageDAccueil);
+    }
+
+    public void afficherPageDeNewPublication() {
+        this.root.setCenter(this.pageDeNewPublication);
+    }
+
+    public Client getClient() {
+        return this.client;
+    }
+
+    public void afficherLaPageDeProfil(Compte compte) {
+        Platform.runLater(() -> {
+            this.pageDeProfil.init(compte);
+            this.root.setCenter(this.pageDeProfil);
+        });
+    }
+
+    public static Region createRegion() {
+        Region region = new Region();
+        VBox.setVgrow(region, Priority.ALWAYS);
+        HBox.setHgrow(region, Priority.ALWAYS);
+        return region;
+    }
+
+    public void afficherPageDeMonProfil() {
+        this.root.setCenter(this.pageDeMonProfil);
+    }
+
+    public void mettreAJourPhoto() {
+        Platform.runLater(() -> {
+            this.pageDeNavigation.changerImage();
+            this.pageDAccueil.getPageDeRecherche().changerImage(this.monCompte);
+        });
+    }
+
+    public void resultatDeLaRecherche(List<Compte> comptes) {
+        Platform.runLater(() -> {
+            this.pageDAccueil.getPageDeRecherche().afficherResultatDeLaRecherche(comptes);
+        });
+    }
+
+    public void miseAJourProfil(Compte compte) {
+        Platform.runLater(() -> {
+            this.pageDAccueil.mettreAJourProfilPublication(compte);
+            this.pageDAccueil.getPageDeRecherche().changerImage(compte);
+        });
+    }
+
+    public void afficherHistorique(List<caches.Message> messages) {
+        Platform.runLater(() -> {
+            this.pageDeMessage.afficherHistorique(messages);
+        });
+    }
+
+    public void mettreAJourLeSuiviProfil(int nbAbonnes, boolean estCeQueJeLeSuis) {
+        Platform.runLater(() -> {
+            this.pageDeProfil.mettreAJourLeSuiviProfil(nbAbonnes, estCeQueJeLeSuis);
+        });
+    }
+
+    public void mettreAJourMonProfilAbonnements(int nbAbonnements) {
+        Platform.runLater(() -> {
+            this.pageDeMonProfil.mettreAJourMonProfilAbonnements(nbAbonnements);
+        });
+    }
+
+    public void afficherMessagePrive(List<caches.Message> messages, String personneConcerne) {
+        Platform.runLater(() -> {
+            this.pageDeMessage.afficherMessagePrive(messages, personneConcerne);
+        });
+    }
+
+    public void ajouterMessage(caches.Message message) {
+        Platform.runLater(() -> {
+            this.pageDeMessage.ajouterMessage(message);
+        });
+    }
+
+    public void serverEtteind() {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Information");
+            alert.setHeaderText("Le serveur vient de s'arrêter");
+            alert.setContentText("Voulez-vous vous tenter une reconnexion ?");
+            alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.YES) {
+                this.reconnexion();
+            } else {
+                this.client.closeSocket();
+                System.exit(0);
+            }
+        });
+    }
+
+    public Message getPageDeMessage() {
+        return this.pageDeMessage;
+    }
+
+    public void removePublications(String pseudo) {
+        Platform.runLater(() -> {
+            this.pageDAccueil.removePublications(pseudo);
+        });
+    }
+
+    public void ajouterNouvellesPublications(List<Publication> publications) {
+        Platform.runLater(() -> {
+            this.pageDAccueil.ajouterPublications(publications);
+        });
+    }
+
+    public void reconnexion() {
+        this.client = new Client(this, this.monCompte.getPseudo(), this.client.getIp(), true);
+        if (this.client.isConnected()) {
+            this.client.start();
+        } else {
+            this.serverEtteind();
         }
     }
 
-    public void afficherPublication(Publication publication, boolean hasNewPublication) {
+    public void removePublication(int idPublication) {
         Platform.runLater(() -> {
-            this.accueil.ajouterPublication(publication, hasNewPublication);
-            this.profil.ajouterPublication(publication.getCompte().getPseudo());
-            if (hasNewPublication && this.client.getPseudo().equals(publication.getCompte().getPseudo()))
-                this.resetPublication();
+            this.pageDAccueil.removePublication(idPublication);
         });
     }
 
-    public void sauvegarderIdentifiant(String ip, String pseudo) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("./client/sauvegarde/identification.txt"))) {
-            writer.write("ip: " + ip + "\n");
-            writer.write("pseudo: " + pseudo);
-            writer.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void mettreAJourLeLike(int idPublication, int nbLike, boolean jaiLike, boolean hasLike) {
+        Platform.runLater(() -> {
+            this.pageDAccueil.mettreAJourLeLike(idPublication, nbLike, jaiLike, hasLike);
+        });
     }
 
-    public String demanderIdentifiant() {
-        try (BufferedReader reader = new BufferedReader(new FileReader("./client/sauvegarde/identification.txt"))) {
-            if (!reader.ready())
-                return null;
-            String ip = reader.readLine().split(": ")[1];
-            String pseudo = reader.readLine().split(": ")[1];
-            return ip + ":" + pseudo;
+    public void setDisplayPublications(List<Publication> publications) {
+        Platform.runLater(() -> {
+            this.pageDAccueil.setDisplayPublications(publications);
+        });
+    }
+
+    public void mettreAJourProfilAbonnements(String pseudo, int nbAbonnements) {
+        Platform.runLater(() -> {
+            this.pageDeProfil.mettreAJourProfilAbonnements(pseudo, nbAbonnements);
+        });
+    }
+
+    public void mettreAJourProfilAbonnes(String pseudo, int nbAbonnes) {
+        Platform.runLater(() -> {
+            this.pageDeProfil.mettreAJourAbonnes(pseudo, nbAbonnes);
+        });
+    }
+
+    public void mettreAJourMonProfilAbonnes(String pseudo2, int nbAbonnes) {
+        Platform.runLater(() -> {
+            this.pageDeMonProfil.mettreAJourMonProfilAbonnes(pseudo2, nbAbonnes);
+        });
+    }
+
+    public void setMonCompte(Compte compte) {
+        this.monCompte = compte;
+    }
+
+    public Compte getMonCompte() {
+        return this.monCompte;
+    }
+
+    public byte[] imageToByteArray(Image image) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                InputStream is = this.getImageInputStream(image)) {
+
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+
+            while ((bytesRead = is.read(buffer)) != -1) {
+                baos.write(buffer, 0, bytesRead);
+            }
+
+            return baos.toByteArray();
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public void likePublication(int id) {
-        this.client.likePublication(id);
+    private InputStream getImageInputStream(Image image) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", out);
+        return new ByteArrayInputStream(out.toByteArray());
     }
 
-    public void unlikePublication(int id) {
-        this.client.unlikePublication(id);
+    public boolean clientEstSurLaPageDesMessages() {
+        return this.clientEstSurLaPageDesMessages;
     }
 
-    public void ajouterLike(int id, int like, boolean isMe) {
-        Platform.runLater(() -> this.accueil.ajouterLike(id, like, isMe));
-    }
-
-    public void removeLike(int id, int like, boolean isMe) {
-        Platform.runLater(() -> this.accueil.removeLike(id, like, isMe));
-    }
-
-    public void afficherPagePublication() {
-        boolean isPageDroite = this.isPageDroite(this.publication);
-        this.enleverPageDroite();
-        if (isPageDroite)
-            return;
-        this.ajouterPageDroite(this.publication);
-    }
-
-    public void afficherPageNotifications() {
-        boolean isPageDroite = this.isPageDroite(this.notifications);
-        this.enleverPageDroite();
-        if (isPageDroite)
-            return;
-        this.ajouterPageDroite(this.notifications);
-    }
-
-    public void afficherPageMessage() {
-        boolean isPageDroite = this.isPageDroite(this.message);
-        this.enleverPageDroite();
-        if (isPageDroite)
-            return;
-        this.ajouterPageDroite(this.message);
-    }
-
-    private boolean isPageDroite(Node node) {
-        return this.splitPane.getItems().size() > 1 && this.splitPane.getItems().get(1) == node;
-    }
-
-    public void afficherNotification(Notification notification) {
-        Platform.runLater(() -> this.notifications.ajouterNotification(notification));
-    }
-
-    public void enleverPageDroite() {
-        if (this.splitPane.getItems().size() > 1) {
-            VBox page = (VBox) this.splitPane.getItems().get(1);
-            if (page == this.publication) {
-                this.publication.resetSon();
-                this.arreterSon(null);
-            }
-            this.splitPane.getItems().remove(1);
-        }
-    }
-
-    public void ajouterMonCompte() {
-        Platform.runLater(() -> {
-            this.barre.ajouterCompte(this);
-        });
-    }
-
-    public void ajouterPageDroite(VBox page) {
-        this.splitPane.getItems().add(page);
-        this.splitPane.setDividerPositions(0.7);
-    }
-
-    public void startVocal() {
-        this.publication.resetSon();
-        this.son.start();
-        this.publication.mettreEnregistrementButtonAOn();
-    }
-
-    public void afficherPageProfil(String pseudo) {
-        this.client.afficherProfil(pseudo);
-    }
-
-    public void afficherProfil(Compte compte, boolean isMe, boolean isFollow) {
-        Platform.runLater(() -> {
-            boolean isPageDroite = this.isPageDroite(this.profil);
-            this.enleverPageDroite();
-            Compte compteDisplay = this.profil.getPseudo();
-            if (isPageDroite && (compteDisplay != null && compteDisplay.getPseudo().equals(compte.getPseudo())))
-                return;
-            this.profil.afficherProfil(compte, isMe, isFollow);
-            this.ajouterPageDroite(this.profil);
-        });
-
-    }
-
-    public void modifierCompteProfil(String pseudo, Image image) {
-        Platform.runLater(() -> this.profil.updateImage(pseudo, image));
-    }
-
-    public void aucunSon() {
-        Platform.runLater(() -> this.publication.aucunSon());
-    }
-
-    public void resetSon() {
-        Platform.runLater(() -> this.publication.resetSon());
-    }
-
-    public void resetPublication() {
-        Platform.runLater(() -> this.publication.reset());
-    }
-
-    public void unfollow(String pseudoUnfollow) {
-        this.client.unfollow(pseudoUnfollow);
-    }
-
-    public void unfollowAffichage(String pseudoUnfollow) {
-        Platform.runLater(() -> {
-            this.profil.unfollow(pseudoUnfollow);
-            this.accueil.resetPublications();
-        });
-    }
-
-    public void supprimerVocal() {
-        this.son.supprimerVocal();
-        this.publication.resetSon();
-    }
-
-    public void stopVocal() {
-        this.son.stopVocal();
-        this.son = new Son(this);
-    }
-
-    public void follow(String pseudoFollow) {
-        this.client.follow(pseudoFollow);
-    }
-
-    public void vocalFini() {
-        Platform.runLater(() -> this.publication.mettreEnregistrementButtonAOff());
-    }
-
-    public void followAffichage(String pseudoFollow) {
-        Platform.runLater(() -> {
-            this.profil.follow(pseudoFollow);
-            this.accueil.resetPublications();
-        });
-    }
-
-    public void addCompteSimilar(String[] recherches) {
-        this.recherchePage.addCompteSimilar(recherches);
-        this.afficherPageRecherche();
-    }
-
-    public void afficherPageRecherche() {
-        this.enleverPageDroite();
-        this.ajouterPageDroite(this.recherchePage);
-    }
-
-    public void clearRecherche() {
-        this.barre.clearRecherche();
-    }
-
-    public void insertLexicographique(Compte compte) {
-        this.barre.insertLexicographique(compte);
-        this.recherchePage.insertCompte(compte);
-    }
-
-    public void nouveauVocal(List<Double> averages) {
-        Platform.runLater(() -> this.publication.messageVocal(averages));
-    }
-
-    public Map<String, Compte> getComptes() {
-        return this.barre.getComptes();
-    }
-
-    public Trie getTrie() {
-        return this.barre.getTrie();
-    }
-
-    public String getResultat() {
-        return this.barre.getResultat();
-    }
-
-    public void jouerSon(byte[] bytes) {
-        if (bytes == null)
-            this.publication.jouerSon();
-        else
-            this.accueil.jouerSon(bytes);
-        this.son.jouerSon(bytes);
-    }
-
-    public byte[] getVocal() {
-        return this.son.getAudioData();
-    }
-
-    public boolean isConnected() {
-        return this.connected;
-    }
-
-    public void enregistrerProfil() {
-        this.client.enregistrerProfil();
-    }
-
-    public void arreterSon(byte[] bytes) {
-        this.son.arreterSon(bytes);
-        if (bytes == null)
-            this.publication.arreterSon();
-        else
-            this.accueil.arreterSon(bytes);
-    }
-
-    public void mettreEnPauseSon(byte[] bytes) {
-        if (this.son.isEcouteSon()) {
-            this.son.mettreEnPauseSon();
-            if (bytes == null)
-                this.publication.mettreEnPauseSon();
-            else
-                this.accueil.mettreEnPauseSon(bytes);
-        }
-    }
-
-    public void afficherMessage(Compte compte) {
-        this.messagerie.clear();
-        this.client.getMessages(compte.getPseudo());
-        byte[] audioJouerActuellement = this.getAudioJouerActuellement();
-        if (this.splitPane.getItems().size() == 0) {
-            this.messagerie.setCompteFollow(compte);
-            this.splitPane.getItems().add(this.messagerie);
-            if (audioJouerActuellement != null)
-                this.arreterSon(audioJouerActuellement);
-        } else {
-            this.messagerie.setCompteFollow(compte);
-            this.splitPane.getItems().set(0, this.messagerie);
-            this.splitPane.setDividerPositions(0.7);
-            if (audioJouerActuellement != null)
-                this.arreterSon(audioJouerActuellement);
-        }
-        this.splitPane.setDividerPositions(0.7);
-    }
-
-    public byte[] getAudioJouerActuellement() {
-        return Son.getAudioJouerActuellement();
-    }
-
-    public void reprendreSon(byte[] bytes) {
-        this.son.reprendreSon();
-        if (bytes == null)
-            this.publication.reprendreSon();
-        else
-            this.accueil.reprendreSon(bytes);
-    }
-
-    public AudioFormat getAudioFormat() {
-        return this.son.getAudioFormat();
-    }
-
-    public void updateSon(byte[] bytes, int nbSecMax, int nbSecActuel) {
-        Platform.runLater(() -> {
-            if (bytes == null)
-                this.publication.updateSon(nbSecMax, nbSecActuel);
-            else
-                this.accueil.updateSon(bytes, nbSecMax, nbSecActuel);
-        });
-    }
-
-    public Compte getCompte() {
-        return this.client.getCompte();
-    }
-
-    public void publierPublication() {
-        String text = this.publication.getPublication().getText();
-        byte[] vocal = this.son.getAudioData();
-        if (text.length() == 0 && vocal == null) {
-            this.publication.erreur();
-            return;
-        }
-        this.client.publierPublication(text, vocal);
-    }
-
-    public List<Double> playAudio(byte[] audio) {
-        return this.son.playAudio(audio);
-    }
-
-    public void modifierCompteBarre(Image image) {
-        Platform.runLater(() -> this.barre.modifierCompteBarre(image));
-    }
-
-    public void afficherCompte(Compte compte, MessageC message) {
-        Platform.runLater(() -> this.message.ajouterCompte(compte, message));
-    }
-
-    public void modifierComptePublications(String pseudo, Image image) {
-        Platform.runLater(() -> this.accueil.modifierComptePublications(pseudo, image));
-    }
-
-    public void afficherMessage(MessageC message) {
-        Platform.runLater(() -> this.messagerie.ajouterMessage(message));
-    }
-
-    public String getPseudo() {
-        return this.client.getPseudo();
-    }
-
-    public static Region createRegion() {
-        Region region = new Region();
-        HBox.setHgrow(region, Priority.ALWAYS);
-        VBox.setVgrow(region, Priority.ALWAYS);
-        return region;
-    }
-
-    public void supprimerPublication(int idPublication) {
-        boolean isAccepted = this.accueil.demanderSupprimerPublication();
-        if (isAccepted)
-            this.client.supprimerPublication(idPublication);
-    }
-
-    public void supprimerMessage(int idMessage) {
-        this.client.supprimerMessage(idMessage);
-    }
-
-    public void removeNotification(int idNotification) {
-        Platform.runLater(() -> this.notifications.removeNotification(idNotification));
-    }
-
-    public void supprimerNotification(int idNotification) {
-        boolean isAccepted = this.notifications.demanderSupprimerPublication();
-        if (isAccepted)
-            this.client.supprimerNotification(idNotification);
-    }
-
-    public void removeMessage(int idMessage) {
-        Platform.runLater(() -> this.messagerie.removeMessage(idMessage));
-    }
-
-    public void removePublication(String pseudo, int idPublication) {
-        Platform.runLater(() -> {
-            this.accueil.removePublication(idPublication);
-            this.profil.removePublication(pseudo);
-        });
-    }
-
-    public void changerDernierMessage(String pseudo, MessageC message) {
-        Platform.runLater(() -> this.message.changerDernierMessage(pseudo, message));
-    }
-
-    public static Image blobToImage(Blob image) {
-        if (image != null) {
-            try {
-                int blobLength = (int) image.length();
-                byte[] bytes = image.getBytes(1, blobLength);
-                return new Image(new ByteArrayInputStream(bytes));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return new Image(CheminIMG.NO_PP.getChemin());
-    }
-
-    public void envoyerMessage() {
-        MessageC messageC = new MessageC(-1, this.client.getPseudo(), this.messagerie.getPseudoDest(),
-                this.messagerie.getNewMessage(), null, null, null, false);
-
-        this.client.envoyerMessage(messageC);
-    }
-
-    public void afficherNotificationConnexion(String pseudo) {
-        Platform.runLater(() -> this.barre.showNotification(pseudo));
+    public static void main(String[] args) {
+        launch(args);
     }
 
 }

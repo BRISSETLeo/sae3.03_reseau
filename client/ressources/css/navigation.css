@@ -1,0 +1,21 @@
+.container {
+    -fx-background-color: rgb(167, 167, 167, 0.3);
+}
+
+HBox {
+    -fx-alignment: center-left;
+    -fx-padding: 1em;
+}
+
+HBox:hover {
+    -fx-cursor: hand;
+}
+
+HBox:hover Label {
+    -fx-border-color: black;
+    -fx-border-width: 0 0 0.1em 0;
+}
+
+Label {
+    -fx-font-size: 1.5em;
+}

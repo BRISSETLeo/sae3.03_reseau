@@ -4,311 +4,352 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.sql.Blob;
 
 import caches.ByteManager;
 import caches.Compte;
-import caches.MessageC;
+import caches.Message;
 import caches.Publication;
-import enums.Color;
-import requete.Requete;
+import requete.RequeteSocket;
 
 public class ServeurThread extends Thread {
 
-    private Serveur serveur;
-    private Compte compte;
-    private Socket socket;
-    private DataInputStream in;
-    private DataOutputStream out;
+    private final String pseudo;
 
-    public ServeurThread(Serveur serveur, String pseudo, Socket socket) throws IOException {
+    private final Serveur serveur;
+    private final Socket socket;
+    private final DataOutputStream out;
+    private final DataInputStream in;
+
+    private final boolean reconnexion;
+
+    public ServeurThread(Serveur serveur, Socket socket) throws IOException {
         this.serveur = serveur;
         this.socket = socket;
-        this.compte = new Compte(pseudo);
-        this.in = new DataInputStream(this.socket.getInputStream());
-        this.out = new DataOutputStream(this.socket.getOutputStream());
-        if (!this.serveur.getConnexionMySQL().isPseudoAlreadyExists(pseudo)) {
-            this.out.writeUTF(Requete.CREER_COMPTE.getRequete());
-            this.out.flush();
-        } else {
-            this.compte = this.serveur.getConnexionMySQL().getCompteByPseudo(this.compte.getPseudo());
-            this.out.writeUTF(Requete.COMPTE_CREE.getRequete());
-            this.out.flush();
-        }
+        this.out = new DataOutputStream(socket.getOutputStream());
+        this.in = new DataInputStream(socket.getInputStream());
+        this.pseudo = this.in.readUTF();
+        this.reconnexion = this.in.readBoolean();
+        this.init(this.serveur.getSQL().hasCompte(this.pseudo));
     }
 
     @Override
     public void run() {
+
+        System.out.println("Un client s'est connecté.");
+
         try {
+
+            String demande;
 
             while (true) {
 
-                if (this.socket.isClosed() || this.socket.isInputShutdown() || this.socket.isOutputShutdown())
-                    break;
+                demande = this.in.readUTF();
 
-                if (this.in.available() > 0) {
-
-                    String message = this.in.readUTF();
-
-                    if (message.equals(Requete.AVOIR_PUBLICATIONS.getRequete())) {
-
-                        this.sendAllPublication();
-                        this.sendNotificationAtAllHerFollower();
-
-                    } else if (message.equals(Requete.CREER_COMPTE.getRequete())) {
-
-                        this.creerCompte();
-
-                    } else if (message.equals(Requete.FERMER.getRequete())) {
-
-                        this.fermer();
-
-                    } else if (message.equals(Requete.LIKER_PUBLICATION.getRequete())) {
-
-                        this.likerPublication(this.in.readInt());
-
-                    } else if (message.equals(Requete.DISLIKER_PUBLICATION.getRequete())) {
-
-                        this.dislikerPublication(this.in.readInt());
-
-                    } else if (message.equals(Requete.PUBLIER_PUBLICATION.getRequete())) {
-
-                        String text = this.in.readUTF();
-                        boolean hasVocal = this.in.readBoolean();
-
-                        byte[] receivedBytes = null;
-
-                        if (hasVocal) {
-                            int arraySize = this.in.readInt();
-                            receivedBytes = new byte[arraySize];
-                            this.in.readFully(receivedBytes);
-                        }
-
-                        this.publierPublication(text, receivedBytes);
-
-                    } else if (message.equals(Requete.AVOIR_FOLLOW.getRequete())) {
-
-                        this.avoirCompte();
-
-                    } else if (message.equals(Requete.VOIR_MESSAGES.getRequete())) {
-
-                        this.voirMessages(this.in.readUTF());
-
-                    } else if (message.equals(Requete.SUPPRIMER_PUBLICATION.getRequete())) {
-
-                        this.supprimerPublication(this.in.readInt());
-
-                    } else if (message.equals(Requete.VOIR_NOTIFICATIONS.getRequete())) {
-
-                        this.voirNotifications();
-
-                    } else if (message.equals(Requete.ENREGISTRER_PROFIL.getRequete())) {
-
-                        int arraySize = this.in.readInt();
-                        byte[] receivedBytes = new byte[arraySize];
-                        this.in.readFully(receivedBytes);
-
-                        try {
-                            Compte compte = ByteManager.fromBytes(receivedBytes, Compte.class);
-                            this.compte.setImage(compte.getImage());
-                            this.enregistrerProfil(compte.getImage());
-                        } catch (ClassNotFoundException | IOException e) {
-                            e.printStackTrace();
-                        }
-
-                    } else if (message.equals(Requete.ENVOYER_MESSAGE.getRequete())) {
-
-                        int arraySize = this.in.readInt();
-                        byte[] receivedBytes = new byte[arraySize];
-                        this.in.readFully(receivedBytes);
-
-                        try {
-                            MessageC messageC = ByteManager.fromBytes(receivedBytes, MessageC.class);
-                            this.envoyerMessage(messageC);
-                        } catch (ClassNotFoundException | IOException e) {
-                            e.printStackTrace();
-                        }
-
-                    } else if (message.equals(Requete.SUPPRIMER_MESSAGE.getRequete())){
-
-                        int idMessage = this.in.readInt();
-                    
-                        this.supprimerMessage(idMessage);
-                        
-                    } else if(message.equals(Requete.AFFICHER_PROFIL.getRequete())){
-
-                        this.afficherProfil(this.in.readUTF());
-
-                    } else if(message.equals(Requete.UNFOLLOW.getRequete())){
-
-                        this.unfollow(this.in.readUTF());
-
-                    }else if(message.equals(Requete.FOLLOW.getRequete())){
-
-                        this.follow(this.in.readUTF());
-
-                    } else if(message.equals(Requete.SUPPRIMER_NOTIFICATION.getRequete())){
-
-                        this.supprimerNotification(this.in.readInt());
-                    
-                    } else if(message.equals(Requete.AVOIR_TOUT_LES_COMPTES.getRequete())){
-
-                        this.avoirToutLesComptes();
-                    }
-
+                if (demande.equals(RequeteSocket.ACCEPTER_CREER_COMPTE.getRequete())) {
+                    this.serveur.getSQL().sauvegarderCompte(this.pseudo);
+                    this.init(true);
+                } else if (demande.equals(RequeteSocket.SAUVEGARDER_PROFIL.getRequete())) {
+                    int taille = this.in.readInt();
+                    byte[] infos = new byte[taille];
+                    this.in.readFully(infos, 0, taille);
+                    this.sauvegarderProfil(ByteManager.fromBytes(infos, Compte.class));
+                } else if (demande.equals(RequeteSocket.RECHERCHER_COMPTES.getRequete())) {
+                    this.rechercherComptes(this.in.readUTF());
+                } else if (demande.equals(RequeteSocket.DEMANDER_PROFIL.getRequete())) {
+                    this.demanderProfil(this.in.readUTF());
+                } else if (demande.equals(RequeteSocket.DEMANDER_SUIVRE.getRequete())) {
+                    this.demanderSuivre(this.in.readUTF());
+                } else if (demande.equals(RequeteSocket.DEMANDER_PLUS_SUIVRE.getRequete())) {
+                    this.demanderPlusSuivre(this.in.readUTF());
+                } else if (demande.equals(RequeteSocket.LIKER_PUBLICATION.getRequete())) {
+                    this.likerPublication(this.in.readInt());
+                } else if (demande.equals(RequeteSocket.DISLIKER_PUBLICATION.getRequete())) {
+                    this.dislikerPublication(this.in.readInt());
+                } else if (demande.equals(RequeteSocket.SUPPRIMER_PUBLICATION.getRequete())) {
+                    this.supprimerPublication(this.in.readInt());
+                } else if (demande.equals(RequeteSocket.PUBLIER_PUBLICATION.getRequete())) {
+                    String contenuPublication = this.in.readUTF();
+                    int taille = this.in.readInt();
+                    byte[] publicationBytes = new byte[taille];
+                    this.in.readFully(publicationBytes, 0, taille);
+                    this.publierPublication(contenuPublication, publicationBytes);
+                } else if (demande.equals(RequeteSocket.AVOIR_DERNIER_MESSAGE.getRequete())) {
+                    this.avoirDernierMessage(this.in.readUTF());
+                } else if (demande.equals(RequeteSocket.DEMANDE_MESSAGE.getRequete())) {
+                    this.demandeMessage(this.in.readUTF());
+                } else if (demande.equals(RequeteSocket.ENVOYER_MESSAGE.getRequete())) {
+                    String pseudo = this.in.readUTF();
+                    String contenu = this.in.readUTF();
+                    int taille = this.in.readInt();
+                    byte[] image = new byte[taille];
+                    this.in.readFully(image, 0, taille);
+                    this.envoyerMessage(pseudo, contenu, image);
+                } else if (demande.equals(RequeteSocket.ENVOYER_VOCAL.getRequete())) {
+                    String pseudo = this.in.readUTF();
+                    int taille = this.in.readInt();
+                    byte[] vocal = new byte[taille];
+                    this.in.readFully(vocal, 0, taille);
+                    this.envoyerVocal(pseudo, vocal);
+                } else if (demande.equals(RequeteSocket.SUPPRIMER_MESSAGE.getRequete())) {
+                    this.supprimerMessage(this.in.readInt());
                 }
 
             }
 
-        } catch (IOException e) {
-
-            e.printStackTrace();
-
+        } catch (IOException | ClassNotFoundException e) {
+            try {
+                this.socket.close();
+                this.out.close();
+                this.in.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
 
-        System.out.println(
-                Color.BLUE.getCode() + this.compte.getPseudo() + Color.PURPLE.getCode() + " s'est déconnecté au serveur"
-                        + Color.RED.getCode() + "." + Color.RESET.getCode());
-    }
-
-    public Compte getCompte() {
-        return this.compte;
-    }
-
-    private void sendAllPublication() throws IOException {
-        this.out.writeUTF(Requete.AVOIR_PUBLICATIONS.getRequete());
-        byte[] listBytes = ByteManager.convertListToBytes(
-                this.serveur.getConnexionMySQL().getPublicationsForUserAndFollowers(this.compte.getPseudo(), 10));
-        this.out.writeInt(listBytes.length);
-        this.out.write(listBytes);
-        this.out.flush();
-    }
-
-    public void creerCompte() throws IOException {
-        this.serveur.getConnexionMySQL().saveNewCompte(this.compte.getPseudo());
-        this.compte = this.serveur.getConnexionMySQL().getCompteByPseudo(this.compte.getPseudo());
-        this.out.writeUTF(Requete.COMPTE_CREE.getRequete());
-        this.out.flush();
-    }
-
-    private void fermer() throws IOException {
         this.serveur.removeClient(this);
-        this.out.close();
-        this.in.close();
-        this.socket.close();
+        System.out.println("Un client s'est déconnecté.");
+
     }
 
-    private void likerPublication(int id) throws IOException {
-        this.serveur.getConnexionMySQL().likePublication(this.compte.getPseudo(), id);
-        int nbLike = this.serveur.getConnexionMySQL().nbLikePublications(id);
+    private void init(boolean hasCompte) throws IOException {
+
+        out.writeUTF((hasCompte) ? RequeteSocket.COMPTE_CREE.getRequete()
+                : RequeteSocket.DEMANDER_CREER_COMPTE.getRequete());
+        if (hasCompte) {
+            byte[] compteBytes = ByteManager.toBytes(this.serveur.getSQL().getCompte(this.pseudo, this.pseudo));
+            out.writeInt(compteBytes.length);
+            out.write(compteBytes);
+            if (!this.reconnexion) {
+                byte[] publicationsBytes = ByteManager
+                        .convertListToBytes(this.serveur.getSQL().getPublicationsCanDisplay(this.pseudo));
+                out.writeInt(publicationsBytes.length);
+                out.write(publicationsBytes);
+            }
+        }
+        out.flush();
+
+    }
+
+    private void sauvegarderProfil(Compte compte) throws IOException {
+        this.serveur.getSQL().modifierCompte(compte);
+        this.out.writeUTF(RequeteSocket.SAUVEGARDER_PROFIL.getRequete());
+        this.out.flush();
+        byte[] compteBytes = ByteManager.toBytes(compte);
         for (ServeurThread client : this.serveur.getClients()) {
-            if (this.canAccessToTheBottom(client.getCompte(), id)) {
-                client.getOut().writeUTF(Requete.LIKER_PUBLICATION.getRequete());
-                client.getOut().writeInt(id);
-                client.getOut().writeInt(nbLike);
-                client.getOut().writeBoolean(client.getCompte().getPseudo().equals(this.compte.getPseudo()));
+            if (client != this && client.isAlive()) {
+                client.getOut().writeUTF(RequeteSocket.MISE_A_JOUR_PROFIL.getRequete());
+                client.getOut().writeInt(compteBytes.length);
+                client.getOut().write(compteBytes);
                 client.getOut().flush();
             }
         }
     }
 
-    private void dislikerPublication(int id) throws IOException {
-        this.serveur.getConnexionMySQL().unlikePublication(this.compte.getPseudo(), id);
-        int nbLike = this.serveur.getConnexionMySQL().nbLikePublications(id);
-        for (ServeurThread client : this.serveur.getClients()) {
-            if (this.canAccessToTheBottom(client.getCompte(), id)) {
-                client.getOut().writeUTF(Requete.DISLIKER_PUBLICATION.getRequete());
-                client.getOut().writeInt(id);
-                client.getOut().writeInt(nbLike);
-                client.getOut().writeBoolean(client.getCompte().getPseudo().equals(this.compte.getPseudo()));
-                client.getOut().flush();
-            }
-        }
+    public boolean isConnected() {
+        return this.socket != null && this.socket.isConnected();
     }
 
-    private boolean canAccessToTheBottom(Compte compte, int id) {
-        return (this.serveur.getConnexionMySQL().isOwnerPublication(compte.getPseudo(), id) ||
-                this.serveur.getConnexionMySQL().hasFollowToSenderPublication(compte.getPseudo(), id));
-    }
+    private void rechercherComptes(String recherche) throws IOException {
 
-    public void publierPublication(String text, byte[] vocal) throws IOException {
-        Publication publication = this.serveur.getConnexionMySQL().publierPublication(this.compte.getPseudo(), text,
-                vocal);
-        byte[] bytes = ByteManager.getBytes(publication);
-        for (ServeurThread client : this.serveur.getClients()) {
-            if (this.canAccessToTheBottom(client.getCompte(), publication.getIdPublication())) {
-                client.getOut().writeUTF(Requete.PUBLIER_PUBLICATION.getRequete());
-                client.getOut().writeInt(bytes.length);
-                client.getOut().write(bytes);
-                client.getOut().flush();
-            }
-        }
-    }
-
-    public void avoirCompte() throws IOException {
-        this.out.writeUTF(Requete.AVOIR_FOLLOW.getRequete());
-        byte[] listBytes = ByteManager.getBytes(this.compte);
-        this.out.writeInt(listBytes.length);
-        this.out.write(listBytes);
-        listBytes = ByteManager.convertMapToBytes(
-                this.serveur.getConnexionMySQL().getFollow(this.compte.getPseudo()));
-        this.out.writeInt(listBytes.length);
-        this.out.write(listBytes);
+        this.out.writeUTF(RequeteSocket.RECHERCHER_COMPTES.getRequete());
+        byte[] comptesBytes = ByteManager
+                .convertListToBytes(this.serveur.getSQL().rechercherComptes(this.pseudo, recherche));
+        this.out.writeInt(comptesBytes.length);
+        this.out.write(comptesBytes);
         this.out.flush();
     }
 
-    public void voirMessages(String pseudo) throws IOException {
-        this.out.writeUTF(Requete.VOIR_MESSAGES.getRequete());
-        byte[] listBytes = ByteManager.convertListToBytes(
-                this.serveur.getConnexionMySQL().getMessages(this.compte.getPseudo(), pseudo));
-        this.out.writeInt(listBytes.length);
-        this.out.write(listBytes);
+    private void demanderProfil(String pseudo) throws IOException {
+        this.out.writeUTF(RequeteSocket.DEMANDER_PROFIL.getRequete());
+        byte[] compteBytes = ByteManager.toBytes(this.serveur.getSQL().getCompte(this.pseudo, pseudo));
+        this.out.writeInt(compteBytes.length);
+        this.out.write(compteBytes);
         this.out.flush();
     }
 
-    public void supprimerPublication(int idPublication) throws IOException {
+    private void demanderSuivre(String pseudo) throws IOException {
+        this.serveur.getSQL().demanderSuivre(this.pseudo, pseudo);
+        this.demandeSuivrePlusSuivre(RequeteSocket.DEMANDER_SUIVRE, pseudo);
+    }
+
+    private void demanderPlusSuivre(String pseudo) throws IOException {
+        this.serveur.getSQL().demanderPlusSuivre(this.pseudo, pseudo);
+        this.demandeSuivrePlusSuivre(RequeteSocket.DEMANDER_PLUS_SUIVRE, pseudo);
+    }
+
+    private void demandeSuivrePlusSuivre(RequeteSocket requeteSocket, String pseudo) throws IOException {
+        this.out.writeUTF(requeteSocket.getRequete());
+        int nbAbonnes = this.serveur.getSQL().getNbFollowers(pseudo);
+        int nbAbonnements = this.serveur.getSQL().getNbFollowings(this.pseudo);
+        this.out.writeInt(nbAbonnes);
+        this.out.writeBoolean(this.serveur.getSQL().estCeQueJeSuisAbonne(this.pseudo, pseudo));
+        this.out.writeInt(nbAbonnements);
+        if (requeteSocket.equals(RequeteSocket.DEMANDER_SUIVRE)) {
+            byte[] publicationByte = ByteManager
+                    .convertListToBytes(this.serveur.getSQL().getPublications(pseudo));
+            this.out.writeInt(publicationByte.length);
+            this.out.write(publicationByte);
+        } else {
+            this.out.writeUTF(pseudo);
+        }
+        this.out.flush();
         for (ServeurThread client : this.serveur.getClients()) {
-            if (this.canAccessToTheBottom(client.getCompte(), idPublication)) {
-                client.getOut().writeUTF(Requete.SUPPRIMER_PUBLICATION.getRequete());
-                client.getOut().writeUTF(this.compte.getPseudo());
+            if (!client.getPseudo().equals(this.pseudo)) {
+                client.getOut().writeUTF(RequeteSocket.METTRE_A_JOUR_SUIVI.getRequete());
+                client.getOut().writeUTF(this.pseudo);
+                client.getOut().writeUTF(pseudo);
+                client.getOut().writeInt(nbAbonnes);
+                client.getOut().writeInt(nbAbonnements);
+
+                client.getOut().flush();
+            }
+        }
+    }
+
+    private void likerPublication(int idPublication) throws IOException {
+        String senderPublication = this.serveur.getSQL().likerPublication(this.pseudo, idPublication);
+        int nbLike = this.serveur.getSQL().getNbLike(idPublication);
+        for (ServeurThread client : this.serveur.getClients()) {
+            if (client.getPseudo().equals(senderPublication)
+                    || this.serveur.getSQL().hasFollower(senderPublication, client.getPseudo())) {
+                client.getOut().writeUTF(RequeteSocket.LIKER_PUBLICATION.getRequete());
                 client.getOut().writeInt(idPublication);
+                client.getOut().writeInt(nbLike);
+                client.getOut().writeBoolean(client.getPseudo().equals(this.pseudo));
+                client.getOut().writeBoolean(this.serveur.getSQL().estCeQueJaiLike(client.getPseudo(), idPublication));
                 client.getOut().flush();
             }
         }
-        this.serveur.getConnexionMySQL().supprimerPublication(idPublication);
     }
 
-    public void voirNotifications() throws IOException {
-        this.out.writeUTF(Requete.VOIR_NOTIFICATIONS.getRequete());
-        byte[] listBytes = ByteManager.convertListToBytes(
-                this.serveur.getConnexionMySQL().getNotifications(this.compte.getPseudo()));
-        this.out.writeInt(listBytes.length);
-        this.out.write(listBytes);
-        this.out.flush();
-    }
-
-    public void supprimerNotification(int idNotification) throws IOException{
-        this.serveur.getConnexionMySQL().supprimerNotification(idNotification);
-        this.out.writeUTF(Requete.SUPPRIMER_NOTIFICATION.getRequete());
-        this.out.writeInt(idNotification);
-        this.out.flush();
-    }
-
-    public void enregistrerProfil(Blob image) {
-        this.serveur.getConnexionMySQL().enregistrerProfil(this.compte.getPseudo(), image);
+    private void dislikerPublication(int idPublication) throws IOException {
+        String senderPublication = this.serveur.getSQL().dislikerPublication(this.pseudo, idPublication);
+        int nbLike = this.serveur.getSQL().getNbLike(idPublication);
         for (ServeurThread client : this.serveur.getClients()) {
-            if (this.serveur.getConnexionMySQL().hasFollowTo(client.getCompte().getPseudo(), this.compte.getPseudo()) ||
-                    client.getCompte().getPseudo().equals(this.compte.getPseudo())) {
+            if (client.getPseudo().equals(senderPublication)
+                    || this.serveur.getSQL().hasFollower(senderPublication, client.getPseudo())) {
+                client.getOut().writeUTF(RequeteSocket.LIKER_PUBLICATION.getRequete());
+                client.getOut().writeInt(idPublication);
+                client.getOut().writeInt(nbLike);
+                client.getOut().writeBoolean(client.getPseudo().equals(this.pseudo));
+                client.getOut().writeBoolean(this.serveur.getSQL().estCeQueJaiLike(client.getPseudo(), idPublication));
+                client.getOut().flush();
+            }
+        }
+    }
+
+    private void supprimerPublication(int idPublication) {
+        this.serveur.getSQL().supprimerPublication(idPublication);
+        for (ServeurThread client : this.serveur.getClients()) {
+            if (client.getPseudo().equals(this.pseudo)
+                    || this.serveur.getSQL().hasFollower(this.pseudo, client.getPseudo())) {
                 try {
-                    client.getOut().writeUTF(Requete.ENREGISTRER_PROFIL.getRequete());
-                    byte[] bytes = ByteManager.getBytes(this.compte);
-                    client.getOut().writeInt(bytes.length);
-                    client.getOut().write(bytes);
-                    client.getOut().writeBoolean(this.compte.getPseudo().equals(client.getCompte().getPseudo()));
+                    client.getOut().writeUTF(RequeteSocket.SUPPRIMER_PUBLICATION.getRequete());
+                    client.getOut().writeInt(idPublication);
                     client.getOut().flush();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+        }
+
+    }
+
+    public void publierPublication(String contenuPublication, byte[] imagesPublication) throws IOException {
+        if (imagesPublication.length == 0) {
+            imagesPublication = null;
+        }
+        Publication publication = this.serveur.getSQL().publierPublication(this.pseudo, contenuPublication,
+                imagesPublication);
+        if (publication != null) {
+            byte[] publicationBytes = ByteManager.toBytes(publication);
+            for (ServeurThread client : this.serveur.getClients()) {
+                if (client.getPseudo().equals(this.pseudo)
+                        || this.serveur.getSQL().hasFollower(this.pseudo, client.getPseudo())) {
+                    try {
+                        client.getOut().writeUTF(RequeteSocket.PUBLIER_PUBLICATION.getRequete());
+                        client.getOut().writeInt(publicationBytes.length);
+                        client.getOut().write(publicationBytes);
+                        client.getOut().flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    public void supprimerMessage(int idMessage) throws IOException {
+        Message message = this.serveur.getSQL().getMessageById(idMessage);
+        this.serveur.getSQL().supprimerMessage(idMessage);
+        if (message != null) {
+            for (ServeurThread client : this.serveur.getClients()) {
+                if (client.getPseudo().equals(message.getCompte().getPseudo()) ||
+                        client.getPseudo().equals(message.getCompteDestinateur().getPseudo())) {
+                    try {
+                        client.getOut().writeUTF(RequeteSocket.SUPPRIMER_MESSAGE.getRequete());
+                        client.getOut().writeInt(idMessage);
+                        client.getOut().flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    public void avoirDernierMessage(String pseudo) {
+        try {
+            if (!pseudo.equals("")) {
+                this.serveur.getSQL().setAllMessagesNonLuEnLu(this.pseudo, pseudo);
+            }
+            this.out.writeUTF(RequeteSocket.AVOIR_DERNIER_MESSAGE.getRequete());
+            byte[] messageBytes = ByteManager
+                    .convertListToBytes(this.serveur.getSQL().getDerniersMessages(this.pseudo));
+            this.out.writeInt(messageBytes.length);
+            this.out.write(messageBytes);
+            this.out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void demandeMessage(String pseudo) {
+        try {
+            this.out.writeUTF(RequeteSocket.DEMANDE_MESSAGE.getRequete());
+            byte[] messageBytes = ByteManager
+                    .convertListToBytes(this.serveur.getSQL().getMessages(this.pseudo, pseudo));
+            this.out.writeInt(messageBytes.length);
+            this.out.write(messageBytes);
+            this.out.writeUTF(pseudo);
+            this.out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void envoyerMessage(String receiver, String contenu, byte[] image) throws IOException {
+        Message message = this.serveur.getSQL().envoyerMessage(this.pseudo, receiver, contenu, image);
+        byte[] messageBytes = ByteManager.toBytes(message);
+        for (ServeurThread client : this.serveur.getClients()) {
+            if (client.getPseudo().equals(this.pseudo) || client.getPseudo().equals(receiver)) {
+                client.getOut().writeUTF(RequeteSocket.ENVOYER_MESSAGE.getRequete());
+                client.getOut().writeInt(messageBytes.length);
+                client.getOut().write(messageBytes);
+                client.getOut().flush();
+            }
+        }
+    }
+
+    public void envoyerVocal(String receiver, byte[] vocal) throws IOException {
+        Message message = this.serveur.getSQL().envoyerVocal(this.pseudo, receiver, vocal);
+        byte[] messageBytes = ByteManager.toBytes(message);
+        for (ServeurThread client : this.serveur.getClients()) {
+            if (client.getPseudo().equals(this.pseudo) || client.getPseudo().equals(receiver)) {
+                client.getOut().writeUTF(RequeteSocket.ENVOYER_VOCAL.getRequete());
+                client.getOut().writeInt(messageBytes.length);
+                client.getOut().write(messageBytes);
+                client.getOut().flush();
             }
         }
     }
@@ -317,75 +358,8 @@ public class ServeurThread extends Thread {
         return this.out;
     }
 
-    public void envoyerMessage(MessageC message) throws IOException {
-        message = this.serveur.getConnexionMySQL().envoyerMessage(message);
-        for (ServeurThread client : this.serveur.getClients()) {
-            boolean isMe = client.getCompte().getPseudo().equals(this.compte.getPseudo());
-            if (client.getCompte().getPseudo().equals(message.getPseudoDestinataire()) || isMe) {
-                client.getOut().writeUTF(Requete.ENVOYER_MESSAGE.getRequete());
-                byte[] bytes = ByteManager.getBytes(message);
-                client.getOut().writeInt(bytes.length);
-                client.getOut().write(bytes);
-                client.getOut().flush();
-            }
-        }
-
-    }
-
-    public void sendNotificationAtAllHerFollower() throws IOException {
-        for (ServeurThread client : this.serveur.getClients()) {
-            if (this.serveur.getConnexionMySQL().hasFollowTo(client.getCompte().getPseudo(), this.compte.getPseudo())) {
-                client.getOut().writeUTF(Requete.NOTIFICATIN_CONNEXION.getRequete());
-                client.getOut().writeUTF(this.compte.getPseudo());
-                client.getOut().flush();
-            }
-        }
-    }
-
-    public void supprimerMessage(int idMessage) throws IOException{
-        this.serveur.getConnexionMySQL().supprimerMessage(idMessage);
-        for(ServeurThread client : this.serveur.getClients()){
-            if(client.getCompte().getPseudo().equals(this.compte.getPseudo())){
-                client.getOut().writeUTF(Requete.SUPPRIMER_MESSAGE.getRequete());
-                client.getOut().writeInt(idMessage);
-                client.getOut().flush();
-            }
-        }
-    }
-
-    public void afficherProfil(String pseudo) throws IOException{
-        Compte compte = this.serveur.getConnexionMySQL().getCompteByPseudo(pseudo);
-        this.out.writeUTF(Requete.AFFICHER_PROFIL.getRequete());
-        byte[] bytes = ByteManager.getBytes(compte);
-        this.out.writeInt(bytes.length);
-        this.out.write(bytes);
-        this.out.writeBoolean(this.serveur.getConnexionMySQL().hasFollowTo(this.compte.getPseudo(), pseudo));
-        this.out.flush();
-    }
-
-    public void unfollow(String pseudoUnfollow) throws IOException{
-        this.serveur.getConnexionMySQL().unfollow(this.compte.getPseudo(), pseudoUnfollow);
-        
-        this.out.writeUTF(Requete.UNFOLLOW.getRequete());
-        this.out.writeUTF(pseudoUnfollow);
-        this.out.flush();
-    }
-
-    public void follow(String pseudoFollow) throws IOException{
-        this.serveur.getConnexionMySQL().follow(this.compte.getPseudo(), pseudoFollow);
-        
-        this.out.writeUTF(Requete.FOLLOW.getRequete());
-        this.out.writeUTF(pseudoFollow);
-        this.out.flush();
-
-    }
-
-    public void avoirToutLesComptes() throws IOException{
-        byte[] bytes = ByteManager.convertListToBytes(this.serveur.getConnexionMySQL().getToutLesComptes());
-        this.out.writeUTF(Requete.AVOIR_TOUT_LES_COMPTES.getRequete());
-        this.out.writeInt(bytes.length);
-        this.out.write(bytes);
-        this.out.flush();
+    public String getPseudo() {
+        return this.pseudo;
     }
 
 }

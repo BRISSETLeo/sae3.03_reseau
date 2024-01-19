@@ -1,0 +1,43 @@
+Label {
+    -fx-font-size: 1.3em;
+}
+
+.container {
+    -fx-padding: 2em;
+}
+
+HBox {
+    -fx-alignment: center-left;
+}
+
+.compte-box:hover {
+    -fx-cursor: hand;
+}
+
+.compte-box:hover Label {
+    -fx-border-color: black;
+    -fx-border-width: 0 0 0.1em 0;
+}
+
+Button {
+    -fx-opacity: 0;
+    -fx-background-color: none;
+    -fx-border-color: none;
+}
+
+Button:hover {
+    -fx-cursor: hand;
+}
+
+.container:hover Button {
+    -fx-background-color: transparent;
+    -fx-opacity: 1;
+}
+
+.container:hover {
+    -fx-background-color: #f0f0f0;
+}
+
+.nb-like-box {
+    -fx-cursor: hand;
+}

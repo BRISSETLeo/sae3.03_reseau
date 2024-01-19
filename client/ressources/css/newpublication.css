@@ -1,0 +1,45 @@
+VBox {
+    -fx-padding: 2em 20em;
+    -fx-alignment: center;
+}
+
+TextArea {
+    -fx-background-color: white;
+    -fx-border-color: black;
+}
+
+HBox {
+    -fx-alignment: center-right;
+}
+
+.insertion-image {
+    -fx-border-color: black;
+    -fx-border-width: 0.1em;
+    -fx-alignment: center;
+}
+
+.insertion-image {
+    -fx-cursor: hand;
+}
+
+Button {
+    -fx-font-size: 1.5em;
+    -fx-background-color: white;
+    -fx-border-color: black;
+    -fx-border-width: 0.1em;
+}
+
+Button:hover {
+    -fx-background-color: black;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+
+.supprimer-image {
+    -fx-background-color: black;
+    -fx-text-fill: white;
+}
+
+.erreur {
+    -fx-background-color: red;
+}

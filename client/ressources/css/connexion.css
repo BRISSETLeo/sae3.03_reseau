@@ -1,0 +1,48 @@
+VBox,
+HBox {
+    -fx-alignment: center;
+    -fx-font-size: 1.5em;
+}
+
+TextField {
+    -fx-border-color: black;
+    -fx-border-width: 0 0 0.1em 0;
+    -fx-background-color: transparent;
+}
+
+CheckBox {
+    -fx-font-style: italic;
+}
+
+CheckBox:hover {
+    -fx-cursor: hand;
+}
+
+CheckBox .box {
+    -fx-background-color: transparent;
+    -fx-border-color: black;
+    -fx-border-width: 0.1em;
+    -fx-pref-width: 1.2em;
+    -fx-pref-height: 1.2em;
+}
+
+Button {
+    -fx-background-color: white;
+    -fx-border-color: black;
+    -fx-border-width: 0.1em;
+    -fx-font-size: 1em;
+    -fx-font-weight: bold;
+    -fx-border-radius: 0.5em;
+    -fx-background-radius: 0.5em;
+    -fx-padding: 0.5em 1em;
+}
+
+Button:hover {
+    -fx-cursor: hand;
+    -fx-background-color: black;
+    -fx-text-fill: white;
+}
+
+.erreur {
+    -fx-text-fill: red;
+}

@@ -1,0 +1,29 @@
+* {
+    -fx-alignment: center;
+}
+
+Label {
+    -fx-font-size: 1.5em;
+}
+
+.pseudo {
+    -fx-font-size: 4em;
+    -fx-font-weight: bold;
+}
+
+Circle:hover {
+    -fx-cursor: hand;
+}
+
+Button {
+    -fx-font-size: 1.5em;
+    -fx-background-color: white;
+    -fx-border-color: black;
+    -fx-border-width: 0.1em;
+}
+
+Button:hover {
+    -fx-background-color: black;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}

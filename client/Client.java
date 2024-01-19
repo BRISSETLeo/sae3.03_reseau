@@ -4,444 +4,369 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import caches.ByteManager;
 import caches.Compte;
-import caches.MessageC;
-import caches.Notification;
 import caches.Publication;
-import enums.ErreurSocket;
+import javafx.application.Platform;
 import javafx.scene.image.Image;
-import requete.*;
+import requete.RequeteSocket;
 
 public class Client extends Thread {
 
-    private Main main;
-    private String pseudo;
-    private Compte compte;
-    private Socket socket;
-    private DataInputStream in;
-    private DataOutputStream out;
+    private final Main main;
+    private final String ip;
+    private final boolean reconnexion;
 
-    public Client(Main main, String pseudo, String ip) {
+    private Socket socket;
+    private DataOutputStream out;
+    private DataInputStream in;
+
+    public Client(Main main, String pseudo, String ip, boolean reconnexion) {
+
         this.main = main;
-        this.pseudo = pseudo;
+        this.ip = ip;
+        this.reconnexion = reconnexion;
 
         try {
 
-            this.socket = new Socket(ip, 8080);
-            this.in = new DataInputStream(this.socket.getInputStream());
-            this.out = new DataOutputStream(this.socket.getOutputStream());
-            super.start();
-            this.main.sauvegarderIdentifiant(ip, this.pseudo);
-            this.out.writeUTF(this.pseudo);
+            this.socket = new Socket(ip, 25565);
+            this.out = new DataOutputStream(socket.getOutputStream());
+            this.in = new DataInputStream(socket.getInputStream());
+
+            this.out.writeUTF(pseudo);
+            this.out.writeBoolean(this.reconnexion);
             this.out.flush();
 
-        } catch (IOException e) {
-
-            if (e.getMessage().equals(ErreurSocket.ERREUR_IP.getErreur())) {
-                this.main.erreurDansAdresse();
-            }
-
+        } catch (IOException ignored) {
         }
+
     }
 
     @Override
     public void run() {
 
-        try {
+        String reponse;
 
-            while (true) {
+        while (true) {
 
-                if (this.socket.isClosed() || this.socket.isInputShutdown() || this.socket.isOutputShutdown() ||
-                        !this.main.isConnected()) {
-                    this.fermer();
+            try {
+
+                reponse = this.in.readUTF();
+
+                if (reponse.equals(RequeteSocket.COMPTE_CREE.getRequete())) {
+                    int taille = this.in.readInt();
+                    byte[] infos = new byte[taille];
+                    this.in.readFully(infos, 0, taille);
+                    this.main.setMonCompte(ByteManager.fromBytes(infos, Compte.class));
+                    if (!this.reconnexion) {
+                        taille = this.in.readInt();
+                        infos = new byte[taille];
+                        this.in.readFully(infos, 0, taille);
+                        this.main.setDisplayPublications(ByteManager.convertBytesToList(infos, Publication.class));
+                        this.main.initialiser();
+                    }
+                } else if (reponse.equals(RequeteSocket.DEMANDER_CREER_COMPTE.getRequete())) {
+                    this.main.afficherLaPageCreerCompte();
+                } else if (reponse.equals(RequeteSocket.SAUVEGARDER_PROFIL.getRequete())) {
+                    this.main.mettreAJourPhoto();
+                    this.main.miseAJourProfil(this.main.getMonCompte());
+                } else if (reponse.equals(RequeteSocket.RECHERCHER_COMPTES.getRequete())) {
+                    int taille = this.in.readInt();
+                    byte[] infos = new byte[taille];
+                    this.in.readFully(infos, 0, taille);
+                    this.main.resultatDeLaRecherche(ByteManager.convertBytesToList(infos, Compte.class));
+                } else if (reponse.equals(RequeteSocket.MISE_A_JOUR_PROFIL.getRequete())) {
+                    int taille = this.in.readInt();
+                    byte[] infos = new byte[taille];
+                    this.in.readFully(infos, 0, taille);
+                    this.main.miseAJourProfil(ByteManager.fromBytes(infos, Compte.class));
+                } else if (reponse.equals(RequeteSocket.DEMANDER_PROFIL.getRequete())) {
+                    int taille = this.in.readInt();
+                    byte[] infos = new byte[taille];
+                    this.in.readFully(infos, 0, taille);
+                    this.main.afficherLaPageDeProfil(ByteManager.fromBytes(infos, Compte.class));
+                } else if (reponse.equals(RequeteSocket.DEMANDER_SUIVRE.getRequete())
+                        || reponse.equals(RequeteSocket.DEMANDER_PLUS_SUIVRE.getRequete())) {
+                    int nbAbonnes = this.in.readInt();
+                    boolean estCeQueJeLeSuis = this.in.readBoolean();
+                    this.main.mettreAJourMonProfilAbonnements(this.in.readInt());
+                    this.main.mettreAJourLeSuiviProfil(nbAbonnes, estCeQueJeLeSuis);
+
+                    if (reponse.equals(RequeteSocket.DEMANDER_SUIVRE.getRequete())) {
+                        int taille = this.in.readInt();
+                        byte[] infos = new byte[taille];
+                        this.in.readFully(infos, 0, taille);
+
+                        List<Publication> publications = ByteManager.convertBytesToList(infos, Publication.class);
+                        this.main.ajouterNouvellesPublications(publications);
+                    } else {
+                        this.main.removePublications(this.in.readUTF());
+                    }
+
+                } else if (reponse.equals(RequeteSocket.METTRE_A_JOUR_SUIVI.getRequete())) {
+                    String pseudo = this.in.readUTF();
+                    String pseudo2 = this.in.readUTF();
+                    int nbAbonnes = this.in.readInt();
+                    int nbAbonnements = this.in.readInt();
+                    this.main.mettreAJourProfilAbonnements(pseudo, nbAbonnements);
+                    this.main.mettreAJourProfilAbonnes(pseudo2, nbAbonnes);
+                    this.main.mettreAJourMonProfilAbonnes(pseudo2, nbAbonnes);
+                } else if (reponse.equals(RequeteSocket.LIKER_PUBLICATION.getRequete())
+                        || reponse.equals(RequeteSocket.DISLIKER_PUBLICATION.getRequete())) {
+                    int idPublication = this.in.readInt();
+                    int nbLike = this.in.readInt();
+                    boolean jaiLike = this.in.readBoolean();
+                    boolean hasLike = this.in.readBoolean();
+                    this.main.mettreAJourLeLike(idPublication, nbLike, jaiLike, hasLike);
+                } else if (reponse.equals(RequeteSocket.SUPPRIMER_PUBLICATION.getRequete())) {
+                    this.main.removePublication(this.in.readInt());
+                } else if (reponse.equals(RequeteSocket.PUBLIER_PUBLICATION.getRequete())) {
+                    int taille = this.in.readInt();
+                    byte[] infos = new byte[taille];
+                    this.in.readFully(infos, 0, taille);
+                    this.main.ajouterNouvellesPublications(
+                            Arrays.asList(ByteManager.fromBytes(infos, Publication.class)));
+                    Platform.runLater(() -> this.main.afficherPageDAccueil());
+                } else if (reponse.equals(RequeteSocket.AVOIR_DERNIER_MESSAGE.getRequete())) {
+                    int taille = this.in.readInt();
+                    byte[] infos = new byte[taille];
+                    this.in.readFully(infos, 0, taille);
+                    Platform.runLater(() -> this.main.afficherPageMessage());
+                    this.main.afficherHistorique(ByteManager.convertBytesToList(infos, caches.Message.class));
+                } else if (reponse.equals(RequeteSocket.DEMANDE_MESSAGE.getRequete())) {
+                    int taille = this.in.readInt();
+                    byte[] infos = new byte[taille];
+                    this.in.readFully(infos, 0, taille);
+                    this.main.afficherMessagePrive(ByteManager.convertBytesToList(infos, caches.Message.class),
+                            this.in.readUTF());
+                } else if (reponse.equals(RequeteSocket.ENVOYER_MESSAGE.getRequete())
+                        || reponse.equals(RequeteSocket.ENVOYER_VOCAL.getRequete())) {
+                    this.main.ajouterMessage(
+                            ByteManager.fromBytes(this.in.readNBytes(this.in.readInt()), caches.Message.class));
+                } else if (reponse.equals(RequeteSocket.DECONNEXION.getRequete())) {
+                    this.main.deconnexion();
+                } else if (reponse.equals(RequeteSocket.SUPPRIMER_MESSAGE.getRequete())) {
+                    this.main.supprimerMessage(this.in.readInt());
+                }
+
+            } catch (IOException e) {
+
+                if (this.socket.isClosed())
+                    break;
+
+                if (e.getMessage() != null) {
+                    if (e.getMessage().equals("Connection reset")) {
+                        this.main.serverEtteind();
+                        break;
+                    } else {
+                        System.out.println(e.getMessage());
+                    }
+
+                } else {
+                    e.printStackTrace();
                     break;
                 }
 
-                if (in.available() > 0) {
-
-                    String demande = this.in.readUTF();
-
-                    if (demande.equals(Requete.CREER_COMPTE.getRequete())) {
-
-                        this.main.demanderCreationDeCompte();
-
-                    } else if (demande.equals(Requete.COMPTE_CREE.getRequete())) {
-
-                        this.demanderPublications();
-                        this.demanderComptes();
-                        this.demanderNotifications();
-                        this.demanderToutLesComptes();
-                        this.main.mettrePage();
-
-                    } else if (demande.equals(Requete.AVOIR_PUBLICATIONS.getRequete())) {
-
-                        int arraySize = this.in.readInt();
-                        byte[] receivedBytes = new byte[arraySize];
-                        this.in.readFully(receivedBytes);
-
-                        List<Publication> retrievedPublicationList = ByteManager.convertBytesToList(receivedBytes,
-                                Publication.class);
-
-                        for (Publication publication : retrievedPublicationList)
-                            this.main.afficherPublication(publication, false);
-
-                    } else if (demande.equals(Requete.LIKER_PUBLICATION.getRequete())) {
-
-                        int idPublication = this.in.readInt();
-                        int like = this.in.readInt();
-                        boolean isMe = this.in.readBoolean();
-                        this.main.ajouterLike(idPublication, like, isMe);
-
-                    } else if (demande.equals(Requete.DISLIKER_PUBLICATION.getRequete())) {
-
-                        int idPublication = this.in.readInt();
-                        int like = this.in.readInt();
-                        boolean isMe = this.in.readBoolean();
-                        this.main.removeLike(idPublication, like, isMe);
-
-                    } else if (demande.equals(Requete.AVOIR_FOLLOW.getRequete())) {
-
-                        int arraySize = this.in.readInt();
-                        byte[] receivedBytes = new byte[arraySize];
-                        this.in.readFully(receivedBytes);
-
-                        this.compte = ByteManager.fromBytes(receivedBytes, Compte.class);
-
-                        this.main.ajouterMonCompte();
-
-                        arraySize = this.in.readInt();
-                        receivedBytes = new byte[arraySize];
-                        this.in.readFully(receivedBytes);
-
-                        Map<Compte, MessageC> comptes = ByteManager.convertBytesToMap(receivedBytes, Compte.class,
-                                MessageC.class);
-                        for (Map.Entry<Compte, MessageC> compte : comptes.entrySet())
-                            this.main.afficherCompte(compte.getKey(), compte.getValue());
-
-                    } else if (demande.equals(Requete.PUBLIER_PUBLICATION.getRequete())) {
-
-                        int arraySize = this.in.readInt();
-                        byte[] receivedBytes = new byte[arraySize];
-                        this.in.readFully(receivedBytes);
-
-                        Publication publication = ByteManager.fromBytes(receivedBytes, Publication.class);
-
-                        this.main.afficherPublication(publication, true);
-
-                    } else if (demande.equals(Requete.VOIR_MESSAGES.getRequete())) {
-
-                        int arraySize = this.in.readInt();
-                        byte[] receivedBytes = new byte[arraySize];
-                        this.in.readFully(receivedBytes);
-
-                        List<MessageC> retrievedMessageCList = ByteManager.convertBytesToList(receivedBytes,
-                                MessageC.class);
-
-                        for (MessageC msg : retrievedMessageCList)
-                            this.main.afficherMessage(msg);
-
-                    } else if (demande.equals(Requete.SUPPRIMER_PUBLICATION.getRequete())) {
-
-                        this.main.removePublication(this.in.readUTF(), this.in.readInt());
-
-                    } else if (demande.equals(Requete.VOIR_NOTIFICATIONS.getRequete())) {
-
-                        int arraySize = this.in.readInt();
-                        byte[] receivedBytes = new byte[arraySize];
-                        this.in.readFully(receivedBytes);
-
-                        List<Notification> retrievedNotificationList = ByteManager.convertBytesToList(receivedBytes,
-                                Notification.class);
-
-                        for (Notification notification : retrievedNotificationList)
-                            this.main.afficherNotification(notification);
-
-                    } else if (demande.equals(Requete.ENREGISTRER_PROFIL.getRequete())) {
-
-                        int arraySize = this.in.readInt();
-                        byte[] receivedBytes = new byte[arraySize];
-                        this.in.readFully(receivedBytes);
-
-                        boolean isMe = this.in.readBoolean();
-
-                        Compte compte = ByteManager.fromBytes(receivedBytes, Compte.class);
-                        Image image = Main.blobToImage(compte.getImage());
-
-                        if (isMe) {
-                            this.main.modifierCompteBarre(image);
-                        }
-
-                        this.main.modifierCompteProfil(compte.getPseudo(), image);
-                        this.main.modifierComptePublications(compte.getPseudo(), image);
-
-                    } else if (demande.equals(Requete.ENVOYER_MESSAGE.getRequete())) {
-
-                        int arraySize = this.in.readInt();
-                        byte[] receivedBytes = new byte[arraySize];
-                        this.in.readFully(receivedBytes);
-
-                        MessageC message = ByteManager.fromBytes(receivedBytes, MessageC.class);
-
-                        this.main.afficherMessage(message);
-                        this.main.changerDernierMessage(
-                                (message.getPseudoExpediteur().equals(this.pseudo) ? message.getPseudoDestinataire()
-                                        : message.getPseudoExpediteur()),
-                                message);
-
-                    } else if (demande.equals(Requete.NOTIFICATIN_CONNEXION.getRequete())) {
-
-                        this.main.afficherNotificationConnexion(this.in.readUTF());
-
-                    } else if (demande.equals(Requete.SUPPRIMER_MESSAGE.getRequete())) {
-
-                        int idMessage = this.in.readInt();
-
-                        this.main.removeMessage(idMessage);
-
-                    } else if (demande.equals(Requete.AFFICHER_PROFIL.getRequete())) {
-
-                        int arraySize = this.in.readInt();
-                        byte[] receivedBytes = new byte[arraySize];
-                        this.in.readFully(receivedBytes);
-
-                        Compte compte = ByteManager.fromBytes(receivedBytes, Compte.class);
-
-                        this.main.afficherProfil(compte, compte.getPseudo().equals(this.pseudo), this.in.readBoolean());
-
-                    } else if (demande.equals(Requete.UNFOLLOW.getRequete())) {
-
-                        this.main.unfollowAffichage(this.in.readUTF());
-                        this.demanderPublications();
-
-                    } else if (demande.equals(Requete.FOLLOW.getRequete())) {
-
-                        this.main.followAffichage(this.in.readUTF());
-                        this.demanderPublications();
-
-                    } else if (demande.equals(Requete.SUPPRIMER_NOTIFICATION.getRequete())) {
-
-                        this.main.removeNotification(this.in.readInt());
-
-                    } else if (demande.equals(Requete.AVOIR_TOUT_LES_COMPTES.getRequete())) {
-
-                        int arraySize = this.in.readInt();
-                        byte[] receivedBytes = new byte[arraySize];
-                        this.in.readFully(receivedBytes);
-
-                        List<Compte> comptes = ByteManager.convertBytesToList(receivedBytes, Compte.class);
-
-                        for (Compte compte : comptes)
-                            this.main.insertLexicographique(compte);
-
-                    }
-
-                }
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
             }
 
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
         }
+
+        this.closeSocket();
 
     }
 
-    public void creerCompte() {
-        try {
-            this.out.writeUTF(Requete.CREER_COMPTE.getRequete());
-            this.out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public boolean isConnected() {
+        return this.socket != null && this.socket.isConnected();
     }
 
-    public void fermer() {
+    public void closeSocket() {
         try {
-            this.out.writeUTF(Requete.FERMER.getRequete());
-            this.out.flush();
+            this.socket.close();
             this.out.close();
             this.in.close();
-            this.socket.close();
+        } catch (IOException ignored) {
+        }
+    }
+
+    public void accepterDeCreerCompte() {
+        try {
+            this.out.writeUTF(RequeteSocket.ACCEPTER_CREER_COMPTE.getRequete());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void demanderPublications() {
+    public void sauvegarderProfil() {
         try {
-            this.out.writeUTF(Requete.AVOIR_PUBLICATIONS.getRequete());
-            this.out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void demanderComptes() {
-        try {
-            this.out.writeUTF(Requete.AVOIR_FOLLOW.getRequete());
-            this.out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void demanderToutLesComptes() {
-        try {
-            this.out.writeUTF(Requete.AVOIR_TOUT_LES_COMPTES.getRequete());
+            this.out.writeUTF(RequeteSocket.SAUVEGARDER_PROFIL.getRequete());
+            byte[] compteBytes = ByteManager.toBytes(this.main.getMonCompte());
+            this.out.writeInt(compteBytes.length);
+            this.out.write(compteBytes);
             this.out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void likePublication(int id) {
+    public void rechercherComptes(String recherche) {
         try {
-            this.out.writeUTF(Requete.LIKER_PUBLICATION.getRequete());
-            this.out.writeInt(id);
+            this.out.writeUTF(RequeteSocket.RECHERCHER_COMPTES.getRequete());
+            this.out.writeUTF(recherche);
             this.out.flush();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void unlikePublication(int id) {
+    public void demanderProfil(String pseudo) {
         try {
-            this.out.writeUTF(Requete.DISLIKER_PUBLICATION.getRequete());
-            this.out.writeInt(id);
-            this.out.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void publierPublication(String text, byte[] vocal) {
-        try {
-            this.out.writeUTF(Requete.PUBLIER_PUBLICATION.getRequete());
-            this.out.writeUTF(text);
-            this.out.writeBoolean(vocal != null);
-            if (vocal != null) {
-                this.out.writeInt(vocal.length);
-                this.out.write(vocal);
-            }
-            this.out.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void getMessages(String pseudo) {
-        try {
-            this.out.writeUTF(Requete.VOIR_MESSAGES.getRequete());
+            this.out.writeUTF(RequeteSocket.DEMANDER_PROFIL.getRequete());
             this.out.writeUTF(pseudo);
             this.out.flush();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void demanderSuivre(String pseudo) {
+        try {
+            this.out.writeUTF(RequeteSocket.DEMANDER_SUIVRE.getRequete());
+            this.out.writeUTF(pseudo);
+            this.out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void demanderNePlusSuivre(String pseudo) {
+        try {
+            this.out.writeUTF(RequeteSocket.DEMANDER_PLUS_SUIVRE.getRequete());
+            this.out.writeUTF(pseudo);
+            this.out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void likerPublication(int idPublication) {
+        try {
+            this.out.writeUTF(RequeteSocket.LIKER_PUBLICATION.getRequete());
+            this.out.writeInt(idPublication);
+            this.out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void dislikerPublication(int idPublication) {
+        try {
+            this.out.writeUTF(RequeteSocket.DISLIKER_PUBLICATION.getRequete());
+            this.out.writeInt(idPublication);
+            this.out.flush();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void supprimerPublication(int idPublication) {
+
         try {
-            this.out.writeUTF(Requete.SUPPRIMER_PUBLICATION.getRequete());
+            this.out.writeUTF(RequeteSocket.SUPPRIMER_PUBLICATION.getRequete());
             this.out.writeInt(idPublication);
             this.out.flush();
-        } catch (Exception e) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void publierPublication(String contenuPublication, Image imagePublication) {
+        try {
+            this.out.writeUTF(RequeteSocket.PUBLIER_PUBLICATION.getRequete());
+            this.out.writeUTF(contenuPublication);
+            if (imagePublication != null) {
+                byte[] imageBytes = this.main.imageToByteArray(imagePublication);
+                this.out.writeInt(imageBytes.length);
+                this.out.write(imageBytes);
+            } else {
+                this.out.writeInt(0);
+            }
+            this.out.flush();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void demanderNotifications() {
+    public void afficherMessage(String pseudo) {
         try {
-            this.out.writeUTF(Requete.VOIR_NOTIFICATIONS.getRequete());
+            this.out.writeUTF(RequeteSocket.AVOIR_DERNIER_MESSAGE.getRequete());
+            if (pseudo == null) {
+                this.out.writeUTF("");
+            } else {
+                this.out.writeUTF(pseudo);
+            }
             this.out.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void enregistrerProfil() {
-        try {
-            this.out.writeUTF(Requete.ENREGISTRER_PROFIL.getRequete());
-            byte[] bytes = ByteManager.getBytes(this.compte);
-            this.out.writeInt(bytes.length);
-            this.out.write(bytes);
-            this.out.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void envoyerMessage(MessageC messageC) {
-        try {
-            this.out.writeUTF(Requete.ENVOYER_MESSAGE.getRequete());
-            byte[] bytes = ByteManager.getBytes(messageC);
-            this.out.writeInt(bytes.length);
-            this.out.write(bytes);
-            this.out.flush();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void supprimerMessage(int idMessage) {
         try {
-            this.out.writeUTF(Requete.SUPPRIMER_MESSAGE.getRequete());
+            this.out.writeUTF(RequeteSocket.SUPPRIMER_MESSAGE.getRequete());
             this.out.writeInt(idMessage);
             this.out.flush();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void supprimerNotification(int idNotification) {
+    public void demanderMessage(String pseudo) {
         try {
-            this.out.writeUTF(Requete.SUPPRIMER_NOTIFICATION.getRequete());
-            this.out.writeInt(idNotification);
-            this.out.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void afficherProfil(String pseudo) {
-        try {
-            this.out.writeUTF(Requete.AFFICHER_PROFIL.getRequete());
+            this.out.writeUTF(RequeteSocket.DEMANDE_MESSAGE.getRequete());
             this.out.writeUTF(pseudo);
             this.out.flush();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void unfollow(String pseudoUnfollow) {
+    public String getIp() {
+        return this.ip;
+    }
+
+    public void envoyerMessage(String receiver, String contenu, byte[] image) {
         try {
-            this.out.writeUTF(Requete.UNFOLLOW.getRequete());
-            this.out.writeUTF(pseudoUnfollow);
+            this.out.writeUTF(RequeteSocket.ENVOYER_MESSAGE.getRequete());
+            this.out.writeUTF(receiver);
+            this.out.writeUTF(contenu);
+            if (image != null) {
+                this.out.writeInt(image.length);
+                this.out.write(image);
+            } else {
+                this.out.writeInt(0);
+            }
             this.out.flush();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void follow(String pseudoFollow) {
+    public void envoyerVocal(String receiver, byte[] vocal) {
         try {
-            this.out.writeUTF(Requete.FOLLOW.getRequete());
-            this.out.writeUTF(pseudoFollow);
+            this.out.writeUTF(RequeteSocket.ENVOYER_VOCAL.getRequete());
+            this.out.writeUTF(receiver);
+            this.out.writeInt(vocal.length);
+            this.out.write(vocal);
             this.out.flush();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public String getPseudo() {
-        return this.pseudo;
-    }
-
-    public Compte getCompte() {
-        return this.compte;
     }
 
 }

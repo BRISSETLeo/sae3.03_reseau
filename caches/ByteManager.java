@@ -18,7 +18,7 @@ public class ByteManager {
     private ByteManager() {
     }
 
-    public static <T extends Serializable> byte[] getBytes(T object) throws IOException {
+    public static <T extends Serializable> byte[] toBytes(T object) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
         objectOutputStream.writeObject(object);
@@ -39,7 +39,7 @@ public class ByteManager {
 
         for (T element : stringList) {
 
-            byte[] elementBytes = ByteManager.getBytes(element);
+            byte[] elementBytes = ByteManager.toBytes(element);
             dataOutputStream.writeInt(elementBytes.length);
             dataOutputStream.write(elementBytes);
 
@@ -80,11 +80,11 @@ public class ByteManager {
             K key = entry.getKey();
             V value = entry.getValue();
 
-            byte[] keyBytes = ByteManager.getBytes(key);
+            byte[] keyBytes = ByteManager.toBytes(key);
             dataOutputStream.writeInt(keyBytes.length);
             dataOutputStream.write(keyBytes);
 
-            byte[] valueBytes = ByteManager.getBytes(value);
+            byte[] valueBytes = ByteManager.toBytes(value);
             dataOutputStream.writeInt(valueBytes.length);
             dataOutputStream.write(valueBytes);
 

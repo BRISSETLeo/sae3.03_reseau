@@ -1,42 +1,41 @@
 package caches;
 
+import java.io.ByteArrayInputStream;
 import java.io.Serializable;
-import java.sql.Blob;
+
+import client.utilitaire.IMAGE;
+import javafx.scene.image.Image;
 
 public class Compte implements Serializable {
 
     private final String pseudo;
-    private Blob image;
-    private int nbPublications;
-    private int nbAbonnes;
-    private int nbAbonnements;
+    private byte[] photo;
+    private final int nbPublications;
+    private final int nbAbonnes;
+    private final int nbAbonnements;
+    private final boolean estCeQueJeLeSuis;
 
-    public Compte(String pseudo, Blob image, int nbPublications, int nbAbonnes, int nbAbonnements) {
+    public Compte(String pseudo, byte[] photo, int nbPublications, int nbAbonnes, int nbAbonnements,
+            boolean estCeQueJeLeSuis) {
         this.pseudo = pseudo;
-        this.image = image;
+        this.photo = photo;
         this.nbPublications = nbPublications;
         this.nbAbonnes = nbAbonnes;
         this.nbAbonnements = nbAbonnements;
-    }
-
-    public Compte(String pseudo) {
-        this.pseudo = pseudo;
+        this.estCeQueJeLeSuis = estCeQueJeLeSuis;
     }
 
     public String getPseudo() {
         return this.pseudo;
     }
 
-    public Blob getImage() {
-        return this.image;
+    public byte[] getPhotoBytes() {
+        return this.photo;
     }
 
-    public void setImage(Blob image) {
-        this.image = image;
-    }
-
-    public int getNbPublications() {
-        return this.nbPublications;
+    public Image getPhoto() {
+        return this.photo == null ? new Image(IMAGE.PROFIL.getChemin())
+                : new Image(new ByteArrayInputStream(this.photo));
     }
 
     public int getNbAbonnes() {
@@ -45,6 +44,18 @@ public class Compte implements Serializable {
 
     public int getNbAbonnements() {
         return this.nbAbonnements;
+    }
+
+    public int getNbPublications() {
+        return this.nbPublications;
+    }
+
+    public boolean estCeQueJeLeSuis() {
+        return this.estCeQueJeLeSuis;
+    }
+
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
     }
 
 }
