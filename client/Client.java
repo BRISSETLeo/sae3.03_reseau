@@ -24,6 +24,14 @@ public class Client extends Thread {
     private DataOutputStream out;
     private DataInputStream in;
 
+    /**
+    * Initialise un nouveau client avec les paramètres spécifiés.
+    *
+    * @param main L'objet Main associé au client.
+    * @param pseudo Le pseudo du client.
+    * @param ip L'adresse IP du serveur auquel se connecter.
+    * @param reconnexion Indicateur indiquant s'il s'agit d'une tentative de reconnexion.
+    */
     public Client(Main main, String pseudo, String ip, boolean reconnexion) {
 
         this.main = main;
@@ -180,10 +188,18 @@ public class Client extends Thread {
 
     }
 
+    /**
+    * Vérifie si la connexion socket est établie.
+    *
+    * @return true si la connexion socket est établie, sinon false.
+    */
     public boolean isConnected() {
         return this.socket != null && this.socket.isConnected();
     }
 
+    /**
+    * Ferme la connexion socket, ainsi que les flux de sortie et d'entrée associés.
+    */
     public void closeSocket() {
         try {
             this.socket.close();
@@ -193,6 +209,9 @@ public class Client extends Thread {
         }
     }
 
+    /**
+    * Envoie une requête au serveur pour accepter de créer un compte.
+    */
     public void accepterDeCreerCompte() {
         try {
             this.out.writeUTF(RequeteSocket.ACCEPTER_CREER_COMPTE.getRequete());
@@ -201,6 +220,9 @@ public class Client extends Thread {
         }
     }
 
+    /**
+    * Envoie une requête au serveur pour sauvegarder le profil de l'utilisateur actuel.
+    */
     public void sauvegarderProfil() {
         try {
             this.out.writeUTF(RequeteSocket.SAUVEGARDER_PROFIL.getRequete());
@@ -213,6 +235,11 @@ public class Client extends Thread {
         }
     }
 
+    /**
+    * Envoie une requête au serveur pour rechercher des comptes d'utilisateurs en fonction d'un critère de recherche.
+    *
+    * @param recherche Le critère de recherche pour les comptes d'utilisateurs.
+    */
     public void rechercherComptes(String recherche) {
         try {
             this.out.writeUTF(RequeteSocket.RECHERCHER_COMPTES.getRequete());
@@ -223,6 +250,11 @@ public class Client extends Thread {
         }
     }
 
+    /**
+    * Envoie une requête au serveur pour demander le profil d'un utilisateur spécifié.
+    *
+    * @param pseudo Le pseudo de l'utilisateur dont on souhaite obtenir le profil.
+    */
     public void demanderProfil(String pseudo) {
         try {
             this.out.writeUTF(RequeteSocket.DEMANDER_PROFIL.getRequete());
@@ -233,6 +265,11 @@ public class Client extends Thread {
         }
     }
 
+    /**
+    * Envoie une requête au serveur pour demander à suivre un utilisateur spécifié.
+    *
+    * @param pseudo Le pseudo de l'utilisateur que l'on souhaite suivre.
+    */
     public void demanderSuivre(String pseudo) {
         try {
             this.out.writeUTF(RequeteSocket.DEMANDER_SUIVRE.getRequete());
@@ -243,6 +280,11 @@ public class Client extends Thread {
         }
     }
 
+    /**
+    * Envoie une requête au serveur pour demander de ne plus suivre un utilisateur spécifié.
+    *
+    * @param pseudo Le pseudo de l'utilisateur que l'on souhaite ne plus suivre.
+    */
     public void demanderNePlusSuivre(String pseudo) {
         try {
             this.out.writeUTF(RequeteSocket.DEMANDER_PLUS_SUIVRE.getRequete());
@@ -253,6 +295,11 @@ public class Client extends Thread {
         }
     }
 
+    /**
+    * Envoie une requête au serveur pour indiquer que l'utilisateur aime une publication spécifiée.
+    *
+    * @param idPublication L'ID de la publication à liker.
+    */
     public void likerPublication(int idPublication) {
         try {
             this.out.writeUTF(RequeteSocket.LIKER_PUBLICATION.getRequete());
@@ -263,6 +310,11 @@ public class Client extends Thread {
         }
     }
 
+    /**
+    * Envoie une requête au serveur pour indiquer que l'utilisateur n'aime plus une publication spécifiée.
+    *
+    * @param idPublication L'ID de la publication à disliker.
+    */
     public void dislikerPublication(int idPublication) {
         try {
             this.out.writeUTF(RequeteSocket.DISLIKER_PUBLICATION.getRequete());
@@ -273,6 +325,11 @@ public class Client extends Thread {
         }
     }
 
+    /**
+    * Envoie une requête au serveur pour supprimer une publication spécifiée par son ID.
+    *
+    * @param idPublication L'ID de la publication à supprimer.
+    */
     public void supprimerPublication(int idPublication) {
 
         try {
@@ -285,6 +342,12 @@ public class Client extends Thread {
 
     }
 
+    /**
+    * Envoie une requête au serveur pour publier une nouvelle publication avec du contenu et éventuellement une image.
+    *
+    * @param contenuPublication Le contenu textuel de la publication.
+    * @param imagePublication L'image associée à la publication (peut être null s'il n'y a pas d'image).
+    */
     public void publierPublication(String contenuPublication, Image imagePublication) {
         try {
             this.out.writeUTF(RequeteSocket.PUBLIER_PUBLICATION.getRequete());
@@ -302,6 +365,11 @@ public class Client extends Thread {
         }
     }
 
+    /**
+     * Envoie une requête au serveur pour afficher le dernier message d'un utilisateur spécifié.
+     *
+     * @param pseudo Le pseudo de l'utilisateur dont le dernier message doit être affiché (peut être null).
+     */
     public void afficherMessage(String pseudo) {
         try {
             this.out.writeUTF(RequeteSocket.AVOIR_DERNIER_MESSAGE.getRequete());
@@ -316,6 +384,11 @@ public class Client extends Thread {
         }
     }
 
+    /**
+    * Envoie une requête au serveur pour supprimer un message spécifié par son ID.
+    *
+    * @param idMessage L'ID du message à supprimer.
+    */
     public void supprimerMessage(int idMessage) {
         try {
             this.out.writeUTF(RequeteSocket.SUPPRIMER_MESSAGE.getRequete());
@@ -325,7 +398,11 @@ public class Client extends Thread {
             e.printStackTrace();
         }
     }
-
+    /**
+     * Demande au serveur l'envoi de messages pour un pseudo spécifié.
+     *
+     * @param pseudo Le pseudo du destinataire pour lequel les messages sont demandés.
+    */
     public void demanderMessage(String pseudo) {
         try {
             this.out.writeUTF(RequeteSocket.DEMANDE_MESSAGE.getRequete());
@@ -335,11 +412,20 @@ public class Client extends Thread {
             e.printStackTrace();
         }
     }
-
+    /**
+    * Renvoie l'adresse IP associée à cette connexion.
+    */
     public String getIp() {
         return this.ip;
     }
 
+    /**
+     * Envoie un message à un destinataire spécifié avec le contenu textuel et éventuellement une image.
+     *
+     * @param receiver Le destinataire du message.
+     * @param contenu Le contenu textuel du message.
+     * @param image Un tableau d'octets représentant une image associée au message (peut être null s'il n'y a pas d'image).
+     */
     public void envoyerMessage(String receiver, String contenu, byte[] image) {
         try {
             this.out.writeUTF(RequeteSocket.ENVOYER_MESSAGE.getRequete());
@@ -357,6 +443,12 @@ public class Client extends Thread {
         }
     }
 
+    /**
+     * Envoie un message vocal à un destinataire spécifié.
+     *
+     * @param receiver Le destinataire du message vocal.
+     * @param vocal Un tableau d'octets représentant les données vocales du message.
+     */
     public void envoyerVocal(String receiver, byte[] vocal) {
         try {
             this.out.writeUTF(RequeteSocket.ENVOYER_VOCAL.getRequete());
