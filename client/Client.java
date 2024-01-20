@@ -370,7 +370,7 @@ public class Client extends Thread {
      *
      * @param pseudo Le pseudo de l'utilisateur dont le dernier message doit être affiché (peut être null).
      */
-    public void afficherMessage(String pseudo) {
+    public synchronized void afficherMessage(String pseudo) {
         try {
             this.out.writeUTF(RequeteSocket.AVOIR_DERNIER_MESSAGE.getRequete());
             if (pseudo == null) {
@@ -403,7 +403,7 @@ public class Client extends Thread {
      *
      * @param pseudo Le pseudo du destinataire pour lequel les messages sont demandés.
     */
-    public void demanderMessage(String pseudo) {
+    public synchronized void demanderMessage(String pseudo) {
         try {
             this.out.writeUTF(RequeteSocket.DEMANDE_MESSAGE.getRequete());
             this.out.writeUTF(pseudo);
