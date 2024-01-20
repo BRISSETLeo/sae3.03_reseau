@@ -22,6 +22,13 @@ public class ServeurThread extends Thread {
 
     private final boolean reconnexion;
 
+    /**
+    * Constructeur de la classe ServeurThread.
+    *
+    * @param serveur  L'instance du serveur auquel le thread est associé.
+    * @param socket   La socket associée à la connexion avec le client.
+    * @throws IOException En cas d'erreur d'entrée/sortie lors de l'initialisation.
+    */
     public ServeurThread(Serveur serveur, Socket socket) throws IOException {
         this.serveur = serveur;
         this.socket = socket;
@@ -111,6 +118,13 @@ public class ServeurThread extends Thread {
 
     }
 
+    /**
+    * Initialise le processus de connexion, en informant le client de la création ou de la demande de création d'un compte.
+    * Envoie également les informations du compte et les publications associées.
+    *
+    * @param hasCompte Indique si le client a un compte existant.
+    * @throws IOException En cas d'erreur d'entrée/sortie lors de l'initialisation.
+    */
     private void init(boolean hasCompte) throws IOException {
 
         out.writeUTF((hasCompte) ? RequeteSocket.COMPTE_CREE.getRequete()
@@ -130,6 +144,13 @@ public class ServeurThread extends Thread {
 
     }
 
+    /**
+    * Sauvegarde le profil du compte spécifié, en informant le serveur SQL de la modification et en envoyant
+    * une mise à jour aux autres clients.
+    *
+    * @param compte Le compte dont le profil doit être sauvegardé.
+    * @throws IOException En cas d'erreur d'entrée/sortie lors de la sauvegarde du profil.
+    */
     private void sauvegarderProfil(Compte compte) throws IOException {
         this.serveur.getSQL().modifierCompte(compte);
         this.out.writeUTF(RequeteSocket.SAUVEGARDER_PROFIL.getRequete());
@@ -145,10 +166,20 @@ public class ServeurThread extends Thread {
         }
     }
 
+    /**
+    * Vérifie si le client est connecté au serveur.
+    *
+    * @return true si le client est connecté, sinon false.
+    */
     public boolean isConnected() {
         return this.socket != null && this.socket.isConnected();
     }
-
+    /**
+    * Traite la demande de recherche de comptes en fonction d'un critère de recherche.
+    *
+    * @param recherche La chaîne de recherche.
+    * @throws IOException En cas d'erreur d'entrée/sortie lors du traitement de la recherche de comptes.
+    */
     private void rechercherComptes(String recherche) throws IOException {
 
         this.out.writeUTF(RequeteSocket.RECHERCHER_COMPTES.getRequete());
@@ -158,7 +189,12 @@ public class ServeurThread extends Thread {
         this.out.write(comptesBytes);
         this.out.flush();
     }
-
+    /**
+    * Traite la demande du profil d'un utilisateur spécifié par son pseudo.
+    *
+    * @param pseudo Le pseudo de l'utilisateur dont le profil est demandé.
+    * @throws IOException En cas d'erreur d'entrée/sortie lors du traitement de la demande de profil.
+    */
     private void demanderProfil(String pseudo) throws IOException {
         this.out.writeUTF(RequeteSocket.DEMANDER_PROFIL.getRequete());
         byte[] compteBytes = ByteManager.toBytes(this.serveur.getSQL().getCompte(this.pseudo, pseudo));
@@ -167,11 +203,24 @@ public class ServeurThread extends Thread {
         this.out.flush();
     }
 
+    /**
+     * Traite la demande de suivre un utilisateur spécifié par son pseudo.
+     *
+     * @param pseudo Le pseudo de l'utilisateur à suivre.
+     * @throws IOException En cas d'erreur d'entrée/sortie lors du traitement de la demande de suivi.
+    */
     private void demanderSuivre(String pseudo) throws IOException {
         this.serveur.getSQL().demanderSuivre(this.pseudo, pseudo);
         this.demandeSuivrePlusSuivre(RequeteSocket.DEMANDER_SUIVRE, pseudo);
     }
 
+    /**
+    * Traite la demande de suivre ou de ne plus suivre un utilisateur.
+    *
+    * @param requeteSocket La requête associée à l'action (DEMANDER_SUIVRE ou DEMANDER_PLUS_SUIVRE).
+    * @param pseudo        Le pseudo de l'utilisateur cible.
+    * @throws IOException En cas d'erreur d'entrée/sortie lors du traitement de la demande.
+    */
     private void demanderPlusSuivre(String pseudo) throws IOException {
         this.serveur.getSQL().demanderPlusSuivre(this.pseudo, pseudo);
         this.demandeSuivrePlusSuivre(RequeteSocket.DEMANDER_PLUS_SUIVRE, pseudo);
@@ -206,6 +255,12 @@ public class ServeurThread extends Thread {
         }
     }
 
+    /**
+    * Traite l'action de liker une publication spécifiée par son identifiant.
+    *
+    * @param idPublication L'identifiant de la publication à liker.
+    * @throws IOException En cas d'erreur d'entrée/sortie lors du traitement de l'action de like.
+    */
     private void likerPublication(int idPublication) throws IOException {
         String senderPublication = this.serveur.getSQL().likerPublication(this.pseudo, idPublication);
         int nbLike = this.serveur.getSQL().getNbLike(idPublication);
@@ -222,6 +277,12 @@ public class ServeurThread extends Thread {
         }
     }
 
+    /**
+    * Dislike une publication spécifiée par son identifiant.
+    *
+    * @param idPublication L'identifiant de la publication à disliker.
+    * @throws IOException En cas d'erreur d'entrée/sortie lors du dislike de la publication.
+    */
     private void dislikerPublication(int idPublication) throws IOException {
         String senderPublication = this.serveur.getSQL().dislikerPublication(this.pseudo, idPublication);
         int nbLike = this.serveur.getSQL().getNbLike(idPublication);
@@ -238,6 +299,11 @@ public class ServeurThread extends Thread {
         }
     }
 
+    /**
+    * Supprime une publication spécifiée par son identifiant.
+    *
+    * @param idPublication L'identifiant de la publication à supprimer.
+    */
     private void supprimerPublication(int idPublication) {
         this.serveur.getSQL().supprimerPublication(idPublication);
         for (ServeurThread client : this.serveur.getClients()) {
@@ -255,6 +321,13 @@ public class ServeurThread extends Thread {
 
     }
 
+    /**
+    * Publie une nouvelle publication avec un contenu et des images spécifiés.
+    *
+    * @param contenuPublication Le contenu de la publication.
+    * @param imagesPublication  Les données des images de la publication.
+    * @throws IOException En cas d'erreur d'entrée/sortie lors de la publication de la nouvelle publication.
+    */
     public void publierPublication(String contenuPublication, byte[] imagesPublication) throws IOException {
         if (imagesPublication.length == 0) {
             imagesPublication = null;
@@ -279,6 +352,12 @@ public class ServeurThread extends Thread {
         }
     }
 
+    /**
+    * Supprime un message spécifié par son identifiant.
+    *
+    * @param idMessage L'identifiant du message à supprimer.
+    * @throws IOException En cas d'erreur d'entrée/sortie lors de la suppression du message.
+    */
     public void supprimerMessage(int idMessage) throws IOException {
         Message message = this.serveur.getSQL().getMessageById(idMessage);
         this.serveur.getSQL().supprimerMessage(idMessage);
@@ -298,6 +377,11 @@ public class ServeurThread extends Thread {
         }
     }
 
+    /**
+    * Récupère les derniers messages entre l'utilisateur actuel et un autre utilisateur spécifié.
+    *
+    * @param pseudo Le pseudo de l'autre utilisateur.
+    */
     public void avoirDernierMessage(String pseudo) {
         try {
             if (!pseudo.equals("")) {
@@ -314,6 +398,11 @@ public class ServeurThread extends Thread {
         }
     }
 
+    /**
+    * Demande les messages entre l'utilisateur actuel et un autre utilisateur spécifié.
+    *
+    * @param pseudo Le pseudo de l'autre utilisateur.
+    */
     public void demandeMessage(String pseudo) {
         try {
             this.out.writeUTF(RequeteSocket.DEMANDE_MESSAGE.getRequete());
@@ -328,6 +417,14 @@ public class ServeurThread extends Thread {
         }
     }
 
+    /**
+    * Envoie un message à un destinataire spécifié avec un contenu et une image.
+    *
+    * @param receiver Le pseudo du destinataire.
+    * @param contenu  Le contenu du message.
+    * @param image    Les données de l'image du message.
+    * @throws IOException En cas d'erreur d'entrée/sortie lors de l'envoi du message.
+    */
     public void envoyerMessage(String receiver, String contenu, byte[] image) throws IOException {
         Message message = this.serveur.getSQL().envoyerMessage(this.pseudo, receiver, contenu, image);
         byte[] messageBytes = ByteManager.toBytes(message);
@@ -341,6 +438,13 @@ public class ServeurThread extends Thread {
         }
     }
 
+    /**
+    * Envoie un message vocal à un destinataire spécifié.
+    *
+    * @param receiver Le pseudo du destinataire.
+    * @param vocal    Les données audio du message vocal.
+    * @throws IOException En cas d'erreur d'entrée/sortie lors de l'envoi du message.
+    */
     public void envoyerVocal(String receiver, byte[] vocal) throws IOException {
         Message message = this.serveur.getSQL().envoyerVocal(this.pseudo, receiver, vocal);
         byte[] messageBytes = ByteManager.toBytes(message);
@@ -354,10 +458,20 @@ public class ServeurThread extends Thread {
         }
     }
 
+    /**
+    * Récupère le flux de sortie associé à ce thread.
+    *
+    * @return Le flux de sortie associé à ce thread.
+    */
     public synchronized DataOutputStream getOut() {
         return this.out;
     }
 
+    /**
+    * Récupère le pseudo associé à ce thread.
+    *
+    * @return Le pseudo associé à ce thread.
+    */  
     public String getPseudo() {
         return this.pseudo;
     }

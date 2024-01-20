@@ -6,11 +6,18 @@ import java.util.Set;
 
 import serveur.sql.ConnexionMySQL;
 
+/**
+ * Classe représentant le serveur de l'application.
+ */
 public class Serveur {
 
     private Set<ServeurThread> clients;
     private ConnexionMySQL mysql;
 
+
+    /**
+     * Constructeur de la classe Serveur.
+     */
     public Serveur() {
 
         this.clients = new HashSet<>();
@@ -39,22 +46,47 @@ public class Serveur {
 
     }
 
+    /**
+     * Ajoute un client à l'ensemble des clients connectés.
+     *
+     * @param client Le client à ajouter.
+     */    
     public synchronized void addClient(ServeurThread client) {
         this.clients.add(client);
     }
 
+    /**
+     * Supprime un client de l'ensemble des clients connectés.
+     *
+     * @param client Le client à supprimer.
+     */
     public synchronized void removeClient(ServeurThread client) {
         this.clients.remove(client);
     }
 
+    /**
+     * Récupère l'ensemble des clients connectés au serveur.
+     *
+     * @return L'ensemble des clients connectés.
+     */
     public synchronized Set<ServeurThread> getClients() {
         return this.clients;
     }
 
+    /**
+     * Récupère la connexion à la base de données MySQL.
+     *
+     * @return La connexion à la base de données MySQL.
+     */
     public synchronized ConnexionMySQL getSQL() {
         return this.mysql;
     }
 
+    /**
+     * Point d'entrée de l'application Serveur.
+     *
+     * @param args Les arguments de la ligne de commande (non utilisés ici).
+     */
     public static void main(String[] args) {
         new Serveur();
     }
